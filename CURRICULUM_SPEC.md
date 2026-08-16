@@ -9,25 +9,29 @@ Every concept in Axon follows strict structural, stylistic, and technical standa
 
 ## 1. Directory & File Structure
 
-Every concept resides in its own isolated directory under `docs/modules/`:
+Content is organized in per-module directories under `docs/modules/`:
 
 ```
-docs/modules/
-└── <module_dir>/
-    └── <concept_dir>/
-        ├── README.md               <-- Main conceptual guide (1,200–1,500 words)
-        └── demo.html               <-- Interactive visualizer (Standalone HTML5/Canvas)
+docs/
+├── README.md                       <-- Curriculum overview and module links
+└── modules/
+    ├── <module_dir>/
+    │   ├── README.md               <-- Module overview and concept directory links
+    │   └── <concept_dir>/
+    │       ├── README.md           <-- Main conceptual guide (1,200–1,500 words)
+    │       └── demo.html           <-- Interactive visualizer (Standalone HTML5/Canvas)
 ```
 
-For Module 1:
-- `docs/modules/01_math_foundations/concept_01_vectors_matrices/`
-- `docs/modules/01_math_foundations/concept_02_trig_angle_topology/`
-- `docs/modules/01_math_foundations/concept_03_motion_calculus/`
-- `docs/modules/01_math_foundations/concept_04_multivariable_gradients/`
+Module Structure:
+- `docs/modules/01_math_foundations/`
+- `docs/modules/02_machine_learning/`
+- `docs/modules/03_control_physics/`
+- `docs/modules/04_swerve_fusion/`
+- `docs/modules/05_rl_agents/`
 
 ---
 
-## 2. Strict Formatting Rules
+## 2. Strict Formatting & Style Rules
 
 ### A. The Strict NO-LaTeX Policy
 - **Never use LaTeX delimiters** (`$`, `$$`, `\(`, `\)`, `\[`, `\]`, `\begin{matrix}`, `\frac{...}`, etc.).
@@ -42,7 +46,11 @@ For Module 1:
     ```
     or row/transpose notation `v = [vx, vy, ω]ᵀ`.
 
-### B. Word Count Target
+### B. Clean Professional Text (No Emojis / Decorative Icons)
+- Avoid emojis or decorative icons in headings, section titles, and body markdown.
+- Maintain a clean, professional, textbook-grade technical publication aesthetic.
+
+### C. Word Count Target
 - Every `README.md` must be a substantial, in-depth guide between **1,200 and 1,500 words**.
 - No hand-waving or skipping algebraic steps.
 
@@ -80,7 +88,11 @@ Every concept `README.md` must contain exactly the following 5 parts:
 
 Every concept folder must include an interactive `demo.html` satisfying:
 - **Zero External Dependencies:** No CDN libraries, no external scripts or fonts. Works 100% offline and locally via `file://`.
-- **Theme & Styling:** Premium dark-mode palette (`#0a0d14` background, `#141923` cards, vibrant neon accents `#38bdf8`, `#4ade80`, `#f43f5e`, `#fbbf24`, `#a855f7`).
+- **Toggle-able Dark & Light Mode:**
+  - Full support for both dark theme (default) and light theme via CSS custom variables (`:root` / `[data-theme="light"]`).
+  - Interactive theme toggle switch in header.
+  - Theme preference persistence across sessions via `localStorage.getItem('axon_theme')`.
+  - Contrast-calibrated canvas rendering for both themes.
 - **Input Controls:** Sliders, buttons, and toggles with live numeric readouts.
 - **Canvas Visualizer:** HTML5 2D Canvas rendering with crisp DPI scaling, coordinate grid, vector arrows, animations, and active state indicators.
 - **Mobile & Touch Ready:** Full support for touch events (`touchstart`, `touchmove`, `touchend`) alongside mouse drag events.

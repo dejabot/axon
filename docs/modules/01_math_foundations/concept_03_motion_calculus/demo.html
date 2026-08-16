@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +16,24 @@
       --accent-red: #f43f5e;
       --accent-amber: #fbbf24;
       --accent-purple: #c084fc;
+      --input-bg: #0a0d14;
+      --btn-bg: #1e2638;
+      --btn-hover: #2b364f;
+    }
+    [data-theme="light"] {
+      --bg-dark: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-blue: #0284c7;
+      --accent-green: #16a34a;
+      --accent-red: #e11d48;
+      --accent-amber: #d97706;
+      --accent-purple: #9333ea;
+      --input-bg: #f1f5f9;
+      --btn-bg: #e2e8f0;
+      --btn-hover: #cbd5e1;
     }
     * {
       box-sizing: border-box;
@@ -31,10 +49,11 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background-color 0.2s, color 0.2s;
     }
     header {
       padding: 16px 24px;
-      background-color: rgba(20, 25, 35, 0.95);
+      background-color: var(--card-bg);
       border-bottom: 1px solid var(--card-border);
       display: flex;
       justify-content: space-between;
@@ -52,18 +71,27 @@
       font-size: 0.85rem;
       color: var(--text-muted);
     }
-    .nav-links a {
-      color: var(--accent-amber);
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .nav-links a, .btn-theme {
+      color: var(--text-main);
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       padding: 6px 12px;
-      background: rgba(251, 191, 36, 0.1);
-      border: 1px solid rgba(251, 191, 36, 0.3);
+      background: var(--btn-bg);
+      border: 1px solid var(--card-border);
       border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
       transition: all 0.2s;
     }
-    .nav-links a:hover {
-      background: rgba(251, 191, 36, 0.2);
+    .nav-links a:hover, .btn-theme:hover {
+      background: var(--btn-hover);
+      border-color: var(--accent-blue);
     }
     .main-container {
       display: flex;
@@ -131,7 +159,7 @@
       margin-bottom: 12px;
     }
     button.profile-btn {
-      background: #1e2638;
+      background: var(--btn-bg);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
       padding: 10px 6px;
@@ -143,7 +171,7 @@
       text-align: center;
     }
     button.profile-btn:hover {
-      background: #2b364f;
+      background: var(--btn-hover);
       color: var(--text-main);
     }
     button.profile-btn.active {
@@ -176,7 +204,7 @@
       gap: 8px;
     }
     .stat-box {
-      background: #0a0d14;
+      background: var(--input-bg);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       padding: 10px;
@@ -208,7 +236,7 @@
     }
     .btn-action {
       flex: 1;
-      background: #1e2638;
+      background: var(--btn-bg);
       border: 1px solid var(--card-border);
       color: var(--text-main);
       padding: 10px;
@@ -219,7 +247,7 @@
       transition: all 0.15s;
     }
     .btn-action:hover {
-      background: #2b364f;
+      background: var(--btn-hover);
       border-color: var(--accent-blue);
     }
     .btn-action.play {
@@ -236,9 +264,12 @@
       <h1>03: Single-Variable Motion Calculus & Jerk</h1>
       <p>Axon Stage 1: The Unified Math Engine</p>
     </div>
-    <div class="nav-links">
-      <a href="README.md">📖 Concept Guide</a>
-      <a href="../../../index.html">🏠 Master Dashboard</a>
+    <div class="header-nav">
+      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
+      <div class="nav-links">
+        <a href="README.md">Concept Guide</a>
+        <a href="../../../index.html">Master Dashboard</a>
+      </div>
     </div>
   </header>
 
@@ -265,8 +296,8 @@
         </div>
 
         <div class="playback-row">
-          <button class="btn-action play" id="btnPlay" onclick="togglePlay()">▶ Play Simulation</button>
-          <button class="btn-action" onclick="resetSim()">↺ Reset</button>
+          <button class="btn-action play" id="btnPlay" onclick="togglePlay()">Play Simulation</button>
+          <button class="btn-action" onclick="resetSim()">Reset</button>
         </div>
       </div>
 
@@ -333,10 +364,28 @@
   </div>
 
   <script>
+    const THEME_KEY = 'axon_theme';
+    function initTheme() {
+      const saved = localStorage.getItem(THEME_KEY) || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeButton(saved);
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem(THEME_KEY, next);
+      updateThemeButton(next);
+    }
+    function updateThemeButton(theme) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+    }
+
     const canvas = document.getElementById('motionCanvas');
     const ctx = canvas.getContext('2d');
 
-    let profileMode = 'scurve'; // 'step', 'trap', 'scurve'
+    let profileMode = 'scurve';
     let targetDist = 2.0;
     let maxV = 2.5;
     let maxA = 5.0;
@@ -346,7 +395,6 @@
     let isPlaying = true;
     let totalDuration = 2.0;
 
-    // Sloshing coffee simulation variable
     let coffeeSlosh = 0.0;
     let coffeeSloshVel = 0.0;
 
@@ -439,9 +487,7 @@
         const tTotal = ta + tj + (targetDist / maxV);
         totalDuration = Math.max(1.5, tTotal);
         
-        // Approximate smooth 7-segment S-curve blend
         const p = Math.min(1.0, Math.max(0.0, t / totalDuration));
-        // 5th order smoothstep: 10p³ - 15p⁴ + 6p⁵
         const s = 10 * Math.pow(p, 3) - 15 * Math.pow(p, 4) + 6 * Math.pow(p, 5);
         const sDot = (30 * Math.pow(p, 2) - 60 * Math.pow(p, 3) + 30 * Math.pow(p, 4)) / totalDuration;
         const sDDot = (60 * p - 180 * Math.pow(p, 2) + 120 * Math.pow(p, 3)) / (totalDuration * totalDuration);
@@ -458,7 +504,7 @@
 
     function togglePlay() {
       isPlaying = !isPlaying;
-      document.getElementById('btnPlay').textContent = isPlaying ? "⏸ Pause" : "▶ Play Simulation";
+      document.getElementById('btnPlay').textContent = isPlaying ? "Pause" : "Play Simulation";
     }
 
     function resetSim() {
@@ -481,10 +527,9 @@
 
       const state = calculateState(simTime);
 
-      // Sloshing physics: damped harmonic oscillator driven by jerk & acceleration
       const drivingForce = state.j * 0.015 + state.a * 0.04;
-      const k = 40.0; // spring stiffness
-      const c = 3.5;  // damping
+      const k = 40.0;
+      const c = 3.5;
       const sloshAcc = drivingForce - k * coffeeSlosh - c * coffeeSloshVel;
       coffeeSloshVel += sloshAcc * dt;
       coffeeSlosh += coffeeSloshVel * dt;
@@ -495,37 +540,36 @@
     }
 
     function render(state) {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       const width = canvas.width / (window.devicePixelRatio || 1);
       const height = canvas.height / (window.devicePixelRatio || 1);
 
       ctx.clearRect(0, 0, width, height);
 
-      // Divide screen: Left 28% = Physical Elevator & Coffee Cup; Right 72% = 4 Osc-Curves
       const leftW = Math.min(220, width * 0.32);
       const rightX = leftW + 10;
       const rightW = width - rightX - 16;
 
-      // 1. Draw Physical Elevator Column
-      ctx.fillStyle = '#0f131c';
+      // 1. Elevator Mast Column
+      ctx.fillStyle = isLight ? '#f1f5f9' : '#0f131c';
       ctx.fillRect(16, 16, leftW - 24, height - 32);
-      ctx.strokeStyle = '#232b3b';
+      ctx.strokeStyle = isLight ? '#cbd5e1' : '#232b3b';
       ctx.lineWidth = 1;
       ctx.strokeRect(16, 16, leftW - 24, height - 32);
 
-      // Mast rails
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      // Rails
+      ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
       ctx.beginPath();
       ctx.moveTo(32, 20); ctx.lineTo(32, height - 20);
       ctx.moveTo(leftW - 24, 20); ctx.lineTo(leftW - 24, height - 20);
       ctx.stroke();
 
-      // Elevator Carriage position
+      // Carriage
       const travelFrac = state.x / targetDist;
       const carriageY = (height - 80) - travelFrac * (height - 160);
 
-      // Carriage block
-      ctx.fillStyle = '#1e2638';
-      ctx.strokeStyle = '#38bdf8';
+      ctx.fillStyle = isLight ? '#ffffff' : '#1e2638';
+      ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
       ctx.lineWidth = 2;
       ctx.fillRect(24, carriageY, leftW - 40, 50);
       ctx.strokeRect(24, carriageY, leftW - 40, 50);
@@ -533,11 +577,11 @@
       // Coffee Cup
       const cupX = 24 + (leftW - 40) / 2;
       const cupY = carriageY + 12;
-      ctx.fillStyle = '#f1f5f9';
+      ctx.fillStyle = isLight ? '#334155' : '#f1f5f9';
       ctx.fillRect(cupX - 16, cupY, 32, 26);
       
-      // Sloshing Coffee Liquid
-      ctx.fillStyle = '#92400e';
+      // Coffee Liquid
+      ctx.fillStyle = '#b45309';
       ctx.beginPath();
       ctx.moveTo(cupX - 14, cupY + 6);
       ctx.lineTo(cupX + 14, cupY + 6 + coffeeSlosh * 20);
@@ -546,51 +590,47 @@
       ctx.closePath();
       ctx.fill();
 
-      // Mechanical stress warning text
+      // Status text
       ctx.font = 'bold 11px monospace';
       if (Math.abs(state.j) > 50 || profileMode === 'step') {
-        ctx.fillStyle = '#f43f5e';
-        ctx.fillText('⚠ HIGH JERK SHOCK!', 24, carriageY - 8);
+        ctx.fillStyle = isLight ? '#e11d48' : '#f43f5e';
+        ctx.fillText('HIGH JERK SHOCK!', 24, carriageY - 8);
       } else {
-        ctx.fillStyle = '#4ade80';
-        ctx.fillText('✓ Smooth Motion', 28, carriageY - 8);
+        ctx.fillStyle = isLight ? '#16a34a' : '#4ade80';
+        ctx.fillText('Smooth Motion', 28, carriageY - 8);
       }
 
-      // 2. Draw 4 Stacked Derivative Curves on Right
+      // 2. Oscilloscope Curves
       const plotCount = 4;
       const plotH = (height - 40) / plotCount;
 
       const plots = [
-        { label: 'Position x(t) [m]', color: '#38bdf8', maxVal: targetDist * 1.1, key: 'x' },
-        { label: 'Velocity v(t) [m/s]', color: '#4ade80', maxVal: maxV * 1.25, key: 'v' },
-        { label: 'Acceleration a(t) [m/s²]', color: '#fbbf24', maxVal: maxA * 1.4, key: 'a', bi: true },
-        { label: 'Jerk j(t) [m/s³]', color: '#f43f5e', maxVal: maxJ * 2.0, key: 'j', bi: true }
+        { label: 'Position x(t) [m]', color: isLight ? '#0284c7' : '#38bdf8', maxVal: targetDist * 1.1, key: 'x' },
+        { label: 'Velocity v(t) [m/s]', color: isLight ? '#16a34a' : '#4ade80', maxVal: maxV * 1.25, key: 'v' },
+        { label: 'Acceleration a(t) [m/s²]', color: isLight ? '#d97706' : '#fbbf24', maxVal: maxA * 1.4, key: 'a', bi: true },
+        { label: 'Jerk j(t) [m/s³]', color: isLight ? '#e11d48' : '#f43f5e', maxVal: maxJ * 2.0, key: 'j', bi: true }
       ];
 
       plots.forEach((p, idx) => {
         const topY = 16 + idx * plotH;
         const midY = p.bi ? topY + plotH / 2 : topY + plotH - 12;
 
-        // Background box
-        ctx.fillStyle = '#0a0d14';
+        ctx.fillStyle = isLight ? '#ffffff' : '#0a0d14';
         ctx.fillRect(rightX, topY, rightW, plotH - 6);
-        ctx.strokeStyle = '#1e2638';
+        ctx.strokeStyle = isLight ? '#e2e8f0' : '#1e2638';
         ctx.lineWidth = 1;
         ctx.strokeRect(rightX, topY, rightW, plotH - 6);
 
-        // Zero line
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
         ctx.beginPath();
         ctx.moveTo(rightX, midY);
         ctx.lineTo(rightX + rightW, midY);
         ctx.stroke();
 
-        // Label
         ctx.font = '10px monospace';
         ctx.fillStyle = p.color;
         ctx.fillText(p.label, rightX + 8, topY + 14);
 
-        // Trace plot curve across duration
         ctx.beginPath();
         ctx.strokeStyle = p.color;
         ctx.lineWidth = 2;
@@ -610,17 +650,15 @@
         }
         ctx.stroke();
 
-        // Current time scrubber bar
         const scrubX = rightX + (simTime / totalDuration) * rightW;
         if (scrubX <= rightX + rightW) {
-          ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+          ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
           ctx.lineWidth = 1.5;
           ctx.beginPath();
           ctx.moveTo(scrubX, topY);
           ctx.lineTo(scrubX, topY + plotH - 6);
           ctx.stroke();
 
-          // Scrubber point
           let curValY = midY;
           if (p.bi) curValY = midY - (state[p.key] / p.maxVal) * (plotH * 0.42);
           else curValY = midY - (state[p.key] / p.maxVal) * (plotH - 24);
@@ -631,14 +669,12 @@
         }
       });
 
-      // Update numeric telemetry
       document.getElementById('telemetryPos').textContent = `${state.x.toFixed(2)} m`;
       document.getElementById('telemetryVel').textContent = `${state.v.toFixed(2)} m/s`;
       document.getElementById('telemetryAcc').textContent = `${state.a > 0 ? '+' : ''}${state.a.toFixed(2)} m/s²`;
       document.getElementById('telemetryJerk').textContent = `${state.j > 0 ? '+' : ''}${state.j.toFixed(1)} m/s³`;
     }
 
-    // Slider inputs
     document.getElementById('sliderDist').addEventListener('input', (e) => {
       targetDist = parseFloat(e.target.value);
       document.getElementById('valDist').textContent = targetDist.toFixed(2) + ' m';
@@ -660,6 +696,7 @@
       resetSim();
     });
 
+    initTheme();
     resizeCanvas();
     requestAnimationFrame(animate);
   </script>

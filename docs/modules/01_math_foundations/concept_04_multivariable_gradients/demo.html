@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +16,24 @@
       --accent-red: #f43f5e;
       --accent-amber: #fbbf24;
       --accent-purple: #c084fc;
+      --input-bg: #0a0d14;
+      --btn-bg: #1e2638;
+      --btn-hover: #2b364f;
+    }
+    [data-theme="light"] {
+      --bg-dark: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-blue: #0284c7;
+      --accent-green: #16a34a;
+      --accent-red: #e11d48;
+      --accent-amber: #d97706;
+      --accent-purple: #9333ea;
+      --input-bg: #f1f5f9;
+      --btn-bg: #e2e8f0;
+      --btn-hover: #cbd5e1;
     }
     * {
       box-sizing: border-box;
@@ -31,10 +49,11 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background-color 0.2s, color 0.2s;
     }
     header {
       padding: 16px 24px;
-      background-color: rgba(20, 25, 35, 0.95);
+      background-color: var(--card-bg);
       border-bottom: 1px solid var(--card-border);
       display: flex;
       justify-content: space-between;
@@ -52,18 +71,27 @@
       font-size: 0.85rem;
       color: var(--text-muted);
     }
-    .nav-links a {
-      color: var(--accent-amber);
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .nav-links a, .btn-theme {
+      color: var(--text-main);
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       padding: 6px 12px;
-      background: rgba(251, 191, 36, 0.1);
-      border: 1px solid rgba(251, 191, 36, 0.3);
+      background: var(--btn-bg);
+      border: 1px solid var(--card-border);
       border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
       transition: all 0.2s;
     }
-    .nav-links a:hover {
-      background: rgba(251, 191, 36, 0.2);
+    .nav-links a:hover, .btn-theme:hover {
+      background: var(--btn-hover);
+      border-color: var(--accent-blue);
     }
     .main-container {
       display: flex;
@@ -103,14 +131,15 @@
       top: 12px;
       left: 12px;
       pointer-events: none;
-      background: rgba(10, 13, 20, 0.8);
-      backdrop-filter: blur(4px);
+      background: var(--card-bg);
+      opacity: 0.92;
       padding: 8px 12px;
       border-radius: 8px;
       border: 1px solid var(--card-border);
       font-size: 0.75rem;
       color: var(--text-muted);
       line-height: 1.4;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
     .controls-panel {
       flex: 1;
@@ -142,7 +171,7 @@
       margin-bottom: 12px;
     }
     button.btn-ls {
-      background: #1e2638;
+      background: var(--btn-bg);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
       padding: 8px 6px;
@@ -153,7 +182,7 @@
       transition: all 0.15s;
     }
     button.btn-ls:hover {
-      background: #2b364f;
+      background: var(--btn-hover);
       color: var(--text-main);
     }
     button.btn-ls.active {
@@ -187,7 +216,7 @@
     }
     .btn-action {
       flex: 1;
-      background: #1e2638;
+      background: var(--btn-bg);
       border: 1px solid var(--card-border);
       color: var(--text-main);
       padding: 9px;
@@ -198,7 +227,7 @@
       transition: all 0.15s;
     }
     .btn-action:hover {
-      background: #2b364f;
+      background: var(--btn-hover);
       border-color: var(--accent-blue);
     }
     .btn-action.play {
@@ -212,7 +241,7 @@
       gap: 8px;
     }
     .stat-box {
-      background: #0a0d14;
+      background: var(--input-bg);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       padding: 10px;
@@ -237,9 +266,12 @@
       <h1>04: Multivariable Calculus, Gradients & The Chain Rule</h1>
       <p>Axon Stage 1: The Unified Math Engine</p>
     </div>
-    <div class="nav-links">
-      <a href="README.md">📖 Concept Guide</a>
-      <a href="../../../index.html">🏠 Master Dashboard</a>
+    <div class="header-nav">
+      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
+      <div class="nav-links">
+        <a href="README.md">Concept Guide</a>
+        <a href="../../../index.html">Master Dashboard</a>
+      </div>
     </div>
   </header>
 
@@ -248,8 +280,8 @@
     <div class="canvas-panel">
       <div class="canvas-overlay-hints">
         • <b>Drag Cyan Particle</b> across the contour map<br>
-        • <b style="color: #fbbf24;">Amber Arrow</b> = ∇f (Steepest Ascent Uphill)<br>
-        • <b style="color: #4ade80;">Green Arrow</b> = -∇f (Gradient Descent Downhill)
+        • <b style="color: var(--accent-amber);">Amber Arrow</b> = ∇f (Steepest Ascent Uphill)<br>
+        • <b style="color: var(--accent-green);">Green Arrow</b> = -∇f (Gradient Descent Downhill)
       </div>
       <canvas id="contourCanvas"></canvas>
     </div>
@@ -282,8 +314,8 @@
         </div>
 
         <div class="playback-row">
-          <button class="btn-action play" id="btnRoll" onclick="toggleRolling()">▶ Roll Particle Downhill</button>
-          <button class="btn-action" onclick="resetParticle()">↺ Reset Trail</button>
+          <button class="btn-action play" id="btnRoll" onclick="toggleRolling()">Roll Particle Downhill</button>
+          <button class="btn-action" onclick="resetParticle()">Reset Trail</button>
         </div>
       </div>
 
@@ -323,10 +355,29 @@
   </div>
 
   <script>
+    const THEME_KEY = 'axon_theme';
+    function initTheme() {
+      const saved = localStorage.getItem(THEME_KEY) || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeButton(saved);
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem(THEME_KEY, next);
+      updateThemeButton(next);
+      draw();
+    }
+    function updateThemeButton(theme) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+    }
+
     const canvas = document.getElementById('contourCanvas');
     const ctx = canvas.getContext('2d');
 
-    let landscapeType = 'bowl'; // 'bowl', 'ravine', 'saddle', 'potential'
+    let landscapeType = 'bowl';
     let lr = 0.10;
     let beta = 0.70;
 
@@ -338,7 +389,7 @@
     let draggingParticle = false;
 
     let center = { x: 0, y: 0 };
-    let scale = 50; // pixels per math unit
+    let scale = 50;
 
     function resizeCanvas() {
       const rect = canvas.parentElement.getBoundingClientRect();
@@ -387,7 +438,6 @@
         return { val, dfdx, dfdy };
       }
       if (landscapeType === 'potential') {
-        // Goal at (2, 0), Obstacle at (0, 0)
         const gx = 2.0, gy = 0.0;
         const ox = 0.0, oy = 0.0;
         const dGoalSq = (x - gx)**2 + (y - gy)**2;
@@ -425,7 +475,7 @@
 
     function toggleRolling() {
       isRolling = !isRolling;
-      document.getElementById('btnRoll').textContent = isRolling ? "⏸ Pause Descent" : "▶ Roll Particle Downhill";
+      document.getElementById('btnRoll').textContent = isRolling ? "Pause Descent" : "Roll Particle Downhill";
     }
 
     function drawArrow(fromX, fromY, toX, toY, color, width = 3) {
@@ -449,12 +499,13 @@
     }
 
     function draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       const width = canvas.width / (window.devicePixelRatio || 1);
       const height = canvas.height / (window.devicePixelRatio || 1);
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Draw Contour Heatmap / Contour Rings
+      // 1. Draw Heatmap
       const gridSize = 35;
       const stepX = width / gridSize;
       const stepY = height / gridSize;
@@ -465,18 +516,24 @@
           const { val } = evaluateField(pt.x, pt.y);
           const normVal = Math.min(1.0, Math.max(0.0, (val + 2.0) / 10.0));
 
-          // Color map: deep navy (0.0) -> teal -> amber -> crimson (1.0)
-          const r = Math.floor(normVal * 200 + 10);
-          const g = Math.floor((1.0 - Math.abs(normVal - 0.5) * 2) * 120 + 20);
-          const b = Math.floor((1.0 - normVal) * 180 + 30);
-          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.18)`;
+          if (isLight) {
+            const r = Math.floor(normVal * 180 + 50);
+            const g = Math.floor((1.0 - Math.abs(normVal - 0.5) * 2) * 140 + 70);
+            const b = Math.floor((1.0 - normVal) * 200 + 50);
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.22)`;
+          } else {
+            const r = Math.floor(normVal * 200 + 10);
+            const g = Math.floor((1.0 - Math.abs(normVal - 0.5) * 2) * 120 + 20);
+            const b = Math.floor((1.0 - normVal) * 180 + 30);
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.18)`;
+          }
           ctx.fillRect(i * stepX, j * stepY, stepX + 1, stepY + 1);
         }
       }
 
-      // 2. Draw Level Contour Lines
+      // 2. Draw Level Contours
       ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.08)';
       for (let r = 0.5; r <= 4.0; r += 0.5) {
         ctx.beginPath();
         if (landscapeType === 'bowl') {
@@ -489,17 +546,17 @@
         ctx.stroke();
       }
 
-      // 3. Draw Coordinate Axes
+      // 3. Axes
       ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.2)';
       ctx.beginPath();
       ctx.moveTo(0, center.y); ctx.lineTo(width, center.y);
       ctx.moveTo(center.x, 0); ctx.lineTo(center.x, height);
       ctx.stroke();
 
-      // 4. Draw Optimization Trail
+      // 4. Trail
       if (trail.length > 1) {
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+        ctx.strokeStyle = isLight ? 'rgba(2, 132, 199, 0.7)' : 'rgba(56, 189, 248, 0.6)';
         ctx.lineWidth = 2;
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
@@ -512,30 +569,26 @@
         ctx.setLineDash([]);
       }
 
-      // 5. Calculate Gradient at Particle
+      // 5. Gradient Vectors at Particle
       const { val, dfdx, dfdy } = evaluateField(particle.x, particle.y);
       const gradNorm = Math.hypot(dfdx, dfdy);
       const pScr = toScreen(particle.x, particle.y);
 
-      // Draw Gradient Vector ∇f (Amber - Uphill)
-      const gradArrowScale = Math.min(1.2, 35.0 / (gradNorm + 1e-5));
       const gradTip = {
         x: pScr.x + (dfdx * scale * 0.25),
         y: pScr.y - (dfdy * scale * 0.25)
       };
-      drawArrow(pScr.x, pScr.y, gradTip.x, gradTip.y, '#fbbf24', 3);
+      drawArrow(pScr.x, pScr.y, gradTip.x, gradTip.y, isLight ? '#d97706' : '#fbbf24', 3);
 
-      // Draw Descent Vector -∇f (Green - Downhill)
       const descTip = {
         x: pScr.x - (dfdx * scale * 0.25),
         y: pScr.y + (dfdy * scale * 0.25)
       };
-      drawArrow(pScr.x, pScr.y, descTip.x, descTip.y, '#4ade80', 3);
+      drawArrow(pScr.x, pScr.y, descTip.x, descTip.y, isLight ? '#16a34a' : '#4ade80', 3);
 
-      // Draw Particle
       ctx.beginPath();
       ctx.arc(pScr.x, pScr.y, 8, 0, Math.PI * 2);
-      ctx.fillStyle = '#38bdf8';
+      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
       ctx.fill();
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 2;
@@ -555,7 +608,6 @@
       document.getElementById('descentText').textContent = `[${-dfdx > 0 ? '+' : ''}${-dfdx.toFixed(2)}, ${-dfdy > 0 ? '+' : ''}${-dfdy.toFixed(2)}]ᵀ`;
     }
 
-    // Sliders
     document.getElementById('sliderLR').addEventListener('input', (e) => {
       lr = parseFloat(e.target.value);
       document.getElementById('valLR').textContent = lr.toFixed(2);
@@ -565,12 +617,10 @@
       document.getElementById('valBeta').textContent = beta.toFixed(2);
     });
 
-    // Animation Loop
     function stepOptimizer() {
       if (!isRolling) return;
       const { dfdx, dfdy } = evaluateField(particle.x, particle.y);
       
-      // Momentum update
       velocity.x = beta * velocity.x + (1.0 - beta) * dfdx;
       velocity.y = beta * velocity.y + (1.0 - beta) * dfdy;
 
@@ -587,7 +637,6 @@
       requestAnimationFrame(loop);
     }
 
-    // Mouse & Touch Dragging
     function getPointerPos(evt) {
       const rect = canvas.getBoundingClientRect();
       const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
@@ -605,7 +654,7 @@
       if (dist < 30) {
         draggingParticle = true;
         isRolling = false;
-        document.getElementById('btnRoll').textContent = "▶ Roll Particle Downhill";
+        document.getElementById('btnRoll').textContent = "Roll Particle Downhill";
       }
     }
 
@@ -632,6 +681,7 @@
     window.addEventListener('touchmove', onPointerMove, { passive: false });
     window.addEventListener('touchend', onPointerUp);
 
+    initTheme();
     resizeCanvas();
     resetParticle();
     requestAnimationFrame(loop);

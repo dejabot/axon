@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +16,24 @@
       --accent-red: #f43f5e;
       --accent-amber: #fbbf24;
       --accent-purple: #c084fc;
+      --input-bg: #0a0d14;
+      --btn-bg: #1e2638;
+      --btn-hover: #2b364f;
+    }
+    [data-theme="light"] {
+      --bg-dark: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-blue: #0284c7;
+      --accent-green: #16a34a;
+      --accent-red: #e11d48;
+      --accent-amber: #d97706;
+      --accent-purple: #9333ea;
+      --input-bg: #f1f5f9;
+      --btn-bg: #e2e8f0;
+      --btn-hover: #cbd5e1;
     }
     * {
       box-sizing: border-box;
@@ -31,10 +49,11 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background-color 0.2s, color 0.2s;
     }
     header {
       padding: 16px 24px;
-      background-color: rgba(20, 25, 35, 0.95);
+      background-color: var(--card-bg);
       border-bottom: 1px solid var(--card-border);
       display: flex;
       justify-content: space-between;
@@ -52,18 +71,27 @@
       font-size: 0.85rem;
       color: var(--text-muted);
     }
-    .nav-links a {
-      color: var(--accent-amber);
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .nav-links a, .btn-theme {
+      color: var(--text-main);
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       padding: 6px 12px;
-      background: rgba(251, 191, 36, 0.1);
-      border: 1px solid rgba(251, 191, 36, 0.3);
+      background: var(--btn-bg);
+      border: 1px solid var(--card-border);
       border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
       transition: all 0.2s;
     }
-    .nav-links a:hover {
-      background: rgba(251, 191, 36, 0.2);
+    .nav-links a:hover, .btn-theme:hover {
+      background: var(--btn-hover);
+      border-color: var(--accent-blue);
     }
     .main-container {
       display: flex;
@@ -103,14 +131,15 @@
       top: 12px;
       left: 12px;
       pointer-events: none;
-      background: rgba(10, 13, 20, 0.75);
-      backdrop-filter: blur(4px);
+      background: var(--card-bg);
+      opacity: 0.92;
       padding: 8px 12px;
       border-radius: 8px;
       border: 1px solid var(--card-border);
       font-size: 0.75rem;
       color: var(--text-muted);
       line-height: 1.4;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
     .controls-panel {
       flex: 1;
@@ -158,7 +187,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #0a0d14;
+      background: var(--input-bg);
       padding: 10px 12px;
       border-radius: 8px;
       border: 1px solid var(--card-border);
@@ -178,13 +207,14 @@
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider-toggle {
       position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #232b3b; transition: .3s; border-radius: 24px;
+      background-color: var(--btn-bg); transition: .3s; border-radius: 24px;
+      border: 1px solid var(--card-border);
     }
     .slider-toggle:before {
-      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
       background-color: white; transition: .3s; border-radius: 50%;
     }
-    input:checked + .slider-toggle { background-color: var(--accent-green); }
+    input:checked + .slider-toggle { background-color: var(--accent-green); border-color: var(--accent-green); }
     input:checked + .slider-toggle:before { transform: translateX(20px); }
 
     .preset-grid {
@@ -194,7 +224,7 @@
       margin-top: 8px;
     }
     button.btn {
-      background: #1e2638;
+      background: var(--btn-bg);
       border: 1px solid var(--card-border);
       color: var(--text-main);
       padding: 8px 6px;
@@ -205,7 +235,7 @@
       transition: all 0.15s;
     }
     button.btn:hover {
-      background: #2b364f;
+      background: var(--btn-hover);
       border-color: var(--accent-blue);
     }
     .telemetry-grid {
@@ -214,7 +244,7 @@
       gap: 8px;
     }
     .stat-box {
-      background: #0a0d14;
+      background: var(--input-bg);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       padding: 10px;
@@ -242,15 +272,6 @@
       border-bottom: 1px solid var(--card-border);
     }
     .comparison-table th { color: var(--text-muted); }
-    .badge {
-      display: inline-block;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: 700;
-    }
-    .badge-ok { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
-    .badge-danger { background: rgba(244, 63, 94, 0.2); color: var(--accent-red); }
   </style>
 </head>
 <body>
@@ -260,9 +281,12 @@
       <h1>02: Trigonometry, atan2 & Continuous Angle Topology</h1>
       <p>Axon Stage 1: The Unified Math Engine</p>
     </div>
-    <div class="nav-links">
-      <a href="README.md">📖 Concept Guide</a>
-      <a href="../../../index.html">🏠 Master Dashboard</a>
+    <div class="header-nav">
+      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
+      <div class="nav-links">
+        <a href="README.md">Concept Guide</a>
+        <a href="../../../index.html">Master Dashboard</a>
+      </div>
     </div>
   </header>
 
@@ -365,6 +389,25 @@
   </div>
 
   <script>
+    const THEME_KEY = 'axon_theme';
+    function initTheme() {
+      const saved = localStorage.getItem(THEME_KEY) || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeButton(saved);
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem(THEME_KEY, next);
+      updateThemeButton(next);
+      draw();
+    }
+    function updateThemeButton(theme) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+    }
+
     const canvas = document.getElementById('angleCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -374,8 +417,7 @@
 
     let center = { x: 0, y: 0 };
     let circleRadius = 150;
-
-    let dragging = null; // 'target' or 'curr'
+    let dragging = null;
 
     function resizeCanvas() {
       const rect = canvas.parentElement.getBoundingClientRect();
@@ -401,6 +443,7 @@
     function radToDeg(r) { return r * 180 / Math.PI; }
 
     function draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       const width = canvas.width / (window.devicePixelRatio || 1);
       const height = canvas.height / (window.devicePixelRatio || 1);
 
@@ -408,7 +451,7 @@
 
       // 1. Draw Coordinate Axes
       ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)';
       ctx.beginPath();
       ctx.moveTo(center.x - circleRadius - 40, center.y);
       ctx.lineTo(center.x + circleRadius + 40, center.y);
@@ -418,7 +461,7 @@
 
       // Quadrant labels
       ctx.font = '11px monospace';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.fillStyle = isLight ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.25)';
       ctx.fillText('Quad I (+,+)', center.x + circleRadius * 0.45, center.y - circleRadius * 0.45);
       ctx.fillText('Quad II (-,+)', center.x - circleRadius * 0.85, center.y - circleRadius * 0.45);
       ctx.fillText('Quad III (-,-)', center.x - circleRadius * 0.85, center.y + circleRadius * 0.55);
@@ -426,13 +469,13 @@
 
       // 2. Draw Unit Circle
       ctx.lineWidth = 2;
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+      ctx.strokeStyle = isLight ? 'rgba(2, 132, 199, 0.4)' : 'rgba(56, 189, 248, 0.3)';
       ctx.beginPath();
       ctx.arc(center.x, center.y, circleRadius, 0, Math.PI * 2);
       ctx.stroke();
 
       // Angle zero and tick marks
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fillStyle = isLight ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.4)';
       ctx.font = '10px monospace';
       ctx.fillText('0° / +X', center.x + circleRadius + 8, center.y + 3);
       ctx.fillText('+90° / +Y', center.x - 18, center.y - circleRadius - 8);
@@ -442,7 +485,6 @@
       const tRad = degToRad(targetAngleDeg);
       const cRad = degToRad(currAngleDeg);
 
-      // Calculations
       const naiveError = targetAngleDeg - currAngleDeg;
       const wrappedError = wrapTo180(naiveError);
 
@@ -454,13 +496,11 @@
       }
 
       // 3. Draw Path Arcs
-      // If naive is significantly different from wrapped, draw naive path in dashed red
       if (Math.abs(naiveError - wrappedError) > 1) {
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 4]);
-        ctx.strokeStyle = 'rgba(244, 63, 94, 0.5)';
+        ctx.strokeStyle = isLight ? 'rgba(225, 29, 72, 0.5)' : 'rgba(244, 63, 94, 0.5)';
         ctx.beginPath();
-        // Naive arc
         ctx.arc(center.x, center.y, circleRadius * 0.85, -cRad, -(cRad + degToRad(naiveError)), naiveError < 0);
         ctx.stroke();
         ctx.setLineDash([]);
@@ -468,17 +508,17 @@
 
       // Shortest turn arc (Green)
       ctx.lineWidth = 4;
-      ctx.strokeStyle = 'rgba(74, 222, 128, 0.8)';
+      ctx.strokeStyle = isLight ? 'rgba(22, 163, 74, 0.85)' : 'rgba(74, 222, 128, 0.8)';
       ctx.beginPath();
       ctx.arc(center.x, center.y, circleRadius * 0.7, -cRad, -(cRad + degToRad(optTurn)), optTurn < 0);
       ctx.stroke();
 
-      // 4. Draw Current Heading Vector (Cyan)
+      // 4. Current Heading Vector (Cyan)
       const curX = center.x + circleRadius * Math.cos(-cRad);
       const curY = center.y + circleRadius * Math.sin(-cRad);
 
       ctx.lineWidth = 3;
-      ctx.strokeStyle = '#38bdf8';
+      ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
       ctx.beginPath();
       ctx.moveTo(center.x, center.y);
       ctx.lineTo(curX, curY);
@@ -486,18 +526,18 @@
 
       ctx.beginPath();
       ctx.arc(curX, curY, 8, 0, Math.PI * 2);
-      ctx.fillStyle = '#38bdf8';
+      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
       ctx.fill();
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // 5. Draw Target Heading Vector (Amber)
+      // 5. Target Heading Vector (Amber)
       const tarX = center.x + circleRadius * Math.cos(-tRad);
       const tarY = center.y + circleRadius * Math.sin(-tRad);
 
       ctx.lineWidth = 3;
-      ctx.strokeStyle = '#fbbf24';
+      ctx.strokeStyle = isLight ? '#d97706' : '#fbbf24';
       ctx.beginPath();
       ctx.moveTo(center.x, center.y);
       ctx.lineTo(tarX, tarY);
@@ -505,20 +545,20 @@
 
       ctx.beginPath();
       ctx.arc(tarX, tarY, 8, 0, Math.PI * 2);
-      ctx.fillStyle = '#fbbf24';
+      ctx.fillStyle = isLight ? '#d97706' : '#fbbf24';
       ctx.fill();
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // If swerve inverted, draw the virtual 180° inverted wheel vector in dashed purple
+      // Inverted wheel orientation
       if (speedMult < 0) {
         const invRad = degToRad(currAngleDeg + optTurn);
         const invX = center.x + circleRadius * Math.cos(-invRad);
         const invY = center.y + circleRadius * Math.sin(-invRad);
         ctx.setLineDash([4, 4]);
         ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#c084fc';
+        ctx.strokeStyle = isLight ? '#9333ea' : '#c084fc';
         ctx.beginPath();
         ctx.moveTo(center.x, center.y);
         ctx.lineTo(invX, invY);
@@ -539,9 +579,7 @@
       document.getElementById('wrappedErrorVal').textContent = `${wrappedError > 0 ? '+' : ''}${wrappedError.toFixed(1)}°`;
       document.getElementById('optTurnVal').textContent = `${optTurn > 0 ? '+' : ''}${optTurn.toFixed(1)}°`;
       document.getElementById('speedMultVal').textContent = `${speedMult > 0 ? '+' : ''}${speedMult.toFixed(1)}×`;
-      document.getElementById('speedMultVal').style.color = speedMult > 0 ? 'var(--accent-amber)' : 'var(--accent-purple)';
 
-      // Table updates
       const tRad = degToRad(targetAngleDeg);
       const x = Math.cos(tRad);
       const y = Math.sin(tRad);
@@ -569,7 +607,6 @@
       }
     }
 
-    // Sliders
     document.getElementById('sliderTarget').addEventListener('input', (e) => {
       targetAngleDeg = parseFloat(e.target.value);
       draw();
@@ -589,7 +626,6 @@
       draw();
     }
 
-    // Mouse & Touch Dragging
     function getPointerAngle(evt) {
       const rect = canvas.getBoundingClientRect();
       const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
@@ -618,22 +654,16 @@
       const distT = Math.hypot(px - tarX, py - tarY);
       const distC = Math.hypot(px - curX, py - curY);
 
-      if (distT < 30) {
-        dragging = 'target';
-      } else if (distC < 30) {
-        dragging = 'curr';
-      }
+      if (distT < 30) dragging = 'target';
+      else if (distC < 30) dragging = 'curr';
     }
 
     function onPointerMove(evt) {
       if (!dragging) return;
       evt.preventDefault();
       const deg = getPointerAngle(evt);
-      if (dragging === 'target') {
-        targetAngleDeg = Math.round(deg);
-      } else if (dragging === 'curr') {
-        currAngleDeg = Math.round(deg);
-      }
+      if (dragging === 'target') targetAngleDeg = Math.round(deg);
+      else if (dragging === 'curr') currAngleDeg = Math.round(deg);
       draw();
     }
 
@@ -649,7 +679,7 @@
     window.addEventListener('touchmove', onPointerMove, { passive: false });
     window.addEventListener('touchend', onPointerUp);
 
-    // Initial render
+    initTheme();
     resizeCanvas();
   </script>
 </body>

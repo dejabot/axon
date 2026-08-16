@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +17,23 @@
       --accent-amber: #fbbf24;
       --accent-red: #f43f5e;
       --accent-purple: #c084fc;
+      --btn-bg: #1e293b;
+      --btn-border: #334155;
+    }
+    [data-theme="light"] {
+      --bg-dark: #f8fafc;
+      --card-bg: #ffffff;
+      --card-hover: #f1f5f9;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-blue: #0284c7;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #e11d48;
+      --accent-purple: #9333ea;
+      --btn-bg: #e2e8f0;
+      --btn-border: #cbd5e1;
     }
     * {
       box-sizing: border-box;
@@ -29,6 +46,7 @@
       color: var(--text-main);
       min-height: 100vh;
       line-height: 1.5;
+      transition: background-color 0.2s, color 0.2s;
     }
     .container {
       max-width: 1200px;
@@ -39,6 +57,15 @@
       margin-bottom: 32px;
       border-bottom: 1px solid var(--card-border);
       padding-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .brand-wrap {
+      flex: 1;
+      min-width: 280px;
     }
     .brand {
       display: flex;
@@ -62,14 +89,31 @@
       font-size: 1.8rem;
       font-weight: 800;
       letter-spacing: -0.03em;
-      background: linear-gradient(to right, #f8fafc, var(--accent-blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--text-main);
     }
     .tagline {
       color: var(--text-muted);
       font-size: 1rem;
       max-width: 780px;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-theme {
+      background: var(--btn-bg);
+      border: 1px solid var(--btn-border);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-theme:hover {
+      border-color: var(--accent-blue);
     }
     
     /* Progress Summary Bar */
@@ -82,6 +126,7 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     .progress-header {
       display: flex;
@@ -106,7 +151,7 @@
     .progress-bar-bg {
       width: 100%;
       height: 10px;
-      background: #1e293b;
+      background: var(--btn-bg);
       border-radius: 999px;
       overflow: hidden;
     }
@@ -121,10 +166,11 @@
       display: flex;
       gap: 10px;
       align-items: center;
+      flex-wrap: wrap;
     }
     .btn-small {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--btn-bg);
+      border: 1px solid var(--btn-border);
       color: var(--text-muted);
       font-size: 0.75rem;
       padding: 6px 12px;
@@ -134,8 +180,8 @@
       transition: all 0.15s;
     }
     .btn-small:hover {
-      background: #334155;
       color: var(--text-main);
+      border-color: var(--accent-blue);
     }
 
     /* Stage Sections */
@@ -198,15 +244,16 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
       transition: transform 0.15s, border-color 0.15s, background-color 0.15s;
     }
     .concept-card:hover {
       background: var(--card-hover);
-      border-color: #334155;
+      border-color: #94a3b8;
     }
     .concept-card.completed {
-      border-color: rgba(74, 222, 128, 0.4);
-      background: rgba(74, 222, 128, 0.03);
+      border-color: var(--accent-green);
+      background: rgba(74, 222, 128, 0.05);
     }
     .card-top {
       display: flex;
@@ -236,7 +283,7 @@
       gap: 8px;
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid var(--card-border);
     }
     .link-btn {
       flex: 1;
@@ -249,12 +296,11 @@
       transition: all 0.15s;
     }
     .link-guide {
-      background: #1e293b;
+      background: var(--btn-bg);
       color: var(--text-main);
-      border: 1px solid #334155;
+      border: 1px solid var(--btn-border);
     }
     .link-guide:hover {
-      background: #334155;
       border-color: var(--accent-blue);
       color: var(--accent-blue);
     }
@@ -267,16 +313,17 @@
       background: rgba(56, 189, 248, 0.25);
     }
     .link-disabled {
-      background: #141923;
-      color: #475569;
-      border: 1px solid #1e293b;
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
       cursor: not-allowed;
       pointer-events: none;
+      opacity: 0.6;
     }
 
     footer {
       text-align: center;
-      color: #64748b;
+      color: var(--text-muted);
       font-size: 0.8rem;
       margin-top: 40px;
       border-top: 1px solid var(--card-border);
@@ -289,11 +336,16 @@
   <div class="container">
     
     <header>
-      <div class="brand">
-        <div class="brand-logo">A</div>
-        <h1>AXON</h1>
+      <div class="brand-wrap">
+        <div class="brand">
+          <div class="brand-logo">A</div>
+          <h1>AXON</h1>
+        </div>
+        <p class="tagline">A first-principles curriculum for mastering 25 foundational concepts across applied mathematics, physical dynamics, control theory, machine learning, and autonomous robotics.</p>
       </div>
-      <p class="tagline">A first-principles curriculum for mastering 25 foundational concepts across applied mathematics, physical dynamics, control theory, machine learning, and autonomous robotics.</p>
+      <div class="header-actions">
+        <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
+      </div>
     </header>
 
     <!-- Progress Summary Card -->
@@ -306,8 +358,8 @@
         <div class="progress-bar-fill" id="progressBar"></div>
       </div>
       <div class="quick-actions">
-        <button class="btn-small" onclick="markModule1Done()">✓ Mark Module 1 Complete</button>
-        <button class="btn-small" onclick="resetAllProgress()">↺ Reset All Progress</button>
+        <button class="btn-small" onclick="markModule1Done()">Mark Module 1 Complete</button>
+        <button class="btn-small" onclick="resetAllProgress()">Reset All Progress</button>
       </div>
     </div>
 
@@ -333,8 +385,8 @@
             </div>
           </div>
           <div class="card-links">
-            <a class="link-btn link-guide" href="docs/modules/01_math_foundations/concept_01_vectors_matrices/README.md">📖 Concept Guide</a>
-            <a class="link-btn link-demo" href="docs/modules/01_math_foundations/concept_01_vectors_matrices/demo.html">⚡ Interactive Demo</a>
+            <a class="link-btn link-guide" href="docs/modules/01_math_foundations/concept_01_vectors_matrices/README.md">Concept Guide</a>
+            <a class="link-btn link-demo" href="docs/modules/01_math_foundations/concept_01_vectors_matrices/demo.html">Interactive Demo</a>
           </div>
         </div>
 
@@ -348,8 +400,8 @@
             </div>
           </div>
           <div class="card-links">
-            <a class="link-btn link-guide" href="docs/modules/01_math_foundations/concept_02_trig_angle_topology/README.md">📖 Concept Guide</a>
-            <a class="link-btn link-demo" href="docs/modules/01_math_foundations/concept_02_trig_angle_topology/demo.html">⚡ Interactive Demo</a>
+            <a class="link-btn link-guide" href="docs/modules/01_math_foundations/concept_02_trig_angle_topology/README.md">Concept Guide</a>
+            <a class="link-btn link-demo" href="docs/modules/01_math_foundations/concept_02_trig_angle_topology/demo.html">Interactive Demo</a>
           </div>
         </div>
 
@@ -363,8 +415,8 @@
             </div>
           </div>
           <div class="card-links">
-            <a class="link-btn link-guide" href="docs/modules/01_math_foundations/concept_03_motion_calculus/README.md">📖 Concept Guide</a>
-            <a class="link-btn link-demo" href="docs/modules/01_math_foundations/concept_03_motion_calculus/demo.html">⚡ Interactive Demo</a>
+            <a class="link-btn link-guide" href="docs/modules/01_math_foundations/concept_03_motion_calculus/README.md">Concept Guide</a>
+            <a class="link-btn link-demo" href="docs/modules/01_math_foundations/concept_03_motion_calculus/demo.html">Interactive Demo</a>
           </div>
         </div>
 
@@ -378,8 +430,8 @@
             </div>
           </div>
           <div class="card-links">
-            <a class="link-btn link-guide" href="docs/modules/01_math_foundations/concept_04_multivariable_gradients/README.md">📖 Concept Guide</a>
-            <a class="link-btn link-demo" href="docs/modules/01_math_foundations/concept_04_multivariable_gradients/demo.html">⚡ Interactive Demo</a>
+            <a class="link-btn link-guide" href="docs/modules/01_math_foundations/concept_04_multivariable_gradients/README.md">Concept Guide</a>
+            <a class="link-btn link-demo" href="docs/modules/01_math_foundations/concept_04_multivariable_gradients/demo.html">Interactive Demo</a>
           </div>
         </div>
 
@@ -404,9 +456,7 @@
               <p>MSE, Cross-Entropy, learning rates (α), momentum (β), and Adam optimizer mechanics.</p>
             </div>
           </div>
-          <div class="card-links">
-            <span class="link-btn link-disabled">Upcoming</span>
-          </div>
+          <div class="card-links"><span class="link-btn link-disabled">Upcoming</span></div>
         </div>
         <div class="concept-card">
           <div class="card-top">
@@ -416,9 +466,7 @@
               <p>Linear matrix mapping + activations (ReLU, Sigmoid, GELU) and proof of linear collapse.</p>
             </div>
           </div>
-          <div class="card-links">
-            <span class="link-btn link-disabled">Upcoming</span>
-          </div>
+          <div class="card-links"><span class="link-btn link-disabled">Upcoming</span></div>
         </div>
         <div class="concept-card">
           <div class="card-top">
@@ -428,9 +476,7 @@
               <p>Derivation of error vectors (δ^[l]), weight gradients (∂L/∂W), and Python backprop engine.</p>
             </div>
           </div>
-          <div class="card-links">
-            <span class="link-btn link-disabled">Upcoming</span>
-          </div>
+          <div class="card-links"><span class="link-btn link-disabled">Upcoming</span></div>
         </div>
         <div class="concept-card">
           <div class="card-top">
@@ -440,9 +486,7 @@
               <p>Live in-browser MLP training with interactive decision boundary warping.</p>
             </div>
           </div>
-          <div class="card-links">
-            <span class="link-btn link-disabled">Upcoming</span>
-          </div>
+          <div class="card-links"><span class="link-btn link-disabled">Upcoming</span></div>
         </div>
       </div>
     </div>
@@ -587,7 +631,7 @@
     </div>
 
     <footer>
-      <p>Axon Curriculum &copy; 2026 &bull; First-Principles Applied Mathematics & Autonomous Robotics</p>
+      <p>Axon Curriculum &bull; First-Principles Applied Mathematics & Autonomous Robotics</p>
     </footer>
 
   </div>
@@ -595,6 +639,28 @@
   <script>
     const TOTAL_CONCEPTS = 25;
     const STORAGE_KEY = 'axon_curriculum_progress';
+    const THEME_KEY = 'axon_theme';
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeButton(savedTheme);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem(THEME_KEY, next);
+      updateThemeButton(next);
+    }
+
+    function updateThemeButton(theme) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+      }
+    }
 
     function getStoredProgress() {
       try {
@@ -662,7 +728,8 @@
       }
     }
 
-    // Initialize UI on load
+    // Initialize on load
+    initTheme();
     updateUI();
   </script>
 </body>
