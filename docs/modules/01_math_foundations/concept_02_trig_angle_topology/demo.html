@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 02: Trigonometry, atan2 & Continuous Angle Topology</title>
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --card-bg: #141923;
+      --card-border: #232b3b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-red: #f43f5e;
+      --accent-amber: #fbbf24;
+      --accent-purple: #c084fc;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 16px 24px;
+      background-color: rgba(20, 25, 35, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      letter-spacing: -0.02em;
+    }
+    .header-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .nav-links a {
+      color: var(--accent-amber);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover {
+      background: rgba(251, 191, 36, 0.2);
+    }
+    .main-container {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 16px;
+      gap: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    @media (min-width: 900px) {
+      .main-container {
+        flex-direction: row;
+      }
+    }
+    .canvas-panel {
+      flex: 1.5;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 480px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .canvas-overlay-hints {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      pointer-events: none;
+      background: rgba(10, 13, 20, 0.75);
+      backdrop-filter: blur(4px);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .controls-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-blue);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .control-group {
+      margin-bottom: 12px;
+    }
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .control-header span.val {
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-blue);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0a0d14;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 10px;
+    }
+    .toggle-row label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider-toggle {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #232b3b; transition: .3s; border-radius: 24px;
+    }
+    .slider-toggle:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider-toggle { background-color: var(--accent-green); }
+    input:checked + .slider-toggle:before { transform: translateX(20px); }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+    button.btn {
+      background: #1e2638;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 6px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button.btn:hover {
+      background: #2b364f;
+      border-color: var(--accent-blue);
+    }
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .stat-box {
+      background: #0a0d14;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .stat-val {
+      font-family: monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      margin-top: 8px;
+    }
+    .comparison-table th, .comparison-table td {
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .comparison-table th { color: var(--text-muted); }
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .badge-ok { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
+    .badge-danger { background: rgba(244, 63, 94, 0.2); color: var(--accent-red); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-title">
+      <h1>02: Trigonometry, atan2 & Continuous Angle Topology</h1>
+      <p>Axon Stage 1: The Unified Math Engine</p>
+    </div>
+    <div class="nav-links">
+      <a href="README.md">📖 Concept Guide</a>
+      <a href="../../../index.html">🏠 Master Dashboard</a>
+    </div>
+  </header>
+
+  <div class="main-container">
+    
+    <div class="canvas-panel">
+      <div class="canvas-overlay-hints">
+        • <b>Drag Cyan pointer</b> (Current Heading θ_curr)<br>
+        • <b>Drag Amber pointer</b> (Target Heading θ_target)<br>
+        • Green arc = Shortest Turn Path | Red arc = Naive Spin
+      </div>
+      <canvas id="angleCanvas"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      
+      <div class="card">
+        <div class="card-title">Angle Position Controls</div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Target Angle (θ_target)</span>
+            <span class="val" id="targetValText" style="color: var(--accent-amber);">+170.0°</span>
+          </div>
+          <input type="range" id="sliderTarget" min="-180" max="180" step="1" value="170">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Current Robot Heading (θ_curr)</span>
+            <span class="val" id="currValText" style="color: var(--accent-blue);">-170.0°</span>
+          </div>
+          <input type="range" id="sliderCurr" min="-180" max="180" step="1" value="-170">
+        </div>
+
+        <div class="toggle-row">
+          <label for="swerveOptToggle">Swerve Inversion (Turn ≤ 90°)</label>
+          <label class="switch">
+            <input type="checkbox" id="swerveOptToggle" checked>
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <div class="preset-grid">
+          <button class="btn" onclick="setScenario(170, -170)">340° Spin Trap</button>
+          <button class="btn" onclick="setScenario(0, 160)">160° Slew Invert</button>
+          <button class="btn" onclick="setScenario(-135, 45)">Quad III vs I</button>
+          <button class="btn" onclick="setScenario(90, -90)">180° Flip</button>
+          <button class="btn" onclick="setScenario(10, 350)">0° Boundary Crossing</button>
+          <button class="btn" onclick="setScenario(0, 0)">Zero Error</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Controller Telemetry</div>
+        <div class="telemetry-grid">
+          <div class="stat-box">
+            <div class="stat-label">Naive Linear Error</div>
+            <div class="stat-val" id="naiveErrorVal" style="color: var(--accent-red);">+340.0°</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Shortest Wrapped Error</div>
+            <div class="stat-val" id="wrappedErrorVal" style="color: var(--accent-green);">-20.0°</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Optimized Slew Command</div>
+            <div class="stat-val" id="optTurnVal" style="color: var(--accent-purple);">-20.0°</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Drive Speed Multiplier</div>
+            <div class="stat-val" id="speedMultVal" style="color: var(--accent-amber);">+1.0×</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">4-Quadrant atan2 vs atan(y/x)</div>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Target Point</th>
+              <th>Quadrant</th>
+              <th>atan(y/x)</th>
+              <th>atan2(y, x)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="tableCoordText">x: -0.98, y: +0.17</td>
+              <td id="tableQuadText">Quad II</td>
+              <td id="tableAtanText" style="color: var(--accent-red);">-10.0° [FAIL]</td>
+              <td id="tableAtan2Text" style="color: var(--accent-green);">+170.0° [OK]</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const canvas = document.getElementById('angleCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let targetAngleDeg = 170.0;
+    let currAngleDeg = -170.0;
+    let swerveOptimizationEnabled = true;
+
+    let center = { x: 0, y: 0 };
+    let circleRadius = 150;
+
+    let dragging = null; // 'target' or 'curr'
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      center.x = rect.width / 2;
+      center.y = rect.height / 2;
+      circleRadius = Math.min(rect.width, rect.height) * 0.38;
+      draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function wrapTo180(deg) {
+      let r = deg % 360;
+      if (r > 180) r -= 360;
+      if (r <= -180) r += 360;
+      return r;
+    }
+
+    function degToRad(d) { return d * Math.PI / 180; }
+    function radToDeg(r) { return r * 180 / Math.PI; }
+
+    function draw() {
+      const width = canvas.width / (window.devicePixelRatio || 1);
+      const height = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Draw Coordinate Axes
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.beginPath();
+      ctx.moveTo(center.x - circleRadius - 40, center.y);
+      ctx.lineTo(center.x + circleRadius + 40, center.y);
+      ctx.moveTo(center.x, center.y - circleRadius - 40);
+      ctx.lineTo(center.x, center.y + circleRadius + 40);
+      ctx.stroke();
+
+      // Quadrant labels
+      ctx.font = '11px monospace';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.fillText('Quad I (+,+)', center.x + circleRadius * 0.45, center.y - circleRadius * 0.45);
+      ctx.fillText('Quad II (-,+)', center.x - circleRadius * 0.85, center.y - circleRadius * 0.45);
+      ctx.fillText('Quad III (-,-)', center.x - circleRadius * 0.85, center.y + circleRadius * 0.55);
+      ctx.fillText('Quad IV (+,-)', center.x + circleRadius * 0.45, center.y + circleRadius * 0.55);
+
+      // 2. Draw Unit Circle
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, circleRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Angle zero and tick marks
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.font = '10px monospace';
+      ctx.fillText('0° / +X', center.x + circleRadius + 8, center.y + 3);
+      ctx.fillText('+90° / +Y', center.x - 18, center.y - circleRadius - 8);
+      ctx.fillText('±180° / -X', center.x - circleRadius - 65, center.y + 3);
+      ctx.fillText('-90° / -Y', center.x - 18, center.y + circleRadius + 16);
+
+      const tRad = degToRad(targetAngleDeg);
+      const cRad = degToRad(currAngleDeg);
+
+      // Calculations
+      const naiveError = targetAngleDeg - currAngleDeg;
+      const wrappedError = wrapTo180(naiveError);
+
+      let optTurn = wrappedError;
+      let speedMult = 1.0;
+      if (swerveOptimizationEnabled && Math.abs(wrappedError) > 90) {
+        speedMult = -1.0;
+        optTurn = wrappedError > 0 ? (wrappedError - 180) : (wrappedError + 180);
+      }
+
+      // 3. Draw Path Arcs
+      // If naive is significantly different from wrapped, draw naive path in dashed red
+      if (Math.abs(naiveError - wrappedError) > 1) {
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(244, 63, 94, 0.5)';
+        ctx.beginPath();
+        // Naive arc
+        ctx.arc(center.x, center.y, circleRadius * 0.85, -cRad, -(cRad + degToRad(naiveError)), naiveError < 0);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Shortest turn arc (Green)
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(74, 222, 128, 0.8)';
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, circleRadius * 0.7, -cRad, -(cRad + degToRad(optTurn)), optTurn < 0);
+      ctx.stroke();
+
+      // 4. Draw Current Heading Vector (Cyan)
+      const curX = center.x + circleRadius * Math.cos(-cRad);
+      const curY = center.y + circleRadius * Math.sin(-cRad);
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(center.x, center.y);
+      ctx.lineTo(curX, curY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(curX, curY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 5. Draw Target Heading Vector (Amber)
+      const tarX = center.x + circleRadius * Math.cos(-tRad);
+      const tarY = center.y + circleRadius * Math.sin(-tRad);
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.moveTo(center.x, center.y);
+      ctx.lineTo(tarX, tarY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(tarX, tarY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // If swerve inverted, draw the virtual 180° inverted wheel vector in dashed purple
+      if (speedMult < 0) {
+        const invRad = degToRad(currAngleDeg + optTurn);
+        const invX = center.x + circleRadius * Math.cos(-invRad);
+        const invY = center.y + circleRadius * Math.sin(-invRad);
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#c084fc';
+        ctx.beginPath();
+        ctx.moveTo(center.x, center.y);
+        ctx.lineTo(invX, invY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      updateTelemetry(naiveError, wrappedError, optTurn, speedMult);
+    }
+
+    function updateTelemetry(naiveError, wrappedError, optTurn, speedMult) {
+      document.getElementById('targetValText').textContent = `${targetAngleDeg > 0 ? '+' : ''}${targetAngleDeg.toFixed(1)}°`;
+      document.getElementById('currValText').textContent = `${currAngleDeg > 0 ? '+' : ''}${currAngleDeg.toFixed(1)}°`;
+      document.getElementById('sliderTarget').value = targetAngleDeg;
+      document.getElementById('sliderCurr').value = currAngleDeg;
+
+      document.getElementById('naiveErrorVal').textContent = `${naiveError > 0 ? '+' : ''}${naiveError.toFixed(1)}°`;
+      document.getElementById('wrappedErrorVal').textContent = `${wrappedError > 0 ? '+' : ''}${wrappedError.toFixed(1)}°`;
+      document.getElementById('optTurnVal').textContent = `${optTurn > 0 ? '+' : ''}${optTurn.toFixed(1)}°`;
+      document.getElementById('speedMultVal').textContent = `${speedMult > 0 ? '+' : ''}${speedMult.toFixed(1)}×`;
+      document.getElementById('speedMultVal').style.color = speedMult > 0 ? 'var(--accent-amber)' : 'var(--accent-purple)';
+
+      // Table updates
+      const tRad = degToRad(targetAngleDeg);
+      const x = Math.cos(tRad);
+      const y = Math.sin(tRad);
+      document.getElementById('tableCoordText').textContent = `x: ${x.toFixed(2)}, y: ${y.toFixed(2)}`;
+
+      let quad = "Quad I";
+      if (x < 0 && y >= 0) quad = "Quad II";
+      else if (x < 0 && y < 0) quad = "Quad III";
+      else if (x >= 0 && y < 0) quad = "Quad IV";
+      document.getElementById('tableQuadText').textContent = quad;
+
+      const naiveAtan = Math.abs(x) < 1e-4 ? (y > 0 ? 90 : -90) : radToDeg(Math.atan(y / x));
+      const trueAtan2 = radToDeg(Math.atan2(y, x));
+
+      document.getElementById('tableAtan2Text').textContent = `${trueAtan2 > 0 ? '+' : ''}${trueAtan2.toFixed(1)}° [OK]`;
+      
+      const atanMatches = Math.abs(wrapTo180(naiveAtan - trueAtan2)) < 1;
+      const atanElem = document.getElementById('tableAtanText');
+      if (atanMatches) {
+        atanElem.textContent = `${naiveAtan > 0 ? '+' : ''}${naiveAtan.toFixed(1)}° [OK]`;
+        atanElem.style.color = 'var(--accent-green)';
+      } else {
+        atanElem.textContent = `${naiveAtan > 0 ? '+' : ''}${naiveAtan.toFixed(1)}° [FAIL]`;
+        atanElem.style.color = 'var(--accent-red)';
+      }
+    }
+
+    // Sliders
+    document.getElementById('sliderTarget').addEventListener('input', (e) => {
+      targetAngleDeg = parseFloat(e.target.value);
+      draw();
+    });
+    document.getElementById('sliderCurr').addEventListener('input', (e) => {
+      currAngleDeg = parseFloat(e.target.value);
+      draw();
+    });
+    document.getElementById('swerveOptToggle').addEventListener('change', (e) => {
+      swerveOptimizationEnabled = e.target.checked;
+      draw();
+    });
+
+    function setScenario(curr, target) {
+      currAngleDeg = curr;
+      targetAngleDeg = target;
+      draw();
+    }
+
+    // Mouse & Touch Dragging
+    function getPointerAngle(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+      const px = clientX - rect.left - center.x;
+      const py = clientY - rect.top - center.y;
+      const rad = Math.atan2(-py, px);
+      return radToDeg(rad);
+    }
+
+    function onPointerDown(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+      const px = clientX - rect.left;
+      const py = clientY - rect.top;
+
+      const tRad = degToRad(targetAngleDeg);
+      const tarX = center.x + circleRadius * Math.cos(-tRad);
+      const tarY = center.y + circleRadius * Math.sin(-tRad);
+
+      const cRad = degToRad(currAngleDeg);
+      const curX = center.x + circleRadius * Math.cos(-cRad);
+      const curY = center.y + circleRadius * Math.sin(-cRad);
+
+      const distT = Math.hypot(px - tarX, py - tarY);
+      const distC = Math.hypot(px - curX, py - curY);
+
+      if (distT < 30) {
+        dragging = 'target';
+      } else if (distC < 30) {
+        dragging = 'curr';
+      }
+    }
+
+    function onPointerMove(evt) {
+      if (!dragging) return;
+      evt.preventDefault();
+      const deg = getPointerAngle(evt);
+      if (dragging === 'target') {
+        targetAngleDeg = Math.round(deg);
+      } else if (dragging === 'curr') {
+        currAngleDeg = Math.round(deg);
+      }
+      draw();
+    }
+
+    function onPointerUp() {
+      dragging = null;
+    }
+
+    canvas.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp);
+
+    // Initial render
+    resizeCanvas();
+  </script>
+</body>
+</html>
