@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.title and page.title != site.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  {% if page.description or site.description %}<meta name="description" content="{{ page.description | default: site.description }}">{% endif %}
+  <!-- Default to dark; honor a saved choice. Runs before paint so there's no flash. -->
+  <script>
+    (function () {
+      try { var t = localStorage.getItem('axon-theme') || localStorage.getItem('axon_theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="site-title" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch between light and dark">☾</button>
+  </header>
+
+  <main class="page markdown-body">
+    {{ content }}
+
+    {%- comment -%}
+      Auto Prev/Next across the concept READMEs, ordered by their directory paths.
+    {%- endcomment -%}
+    {%- assign concepts = site.pages
+          | where_exp: "p", "p.name == 'README.md'"
+          | where_exp: "p", "p.path contains 'concept_'"
+          | sort: "path" -%}
+    {%- assign cur = -1 -%}
+    {%- for p in concepts -%}
+      {%- if p.url == page.url -%}{%- assign cur = forloop.index0 -%}{%- endif -%}
+    {%- endfor -%}
+    {%- if cur >= 0 -%}
+      {%- assign last_i = concepts.size | minus: 1 -%}
+      <nav class="lesson-nav" aria-label="Concept navigation">
+        {%- if cur > 0 -%}
+          {%- assign prev_i = cur | minus: 1 -%}
+          {%- assign prev = concepts[prev_i] -%}
+          <a class="lesson-nav-link lesson-nav-prev" href="{{ prev.url | relative_url }}">
+            <span class="lesson-nav-dir">← Previous Concept</span>
+            <span class="lesson-nav-title">{{ prev.title | default: prev.dir }}</span>
+          </a>
+        {%- else -%}<span></span>{%- endif -%}
+        {%- if cur < last_i -%}
+          {%- assign next_i = cur | plus: 1 -%}
+          {%- assign next = concepts[next_i] -%}
+          <a class="lesson-nav-link lesson-nav-next" href="{{ next.url | relative_url }}">
+            <span class="lesson-nav-dir">Next Concept →</span>
+            <span class="lesson-nav-title">{{ next.title | default: next.dir }}</span>
+          </a>
+        {%- else -%}<span></span>{%- endif -%}
+      </nav>
+    {%- endif -%}
+  </main>
+
+  <footer class="site-footer">
+    Axon Curriculum · <a href="{{ '/' | relative_url }}">Home</a>
+  </footer>
+
+  <!-- Simple light/dark toggle, remembered across the whole site (pages + demos). -->
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById('themeToggle');
+      function cur() { return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
+      function paint() {
+        if (btn) {
+          btn.textContent = cur() === 'dark' ? '☾' : '☀';
+          btn.title = cur() === 'dark' ? 'Dark theme — switch to light' : 'Light theme — switch to dark';
+        }
+      }
+      paint();
+      if (btn) {
+        btn.addEventListener('click', function () {
+          var next = cur() === 'dark' ? 'light' : 'dark';
+          root.setAttribute('data-theme', next);
+          try {
+            localStorage.setItem('axon-theme', next);
+            localStorage.setItem('axon_theme', next);
+          } catch (e) {}
+          paint();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

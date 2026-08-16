@@ -4,7 +4,11 @@
        Module 1: Math Foundations  ➔  Concept 03: Motion Calculus & Jerk
 ```
 
-<iframe src="demo.html" width="100%" height="560" style="border: 1px solid var(--card-border, #232b3b); border-radius: 12px; margin: 16px 0; background: #0a0d14;"></iframe>
+> **▶ Interactive Demo: [Single-Variable Motion Calculus & Jerk Visualizer](demo.html)**
+>
+> Open in your browser or explore the embedded frame below to observe higher-order derivatives of motion (Position ➔ Velocity ➔ Acceleration ➔ Jerk) and compare S-Curve smoothing against destructive step profiles.
+
+<iframe src="demo.html" width="100%" height="560" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--code-bg, #0a0d14);"></iframe>
 
 ---
 

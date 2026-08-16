@@ -4,7 +4,11 @@
        Module 1: Math Foundations  ➔  Concept 04: Gradients & Chain Rule
 ```
 
-<iframe src="demo.html" width="100%" height="560" style="border: 1px solid var(--card-border, #232b3b); border-radius: 12px; margin: 16px 0; background: #0a0d14;"></iframe>
+> **▶ Interactive Demo: [Multivariable Gradients & Potential Fields Visualizer](demo.html)**
+>
+> Open in your browser or explore the embedded frame below to test scalar loss landscapes f(x, y), orthogonal gradient ascent vectors ∇f, and roll a particle downhill with momentum and learning rate controls.
+
+<iframe src="demo.html" width="100%" height="560" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--code-bg, #0a0d14);"></iframe>
 
 ---
 

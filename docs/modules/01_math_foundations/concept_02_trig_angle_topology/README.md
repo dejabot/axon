@@ -4,7 +4,11 @@
        Module 1: Math Foundations  ➔  Concept 02: Angle Topology & Quaternions
 ```
 
-<iframe src="demo.html" width="100%" height="560" style="border: 1px solid var(--card-border, #232b3b); border-radius: 12px; margin: 16px 0; background: #0a0d14;"></iframe>
+> **▶ Interactive Demo: [2D Angle Topology & 3D Quaternion Sandbox](demo.html)**
+>
+> Open in your browser or explore the embedded frame below to analyze 2D angle wrapping, 4-quadrant atan2 mechanics, and 3D Quaternion rotations without Gimbal Lock.
+
+<iframe src="demo.html" width="100%" height="560" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--code-bg, #0a0d14);"></iframe>
 
 ---
 

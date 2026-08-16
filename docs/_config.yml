@@ -1,0 +1,20 @@
+# GitHub Pages (classic "deploy from a branch") builds this docs/ folder with Jekyll.
+# We provide our own dark-first layout + stylesheet instead of the default Primer theme,
+# so the prose pages and the interactive HTML demos share one look.
+
+title: Axon Curriculum
+description: A first-principles curriculum for applied math, physical dynamics, control theory, machine learning, and robotics.
+url: "https://dejabot.github.io"
+baseurl: "/axon"
+
+# Apply our layout to every page. GitHub Pages' jekyll-optional-front-matter turns the
+# front-matter-less Markdown files into pages, and this default gives them our chrome —
+# so none of the lesson files need front matter added.
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+exclude:
+  - "*.DS_Store"
