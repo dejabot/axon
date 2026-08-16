@@ -1,9 +1,5 @@
 # Concept 18: Discrete Distributions & Softmax
 
-```
-       Module 5: Probability  ➔  Concept 18: Discrete Softmax
-```
-
 > **▶ Interactive Demo: [Softmax & Temperature Visualizer](demo.html)**
 >
 > Open the interactive demo below to adjust the raw class logits and drag the Temperature slider to observe how temperature turns sharp greedy argmax into smooth probability distributions.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Turning Raw Scores into Confidences
-
 When a robot's computer vision neural network inspects an object on the field, the raw output layer generates unconstrained real numbers called **logits**:
 
 * **Game Piece (Note):** `+3.2`
@@ -50,7 +45,6 @@ How do we convert raw numbers into clean, calibrated probabilities that sum to 1
 ---
 
 ## 2. Solving It in Code: The Softmax Function
-
 To convert logits into valid probabilities:
 1. Take the exponential `e^z` of every score (turning all numbers positive).
 2. Divide each by the sum of all exponentials (so the total equals `1.0`):
@@ -100,7 +94,6 @@ for label, prob in zip(labels, probs):
 ---
 
 ## 3. Bridge to Machine Learning: LLM Token Generation
-
 In Large Language Models (like ChatGPT, Gemini, and Claude):
 * The AI computes logits across its entire 32,000-word dictionary for the next token.
 * **Temperature Sampling:**
@@ -110,7 +103,6 @@ In Large Language Models (like ChatGPT, Gemini, and Claude):
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 A classifier outputs two logits: `z₁ = 0.0` and `z₂ = 0.0`.
 What are the resulting probabilities?

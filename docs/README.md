@@ -1,7 +1,4 @@
 # Axon Curriculum Documentation
-
-Axon is an educational curriculum designed from first principles to bridge high-school mathematics (algebra, geometry, trigonometry, single-variable calculus, and probability) into university-level applied mathematics, physical dynamics, autonomous robotics (FIRST Robotics Competition / FRC), and machine learning (grounded in [*Mathematics for Machine Learning*](https://mml-book.github.io/book/mml-book.pdf) by Deisenroth, Faisal, and Ong).
-
 ---
 
 ## Pedagogical Philosophy

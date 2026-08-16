@@ -1,9 +1,5 @@
 # Concept 11: Determinants, Inverses & Singularity
 
-```
-       Module 3: Linear Algebra  ➔  Concept 11: Determinants & Inverses
-```
-
 > **▶ Interactive Demo: [Determinant & Singularity Sandbox](demo.html)**
 >
 > Open the interactive demo below to squash the 2D plane down to a 1D line and observe when a matrix becomes singular (`det = 0`) and loses its inverse.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Running the Movie Backward
-
 Suppose your robot's swerve drive kinematics software uses a matrix `A` to convert robot velocities `[vx, vy]` into wheel motor speeds:
 
 ```
@@ -46,7 +41,6 @@ What happens if the matrix squashes 2D space down into a single 1D line? You los
 ---
 
 ## 2. Solving It in Code
-
 In Python, we compute the determinant `det` first to verify that the matrix is safe to invert:
 
 ```python
@@ -95,7 +89,6 @@ print(f"Inverse Matrix: {inv_A}")  # [[0.5, 0.0], [0.0, 0.25]]
 ---
 
 ## 3. Bridge to Machine Learning: Linear Regression
-
 In machine learning:
 * When fitting a straight line through data points (Linear Regression), the AI solves the famous **Normal Equation**:
   ```
@@ -106,7 +99,6 @@ In machine learning:
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 Matrix `A = [[3, 1], [6, 2]]`.
 1. Compute `det(A)`.

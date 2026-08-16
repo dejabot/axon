@@ -1,15 +1,10 @@
 # Module 2: Trigonometry & Angles
 
-```
-       Module 2: Trigonometry & Angles (Concepts 04 ➔ 07)
-```
-
 Welcome to **Module 2: Trigonometry & Angles**. In this module, we build from everyday right triangles and the clock-hand unit circle up into 4-quadrant heading calculations, circle topology, swerve drive module speed flips, and 3D Quaternions.
 
 ---
 
 ## Concepts in this Module
-
 * **[Concept 04: The Unit Circle & Trigonometric Ratios](concept_04_unit_circle_ratios/README.md)**
   * *The Everyday Problem:* How does pushing a gamepad joystick decompose into forward and sideways wheel power?
   * *Code & Math:* SOH-CAH-TOA, unit circle projections, `cos` as horizontal shadow, `sin` as vertical height.

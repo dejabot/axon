@@ -1,9 +1,5 @@
 # Concept 06: Angle Wrapping & Swerve 180° Speed Flip
 
-```
-       Module 2: Trigonometry  ➔  Concept 06: Angle Wrapping & Swerve
-```
-
 > **▶ Interactive Demo: [Swerve Angle Wrapping Visualizer](demo.html)**
 >
 > Open the interactive demo below to drag the Current and Target angles and observe the shortest-path turn vs. the 180° swerve speed flip in action.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: The 340° Spin Trap
-
 Imagine your robot is currently facing **North-West at `+170°`**. 
 
 During autonomous, the trajectory planner commands the robot to turn to **South-West at `-170°`**.
@@ -44,7 +39,6 @@ During autonomous, the trajectory planner commands the robot to turn to **South-
 ---
 
 ## 2. Solving It in Code: Shortest-Path Angle Wrapping
-
 Because angles wrap around on a circle, we constrain the angular error into the range `[-180°, +180°]` using modular arithmetic:
 
 ```python
@@ -64,7 +58,6 @@ print(f"Shortest turn command: {error:+.1f}°")  # Output: -20.0° (Clean 20° c
 ---
 
 ## 3. The Swerve Drive 180° Speed Flip
-
 In an autonomous swerve drive robot, every wheel module has two motors:
 1. An **Azimuth Steering Motor** that rotates the wheel pod angle.
 2. A **Drive Motor** that spins the wheel forward or backward.
@@ -100,7 +93,6 @@ def optimize_swerve_module(target_angle, target_speed, current_angle):
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 Your robot heading is `-175°`. The autonomous command requests a heading of `+175°`.
 What is the shortest turn required?

@@ -1,9 +1,5 @@
 # Concept 04: The Unit Circle & Trigonometric Ratios
 
-```
-       Module 2: Trigonometry  ➔  Concept 04: Unit Circle & Ratios
-```
-
 > **▶ Interactive Demo: [Joystick Unit Circle Visualizer](demo.html)**
 >
 > Open the interactive demo below to sweep the joystick angle $\theta$ around the circle and see how `cos(θ)` (horizontal power) and `sin(θ)` (vertical power) respond in real time.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Gamepad Joystick Steering
-
 When an FRC driver pushes the analog joystick on a controller:
 * The joystick tilts by an angle `θ` (measured counter-clockwise from the positive X-axis).
 * The joystick push has a length (magnitude) `r = 1.0` (full power).
@@ -41,7 +36,6 @@ How does the robot software break this diagonal stick push into two separate mot
 ---
 
 ## 2. Solving It in Code
-
 We decompose any diagonal angle `θ` into horizontal and vertical components using Python's `math.cos` and `math.sin`:
 
 ```python
@@ -89,7 +83,6 @@ print(f"Strafe speed  (vy): {vy:.3f}")  # sin(30°) = 0.500
 ---
 
 ## 3. Radians vs. Degrees
-
 * **Degrees:** Humans divide a full circle into `360°` (convenient for compasses).
 * **Radians:** Mathematics measures angles by the actual arc length traveled along a unit circle. Since the circumference of a circle is `2·π·r`, a full circle is **`2·π` radians** (`≈ 6.283 rad`).
 
@@ -103,7 +96,6 @@ print(f"Strafe speed  (vy): {vy:.3f}")  # sin(30°) = 0.500
 ---
 
 ## 4. Bridge to Machine Learning: Rotary Position Embeddings (RoPE)
-
 In modern Large Language Models (like Llama and GPT-4):
 * The AI needs to know the order of words in a sentence ("dog bites man" vs "man bites dog").
 * State-of-the-art LLMs use **Rotary Position Embedding (RoPE)**, which rotates the internal numbers of each word by an angle proportional to its position in the sentence using `cos(m·θ)` and `sin(m·θ)`!
@@ -111,7 +103,6 @@ In modern Large Language Models (like Llama and GPT-4):
 ---
 
 ## 5. Review Checkpoints
-
 ### Checkpoint 1
 The driver pushes the joystick straight North (`90°`).
 What are `vx` and `vy`?

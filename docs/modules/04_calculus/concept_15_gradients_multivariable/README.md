@@ -1,9 +1,5 @@
 # Concept 15: Multivariable Gradients & Hill Climbing
 
-```
-       Module 4: Calculus  ➔  Concept 15: Gradients & Optimization
-```
-
 > **▶ Interactive Demo: [Potential Field & Gradient Visualizer](demo.html)**
 >
 > Open the interactive demo below to drag the robot on the 2D contour map and watch the gradient vector $\nabla U$ (uphill) and steering force $-\nabla U$ (downhill toward goal) update live.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Hiking in the Fog
-
 Imagine you are hiking blindfolded on a foggy, hilly mountain. Your elevation (height) is given by a 2D terrain surface `z = f(x, y)`:
 * `x` is your coordinate East-West.
 * `y` is your coordinate North-South.
@@ -45,7 +40,6 @@ Imagine you are hiking blindfolded on a foggy, hilly mountain. Your elevation (h
 ---
 
 ## 2. Solving It in Code: Artificial Potential Fields
-
 In autonomous robotics, we steer around obstacles by creating a virtual energy surface `U(x, y)`:
 * The goal is a low bowl pulling the robot in.
 * Obstacles are tall mountains repelling the robot away.
@@ -99,7 +93,6 @@ print(f"Steering Force Vector: [{fx:.2f}, {fy:.2f}] N")
 ---
 
 ## 3. Bridge to Machine Learning: Training Deep Neural Networks
-
 In deep learning:
 * A neural network has an error loss function `Loss(weights)`.
 * Training the AI means finding the lowest point on this loss mountain using **Gradient Descent**:
@@ -111,7 +104,6 @@ In deep learning:
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 Given the loss function `f(x, y) = x² + 3·y²`:
 1. Find the partial derivatives `∂f/∂x` and `∂f/∂y`.

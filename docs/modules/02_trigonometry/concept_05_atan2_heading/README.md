@@ -1,9 +1,5 @@
 # Concept 05: 4-Quadrant Heading with atan2
 
-```
-       Module 2: Trigonometry  ➔  Concept 05: 4-Quadrant atan2
-```
-
 > **▶ Interactive Demo: [4-Quadrant atan2 vs atan Sandbox](demo.html)**
 >
 > Open the interactive demo below to drag the target into all 4 quadrants and see where high-school `atan(y/x)` fails and `atan2(y, x)` succeeds.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: The Minus-Sign Trap
-
 Suppose your robot is at `(0, 0)` and wants to turn its turret to aim at a target.
 
 Consider two completely different target locations:
@@ -46,7 +41,6 @@ Because the two negative signs cancel out (`-2 / -2 = +1`), regular `tan⁻¹` i
 ---
 
 ## 2. Solving It in Code: The `atan2` Function
-
 Programming languages solve this by providing **`math.atan2(y, x)`**, which takes `y` and `x` as **two separate parameters** rather than dividing them first:
 
 ```python
@@ -62,7 +56,6 @@ def calculate_aim_angle(dx, dy):
 # Target A: North-East (+2m, +2m)
 angle_A = calculate_aim_angle(dx=2.0, dy=2.0)
 print(f"Target A Heading: {angle_A:+.1f}°")  # Output: +45.0° (Quad I)
-
 # Target B: South-West (-2m, -2m)
 angle_B = calculate_aim_angle(dx=-2.0, dy=-2.0)
 print(f"Target B Heading: {angle_B:+.1f}°")  # Output: -135.0° (Quad III)
@@ -86,7 +79,6 @@ print(f"Target B Heading: {angle_B:+.1f}°")  # Output: -135.0° (Quad III)
 ---
 
 ## 3. Bridge to Machine Learning: Orientation Loss
-
 In AI object detection (e.g. bounding boxes around cars or robot game pieces):
 * The AI must predict the object's orientation angle `θ`.
 * Predicting a single raw number can jump discontinuously. Instead, neural networks often predict `[cos(θ), sin(θ)]` as two separate output neurons, and the software reconstructs the true heading using `atan2(sin_pred, cos_pred)`.
@@ -94,7 +86,6 @@ In AI object detection (e.g. bounding boxes around cars or robot game pieces):
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 An AprilTag is at `dx = -4.0` meters, `dy = +4.0` meters.
 1. Which quadrant is the target in?

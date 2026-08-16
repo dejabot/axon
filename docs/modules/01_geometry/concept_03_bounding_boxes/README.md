@@ -1,9 +1,5 @@
 # Concept 03: 2D Bounding Boxes & Collision Detection
 
-```
-       Module 1: Geometry  ➔  Concept 03: Bounding Boxes & Collision
-```
-
 > **▶ Interactive Demo: [2D Collision Detection Sandbox](demo.html)**
 >
 > Open the interactive demo below to drag your robot toward field obstacles and watch the bounding box collision checks illuminate green (Safe) or red (Collision).
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Will the Robot Crash?
-
 An FRC robot is not a zero-dimensional point on a map. A standard robot is a physical box with a bumper perimeter (e.g. 0.9 meters wide by 0.9 meters long).
 
 When planning an autonomous trajectory through the field:
@@ -40,7 +35,6 @@ Before moving the drivetrain motors, how does the software know if our robot's b
 ---
 
 ## 2. Solving It in Code: The AABB Overlap Test
-
 The fastest way to test for collisions is an **Axis-Aligned Bounding Box (AABB)** check. 
 
 Two boxes overlap **if and only if** they overlap on **both the X-axis AND the Y-axis simultaneously**:
@@ -89,7 +83,6 @@ else:
 ---
 
 ## 3. Bridge to Machine Learning: Object Detection & IoU
-
 In computer vision (like YOLO detecting game pieces or AprilTags):
 * The AI predicts a bounding box `[x_min, y_min, x_max, y_max]`.
 * To measure accuracy against the true label, ML uses **Intersection over Union (IoU)**:
@@ -102,7 +95,6 @@ In computer vision (like YOLO detecting game pieces or AprilTags):
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 Robot box A is at `x: [1.0, 2.0], y: [1.0, 2.0]`.
 Obstacle B is at `x: [2.5, 3.5], y: [1.0, 2.0]`.

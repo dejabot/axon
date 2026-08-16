@@ -1,9 +1,5 @@
 # Concept 10: Matrices as Coordinate Transformers
 
-```
-       Module 3: Linear Algebra  ➔  Concept 10: Matrix Transformations
-```
-
 > **▶ Interactive Demo: [2D Grid Transformation Visualizer](demo.html)**
 >
 > Open the interactive demo below to drag the landing spots of basis steps **î'** and **ĵ'** and see the entire coordinate grid transform in real time.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Field-Centric Robot Driving
-
 In FRC autonomous and teleop driving, the driver pushes the joystick "Forward" relative to the field.
 
 However, if the robot is currently rotated by heading angle `θ`:
@@ -40,7 +35,6 @@ How does the chassis controller translate the driver's field command `[v_field_x
 ---
 
 ## 2. Solving It in Code: 2D Matrix Rotation
-
 A **Matrix** is a machine that moves the coordinate grid. We transform a 2D vector by multiplying it with the rotation matrix:
 
 ```python
@@ -90,7 +84,6 @@ print(f"Chassis Motor Commands -> vx: {vx_r:.1f} m/s, vy: {vy_r:.1f} m/s")
 ---
 
 ## 3. Bridge to Machine Learning: Dense Neural Layers
-
 In deep neural networks (like ChatGPT or image classifiers):
 * Every standard layer is a **Matrix Multiplication**:
   ```
@@ -101,7 +94,6 @@ In deep neural networks (like ChatGPT or image classifiers):
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 Suppose matrix `A` has columns `[2, 0]` and `[0, 3]`.
 What is the result of `A · [1, 1]`?

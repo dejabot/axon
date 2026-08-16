@@ -1,15 +1,10 @@
 # Module 4: Calculus, Motion & Optimization
 
-```
-       Module 4: Calculus & Motion (Concepts 12 ➔ 15)
-```
-
 Welcome to **Module 4: Calculus, Motion & Optimization**. In this module, we explore the mathematics of motion and optimization—from speedometer rates of change and elevator jerk to area integration and gradient descent.
 
 ---
 
 ## Concepts in this Module
-
 * **[Concept 12: Rates of Change & Derivatives](concept_12_rates_of_change/README.md)**
   * *The Everyday Problem:* How does an optical encoder turn wheel tick counts into instantaneous robot velocity?
   * *Code & Math:* Secant slope vs. tangent slope, numerical differentiation `dx / dt`, velocity from position.

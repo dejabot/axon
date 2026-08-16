@@ -1,9 +1,5 @@
 # Concept 01: Coordinates, Poses & Pythagorean Distance
 
-```
-       Module 1: Geometry  ➔  Concept 01: Coordinates & Distance
-```
-
 > **▶ Interactive Demo: [2D Field Distance Visualizer](demo.html)**
 >
 > Open the interactive demo below to drag the robot and target across the field and watch the distance calculation update live.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Where is the Robot?
-
 Imagine standing at the corner of an FRC playing field. The field is a large rectangle:
 * The long edge along the wall is the **X-axis** (from 0 to 16.5 meters).
 * The short edge along the driver stations is the **Y-axis** (from 0 to 8.2 meters).
@@ -51,7 +46,6 @@ If your robot is sitting at `(x = 3.0m, y = 2.0m)` and wants to shoot a game pie
 ---
 
 ## 2. Solving It in Code
-
 We can compute the straight-line distance in just a few lines of Python:
 
 ```python
@@ -67,7 +61,6 @@ target_y = 6.0
 # 2. Find the differences in x and y
 dx = target_x - robot_x   # 12.0 - 3.0 = 9.0 meters
 dy = target_y - robot_y   #  6.0 - 2.0 = 4.0 meters
-
 # 3. Calculate straight-line distance
 distance = math.sqrt(dx**2 + dy**2)
 
@@ -94,7 +87,6 @@ print(f"Distance to target: {distance:.2f} meters")  # Output: 9.85 meters
 ---
 
 ## 3. What is a Robot Pose?
-
 In robotics, knowing the robot's `(x, y)` location is only half the story. The robot also has a **heading angle `θ`** (which way its front bumper is facing).
 
 We bundle these three numbers together into a **Pose**:
@@ -113,7 +105,6 @@ Every autonomous path follower and odometry system tracks the robot's state as t
 ---
 
 ## 4. Bridge to Machine Learning: Distance in AI
-
 In machine learning, we use this exact same distance formula (called **Euclidean Distance**) to compare items:
 * Suppose an AI represents two images or words as lists of numbers called **feature vectors**:
   * Item A: `[3.0, 2.0]`
@@ -123,7 +114,6 @@ In machine learning, we use this exact same distance formula (called **Euclidean
 ---
 
 ## 5. Review Checkpoints
-
 ### Checkpoint 1
 Your robot is at `(x = 1.0, y = 1.0)`. An AprilTag on the field wall is located at `(x = 4.0, y = 5.0)`.
 Calculate the straight-line distance between the robot and the AprilTag.

@@ -1,9 +1,5 @@
 # Concept 08: Vectors, Displacements & Scalar Scaling
 
-```
-       Module 3: Linear Algebra  ➔  Concept 08: Vectors & Scaling
-```
-
 > **▶ Interactive Demo: [Vector Addition & Scaling Sandbox](demo.html)**
 >
 > Open the interactive demo below to drag vector arrows **A** and **B**, adjust the scalar multiplier slider, and see head-to-tail vector addition live.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Combining Robot Moves
-
 Suppose an autonomous robot performs two sequential driving steps:
 1. **Move A:** Drive 2 meters East and 1 meter North (`[2.0, 1.0]`).
 2. **Move B:** Drive 1 meter East and 2 meters North (`[1.0, 2.0]`).
@@ -44,7 +39,6 @@ You simply place the tail of Move B at the tip of Move A (**Head-to-Tail additio
 ---
 
 ## 2. Solving It in Code
-
 In Python, adding and scaling vectors is straightforward list arithmetic:
 
 ```python
@@ -62,7 +56,6 @@ move_B = [1.0, 2.0]
 # 1. Total Move (Vector Addition)
 total_move = add_vectors(move_A, move_B)
 print(f"Total move: {total_move}")  # [3.0, 3.0] meters
-
 # 2. Scale by 2.0x (Drive twice as far)
 boosted_move = scale_vector(total_move, 2.0)
 print(f"Twice as far: {boosted_move}")  # [6.0, 6.0] meters
@@ -82,7 +75,6 @@ print(f"Twice as far: {boosted_move}")  # [6.0, 6.0] meters
 ---
 
 ## 3. Bridge to Machine Learning: Word Embeddings
-
 In natural language processing AI (like Word2Vec and ChatGPT):
 * Every word is represented as a list of numbers (a vector in 1536-dimensional space).
 * Because concepts are vectors, the AI can perform vector arithmetic on meanings:
@@ -93,7 +85,6 @@ In natural language processing AI (like Word2Vec and ChatGPT):
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 You have vector `A = [4.0, -2.0]` and vector `B = [-1.0, 5.0]`.
 Compute `A + B`.

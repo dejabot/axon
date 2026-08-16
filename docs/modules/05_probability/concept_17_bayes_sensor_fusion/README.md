@@ -1,9 +1,5 @@
 # Concept 17: Bayes' Rule & 1D Sensor Fusion
 
-```
-       Module 5: Probability  ➔  Concept 17: Bayes' Rule & Sensor Fusion
-```
-
 > **▶ Interactive Demo: [1D Kalman Sensor Fusion Sandbox](demo.html)**
 >
 > Open the interactive demo below to drag the Prior (Wheel Odometry) and Measurement (Vision Camera) curves and watch the combined Posterior belief become narrower and more confident than either sensor alone.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Two Conflicting Sensors
-
 Suppose your robot is attempting to localize itself on the field:
 1. **Wheel Odometry (Prior):** Predicts position `x₁ = 4.00m` with high confidence (`σ₁ = 0.20m`).
 2. **Vision Camera (Measurement):** Detects an AprilTag and reports `x₂ = 4.50m`, but with lower confidence (`σ₂ = 0.40m`) due to camera blur.
@@ -41,7 +36,6 @@ Neither sensor is 100% right! Instead of blindly picking one, we mathematically 
 ---
 
 ## 2. Solving It in Code: 1D Kalman Fusion
-
 The optimal way to fuse two Gaussian sensors is the **Kalman Filter update formula**:
 
 ```python
@@ -93,7 +87,6 @@ print(f"Combined Uncertainty (σ)   : ±{sigma:.3f} meters")  # ±0.179m (Tighte
 ---
 
 ## 3. Bridge to Machine Learning: Bayesian Inference
-
 In machine learning and statistics:
 * **Naive Bayes Classifiers:** Use Bayes' rule to compute the probability that an email is spam given the occurrence of specific keywords.
 * **Maximum A Posteriori (MAP) Estimation:** Used in neural network regularization (like Weight Decay / L2 regularization), which treats the network weights as having a Gaussian prior centered at zero.
@@ -101,7 +94,6 @@ In machine learning and statistics:
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 If two identical sensors both measure distance with equal uncertainty `σ = 0.40m`, what weight (`Kalman Gain K`) is given to the second reading?
 

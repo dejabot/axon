@@ -1,9 +1,5 @@
 # Concept 02: Coordinate Frames (Field vs. Robot vs. Camera)
 
-```
-       Module 1: Geometry  ➔  Concept 02: Coordinate Frames
-```
-
 > **▶ Interactive Demo: [Frame Transformation Visualizer](demo.html)**
 >
 > Open the interactive demo below to see how a target's position changes depending on whether you measure it from the **Field Origin** or from the **Robot's Perspective**.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: The Camera's Eyes vs. The Field
-
 Imagine your robot's front-facing camera spots a game piece on the floor. 
 
 The camera reports:
@@ -52,7 +47,6 @@ If the robot is located at `(x = 4.0m, y = 2.0m)` facing directly East:
 ---
 
 ## 2. Solving It in Code
-
 Here is how we convert a local sensor measurement into a global field coordinate when the robot is facing along the field axis:
 
 ```python
@@ -63,7 +57,6 @@ robot_field_y = 2.0
 # 2. Local position of the object detected by the camera
 object_robot_x = 1.5   # 1.5 meters forward
 object_robot_y = 0.5   # 0.5 meters left
-
 # 3. Calculate object's true position on the field (Translation)
 object_field_x = robot_field_x + object_robot_x
 object_field_y = robot_field_y + object_robot_y
@@ -91,7 +84,6 @@ print(f"Object on Field: ({object_field_x:.2f}, {object_field_y:.2f}) meters")
 ---
 
 ## 3. The 3 Common Frames in Robotics
-
 Every modern robot codebase (such as WPILib) works with three standard frames of reference:
 
 | Frame | Origin (0, 0) | Use Case |
@@ -103,7 +95,6 @@ Every modern robot codebase (such as WPILib) works with three standard frames of
 ---
 
 ## 4. Bridge to Machine Learning: 3D Object Detection
-
 In autonomous driving AI (like Tesla Autopilot or Waymo) and robot vision:
 1. Neural networks process camera images to find bounding boxes in **Pixel Coordinates** `(u, v)`.
 2. Depth sensors convert pixels into **Camera Frame Coordinates** `(x, y, z)`.
@@ -112,7 +103,6 @@ In autonomous driving AI (like Tesla Autopilot or Waymo) and robot vision:
 ---
 
 ## 5. Review Checkpoints
-
 ### Checkpoint 1
 Your robot is at Field position `(x = 6.0m, y = 3.0m)`. A distance sensor on the rear bumper detects a wall `0.8 meters` behind the robot (`local_x = -0.8m, local_y = 0.0m`).
 What is the field position of the wall?

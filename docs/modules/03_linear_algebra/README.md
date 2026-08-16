@@ -1,15 +1,10 @@
 # Module 3: Linear Algebra & Matrix Transformations
 
-```
-       Module 3: Linear Algebra (Concepts 08 ➔ 11)
-```
-
 Welcome to **Module 3: Linear Algebra & Matrix Transformations**. In this module, we start with simple lists of numbers and graph-paper arrows, build up to dot product directional alignments, discover matrices as coordinate grid transformers, and understand determinants and matrix inverses.
 
 ---
 
 ## Concepts in this Module
-
 * **[Concept 08: Vectors, Displacements & Scalar Scaling](concept_08_vectors_scaling/README.md)**
   * *The Everyday Problem:* How does an autonomous robot combine driving forward 2 meters with strafing right 3 meters?
   * *Code & Math:* Vectors as lists/arrows, vector addition (head-to-tail), scalar multiplication, and basis steps.

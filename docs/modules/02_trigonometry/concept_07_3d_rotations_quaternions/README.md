@@ -1,9 +1,5 @@
 # Concept 07: 3D Rotations & Quaternions
 
-```
-       Module 2: Trigonometry  ➔  Concept 07: 3D Quaternions
-```
-
 > **▶ Interactive Demo: [3D Gimbal Lock & Quaternion Sandbox](demo.html)**
 >
 > Open the interactive demo below to pitch the 3D axis to `±90°` and see Euler Gimbal Lock occur, and observe how unit Quaternions represent 3D orientation smoothly.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: When 3D Angles Lock Up
-
 On a flat 2D carpet, we only care about 1 angle: **Heading (Yaw)**.
 
 But a real robot moves in 3D space:
@@ -44,7 +39,6 @@ If a robot's 3D gyro (like a Pigeon 2.0 or NavX) pitches straight up by `90°`:
 ---
 
 ## 2. The Solution: What is a Quaternion?
-
 Instead of using 3 angles that can lock up, modern robotics software (like WPILib's `Rotation3d`) uses a **Quaternion**.
 
 A unit quaternion packages a 3D rotation into **4 numbers**: `(w, x, y, z)`:
@@ -90,7 +84,6 @@ print(f"Quaternion (w, x, y, z): [{q[0]:.3f}, {q[1]:.3f}, {q[2]:.3f}, {q[3]:.3f}
 ---
 
 ## 3. Review Checkpoints
-
 ### Checkpoint 1
 What is the quaternion `(w, x, y, z)` for a robot that has zero rotation (identity orientation)?
 

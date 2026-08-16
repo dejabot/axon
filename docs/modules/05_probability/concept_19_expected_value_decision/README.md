@@ -1,9 +1,5 @@
 # Concept 19: Expected Value & Decision Making
 
-```
-       Module 5: Probability  ➔  Concept 19: Expected Value & Decisions
-```
-
 > **▶ Interactive Demo: [Endgame Strategy Monte Carlo Simulator](demo.html)**
 >
 > Open the interactive demo below to simulate 1,000 matches comparing Safe vs. Risky autonomous strategies and watch the empirical match scores converge to their theoretical Expected Values.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: The Endgame Dilemma
-
 With 20 seconds remaining in an intense playoff match, your alliance is deciding its final autonomous action:
 
 * **Strategy A (Safe Low Score):**
@@ -44,7 +39,6 @@ How does an autonomous robot evaluate risk vs. reward dynamically during a match
 ---
 
 ## 2. Solving It in Code: Expected Value & Monte Carlo
-
 We compute the **Expected Value `E[X]`** by multiplying every possible outcome by its probability:
 
 ```python
@@ -96,7 +90,6 @@ print(f"Strategy B Simulated (1000x): {run_monte_carlo(strat_B):.2f} points")
 ---
 
 ## 3. Bridge to Machine Learning: Reinforcement Learning & MCTS
-
 In modern game-playing and autonomous AI:
 * **Reinforcement Learning (Q-Learning):** The AI selects actions that maximize the **Expected Future Reward** ($Q(s, a) = E[r + \gamma \max Q(s', a')]$).
 * **Monte Carlo Tree Search (MCTS in AlphaZero & Game Bots):** The AI simulates thousands of random rollouts from the current board state to estimate the win probability of every legal move!
@@ -104,7 +97,6 @@ In modern game-playing and autonomous AI:
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 An autonomous shooting routine has a 40% chance to score a 3-point goal, and a 60% chance to score a 1-point ball.
 What is the expected point value per shot?

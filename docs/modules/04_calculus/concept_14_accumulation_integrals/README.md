@@ -1,9 +1,5 @@
 # Concept 14: Accumulation, Area & Numerical Integration
 
-```
-       Module 4: Calculus  ➔  Concept 14: Integration & Accumulation
-```
-
 > **▶ Interactive Demo: [Numerical Integration Visualizer](demo.html)**
 >
 > Open the interactive demo below to compare Euler rectangles vs. Trapezoidal slices and see how Trapezoidal integration drastically cuts odometry drift.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Where Did the Robot Go?
-
 During the 15-second autonomous period, your robot's wheel encoders measure velocity every 20 milliseconds (`dt = 0.02s`).
 
 How does the robot calculate its total distance traveled from a sequence of velocity readings?
@@ -39,7 +34,6 @@ Distance is the **Accumulation of Speed over Time**:
 ---
 
 ## 2. Solving It in Code: Euler vs. Trapezoid
-
 ### 1. Forward Euler (Naive)
 Assumes speed is constant across the entire 20ms slice:
 ```python
@@ -100,7 +94,6 @@ compare_integrators(acceleration=2.0, total_time=1.0, dt=0.05)
 ---
 
 ## 3. Review Checkpoints
-
 ### Checkpoint 1
 A robot drives at a constant speed of `2.5 m/s` for `3.0` seconds. What is the area under its velocity curve?
 

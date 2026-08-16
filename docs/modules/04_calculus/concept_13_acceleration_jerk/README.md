@@ -1,9 +1,5 @@
 # Concept 13: Acceleration, Jerk & S-Curves
 
-```
-       Module 4: Calculus  ➔  Concept 13: Acceleration & Jerk
-```
-
 > **▶ Interactive Demo: [Elevator Motion & Jerk Visualizer](demo.html)**
 >
 > Open the interactive demo below to compare an instant acceleration step against a smooth S-Curve profile and watch the sloshing coffee / carriage forces in real time.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: The Coffee-Spill Elevator
-
 Imagine you are standing inside an elevator holding a full cup of hot coffee filled to the very brim:
 
 1. **Position `x` (Where you are):** Which floor you are on.
@@ -37,7 +32,6 @@ Imagine you are standing inside an elevator holding a full cup of hot coffee fil
 ---
 
 ## 2. Solving It in Code: S-Curve Smoothing
-
 To protect mechanical chains and gearboxes, software bounds the maximum **Jerk** (`j_max`), producing a smooth "S-shaped" velocity curve:
 
 ```python
@@ -77,7 +71,6 @@ print(f"Elevator height at 0.5s: {x:.3f} meters")  # 0.206m (gentle start)
 ---
 
 ## 3. Review Checkpoints
-
 ### Checkpoint 1
 A robot elevator's velocity is given by `v(t) = 3·t²`.
 What is the acceleration `a(t)` at `t = 2.0` seconds?

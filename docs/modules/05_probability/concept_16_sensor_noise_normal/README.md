@@ -1,9 +1,5 @@
 # Concept 16: Sensor Noise & Normal Distributions
 
-```
-       Module 5: Probability  ➔  Concept 16: Sensor Noise & Normal Dist
-```
-
 > **▶ Interactive Demo: [Sensor Noise & Bell Curve Visualizer](demo.html)**
 >
 > Open the interactive demo below to adjust the true distance $\mu$ and sensor noise $\sigma$ sliders, generate 1,000 live sensor readings, and watch the histogram match the theoretical Gaussian bell curve.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: The Jittery Sensor
-
 Suppose an autonomous robot uses an optical distance sensor or an AprilTag camera to measure its distance from the field reef wall.
 
 Even if the robot is parked completely still at a true distance of **4.00 meters**, 10 consecutive sensor readings might look like this:
@@ -44,7 +39,6 @@ How do we model this uncertainty mathematically so our robot can trust its senso
 ---
 
 ## 2. Solving It in Code: Mean, Variance & Standard Deviation
-
 We summarize a collection of noisy readings using three core statistical metrics:
 1. **Sample Mean (`μ`):** The average measurement (best estimate of true location).
 2. **Variance (`σ²`):** The average squared spread (how noisy the sensor is).
@@ -103,7 +97,6 @@ print(f"68% Confidence Interval  : [{mu - sigma:.3f}, {mu + sigma:.3f}] meters")
 ---
 
 ## 3. Bridge to Machine Learning: Diffusion Models & Weight Initialization
-
 In modern generative AI:
 * **Diffusion Models (Stable Diffusion / DALL-E):** Image generation begins by taking a pure image and progressively adding Gaussian noise ($\mathcal{N}(0, \sigma^2)$). The neural network is trained to reverse this process by predicting and subtracting the Gaussian noise at each step!
 * **Neural Network Initialization:** When initializing weights in deep networks (e.g. He or Xavier initialization), weights are drawn from a Gaussian distribution with mean $0$ and a carefully chosen variance to prevent gradients from exploding or vanishing.
@@ -111,7 +104,6 @@ In modern generative AI:
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 A LiDAR sensor has mean `μ = 3.0m` and noise `σ = 0.05m`.
 Between what two distances will `95%` of all sensor readings fall?

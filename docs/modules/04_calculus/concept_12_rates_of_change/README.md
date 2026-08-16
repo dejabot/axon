@@ -1,9 +1,5 @@
 # Concept 12: Rates of Change & Derivatives
 
-```
-       Module 4: Calculus  ➔  Concept 12: Rates of Change & Derivatives
-```
-
 > **▶ Interactive Demo: [Rate of Change & Derivative Visualizer](demo.html)**
 >
 > Open the interactive demo below to shrink the time step $\Delta t$ and watch the average speed converge into the exact instantaneous tangent slope.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: How Fast Are We Moving?
-
 A robot's wheel encoder does not measure velocity directly. It only reports how many rotations (or meters) the wheel has turned.
 
 Every 20 milliseconds (`dt = 0.02s`), the robot's control loop reads the position:
@@ -42,7 +37,6 @@ To find the robot's speed, we calculate the **rate of change**:
 ---
 
 ## 2. Solving It in Code
-
 Here is how a robot control loop calculates instantaneous velocity from successive position samples:
 
 ```python
@@ -78,7 +72,6 @@ print(f"Robot Velocity: {v:.2f} m/s")  # 4.00 m/s
 ---
 
 ## 3. Bridge to Machine Learning: The Loss Slope
-
 In machine learning:
 * When training a model, we measure how much the prediction error changes when a weight `w` is tweaked slightly:
   ```
@@ -89,7 +82,6 @@ In machine learning:
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 An encoder reports `x = 5.0m` at `t = 2.0s`, and `x = 5.15m` at `t = 2.05s`.
 What is the average velocity over this interval?

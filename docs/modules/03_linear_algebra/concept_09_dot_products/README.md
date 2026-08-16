@@ -1,9 +1,5 @@
 # Concept 09: Dot Products, Projections & Alignment
 
-```
-       Module 3: Linear Algebra  ➔  Concept 09: Dot Products & Projections
-```
-
 > **▶ Interactive Demo: [Dot Product & Projection Visualizer](demo.html)**
 >
 > Open the interactive demo below to rotate two vector arrows and see their dot product, angle $\theta$, and projected shadow update live.
@@ -13,7 +9,6 @@
 ---
 
 ## 1. The Real-World Problem: Are We Driving on Path?
-
 Imagine your robot is following an autonomous path pointing straight down the field:
 * **Desired Path Direction:** `u = [1.0, 0.0]` (Straight East).
 * **Actual Robot Velocity:** `v = [2.0, 1.5]` (Moving at an angle due to wheel slip).
@@ -42,7 +37,6 @@ The path-following software needs to know:
 ---
 
 ## 2. Solving It in Code: The Dot Product
-
 To compute how aligned two vectors are, we multiply matching components and add them up:
 
 ```python
@@ -78,7 +72,6 @@ print(f"Forward progress along path: {forward_progress:.2f} m/s")  # 2.00 m/s
 ---
 
 ## 3. Bridge to Machine Learning: Cosine Similarity
-
 In modern AI search engines and RAG (Retrieval-Augmented Generation):
 * When you ask a question to an AI, the question is converted into a vector `q`.
 * Every document in the database is stored as a vector `d`.
@@ -91,7 +84,6 @@ In modern AI search engines and RAG (Retrieval-Augmented Generation):
 ---
 
 ## 4. Review Checkpoints
-
 ### Checkpoint 1
 Vector `u = [3.0, 4.0]` and vector `v = [-4.0, 3.0]`.
 Compute `u · v`. What is the angle between them?

@@ -1,15 +1,10 @@
 # Module 1: Geometry for Robotics
 
-```
-       Module 1: Geometry (Concepts 01 ➔ 03)
-```
-
 Welcome to **Module 1: Geometry for Robotics**. In this module, we start with the absolute fundamentals of how robots perceive space, measure distances, navigate field coordinates, transform frames of reference, and avoid physical collisions.
 
 ---
 
 ## Concepts in this Module
-
 * **[Concept 01: Coordinates, Poses & Pythagorean Distance](concept_01_coordinates_distance/README.md)**
   * *The Everyday Problem:* Where is the robot on the field, and how far is it from the scoring target?
   * *Code & Math:* `(x, y)` coordinate positions, the Pythagorean distance formula, and 2D robot poses `(x, y, θ)`.
