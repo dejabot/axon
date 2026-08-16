@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Concept 02: Trigonometry, atan2 & Continuous Angle Topology</title>
+  <title>Concept 02: Trigonometry, Continuous Angle Topology & 3D Quaternions</title>
   <script>
     (function() {
       const saved = localStorage.getItem('axon_theme') || 'dark';
@@ -175,15 +175,37 @@
       justify-content: space-between;
       align-items: center;
     }
-    .control-group {
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
       margin-bottom: 12px;
+    }
+    button.mode-tab {
+      background: var(--btn-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 8px 6px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button.mode-tab.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+    .control-group {
+      margin-bottom: 10px;
     }
     .control-header {
       display: flex;
       justify-content: space-between;
       font-size: 0.8rem;
       color: var(--text-muted);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .control-header span.val {
       font-family: monospace;
@@ -194,40 +216,6 @@
       width: 100%;
       accent-color: var(--accent-blue);
     }
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--input-bg);
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--card-border);
-      margin-bottom: 10px;
-    }
-    .toggle-row label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 24px;
-    }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider-toggle {
-      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: var(--btn-bg); transition: .3s; border-radius: 24px;
-      border: 1px solid var(--card-border);
-    }
-    .slider-toggle:before {
-      position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
-      background-color: white; transition: .3s; border-radius: 50%;
-    }
-    input:checked + .slider-toggle { background-color: var(--accent-green); border-color: var(--accent-green); }
-    input:checked + .slider-toggle:before { transform: translateX(20px); }
-
     .preset-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -268,28 +256,16 @@
     }
     .stat-val {
       font-family: monospace;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
     }
-    .comparison-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.75rem;
-      margin-top: 8px;
-    }
-    .comparison-table th, .comparison-table td {
-      padding: 6px 8px;
-      text-align: left;
-      border-bottom: 1px solid var(--card-border);
-    }
-    .comparison-table th { color: var(--text-muted); }
   </style>
 </head>
 <body>
 
   <header>
     <div class="header-title">
-      <h1>02: Trigonometry, atan2 & Continuous Angle Topology</h1>
+      <h1>02: Trigonometry, Continuous Angle Topology & 3D Quaternions</h1>
       <p>Module 1: Math Foundations</p>
     </div>
     <div class="header-nav">
@@ -304,56 +280,86 @@
   <div class="main-container">
     
     <div class="canvas-panel">
-      <div class="canvas-overlay-hints">
+      <div class="canvas-overlay-hints" id="overlayHints">
         • <b>Drag Cyan pointer</b> (Current Heading θ_curr)<br>
         • <b>Drag Amber pointer</b> (Target Heading θ_target)<br>
         • Green arc = Shortest Turn Path | Red arc = Naive Spin
       </div>
-      <canvas id="angleCanvas"></canvas>
+      <canvas id="mainCanvas"></canvas>
     </div>
 
     <div class="controls-panel">
       
       <div class="card">
-        <div class="card-title">Angle Position Controls</div>
+        <div class="card-title">Interactive Mode</div>
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="tab2D" onclick="setMode('2D')">1. 2D Angle Topology</button>
+          <button class="mode-tab" id="tab3D" onclick="setMode('3D')">2. 3D Quaternion & Gimbal</button>
+        </div>
 
-        <div class="control-group">
-          <div class="control-header">
-            <span>Target Angle (θ_target)</span>
-            <span class="val" id="targetValText" style="color: var(--accent-amber);">+170.0°</span>
+        <!-- 2D Controls -->
+        <div id="controls2D">
+          <div class="control-group">
+            <div class="control-header">
+              <span>Target Angle (θ_target)</span>
+              <span class="val" id="targetValText" style="color: var(--accent-amber);">+170.0°</span>
+            </div>
+            <input type="range" id="sliderTarget" min="-180" max="180" step="1" value="170">
           </div>
-          <input type="range" id="sliderTarget" min="-180" max="180" step="1" value="170">
-        </div>
 
-        <div class="control-group">
-          <div class="control-header">
-            <span>Current Robot Heading (θ_curr)</span>
-            <span class="val" id="currValText" style="color: var(--accent-blue);">-170.0°</span>
+          <div class="control-group">
+            <div class="control-header">
+              <span>Current Robot Heading (θ_curr)</span>
+              <span class="val" id="currValText" style="color: var(--accent-blue);">-170.0°</span>
+            </div>
+            <input type="range" id="sliderCurr" min="-180" max="180" step="1" value="-170">
           </div>
-          <input type="range" id="sliderCurr" min="-180" max="180" step="1" value="-170">
+
+          <div class="preset-grid">
+            <button class="btn" onclick="setScenario(170, -170)">340° Spin Trap</button>
+            <button class="btn" onclick="setScenario(0, 160)">160° Slew Invert</button>
+            <button class="btn" onclick="setScenario(-135, 45)">Quad III vs I</button>
+          </div>
         </div>
 
-        <div class="toggle-row">
-          <label for="swerveOptToggle">Swerve Inversion (Turn ≤ 90°)</label>
-          <label class="switch">
-            <input type="checkbox" id="swerveOptToggle" checked>
-            <span class="slider-toggle"></span>
-          </label>
+        <!-- 3D Controls -->
+        <div id="controls3D" style="display: none;">
+          <div class="control-group">
+            <div class="control-header">
+              <span>Pitch (Y-Axis)</span>
+              <span class="val" id="pitchValText" style="color: var(--accent-red);">0.0°</span>
+            </div>
+            <input type="range" id="sliderPitch" min="-90" max="90" step="1" value="0">
+          </div>
+
+          <div class="control-group">
+            <div class="control-header">
+              <span>Yaw (Z-Axis)</span>
+              <span class="val" id="yawValText" style="color: var(--accent-blue);">30.0°</span>
+            </div>
+            <input type="range" id="sliderYaw" min="-180" max="180" step="1" value="30">
+          </div>
+
+          <div class="control-group">
+            <div class="control-header">
+              <span>Roll (X-Axis)</span>
+              <span class="val" id="rollValText" style="color: var(--accent-green);">20.0°</span>
+            </div>
+            <input type="range" id="sliderRoll" min="-180" max="180" step="1" value="20">
+          </div>
+
+          <div class="preset-grid">
+            <button class="btn" onclick="set3D(90, 30, 20)">Gimbal Lock (90°)</button>
+            <button class="btn" onclick="set3D(0, 45, 0)">Pure Yaw (45°)</button>
+            <button class="btn" onclick="set3D(30, 60, 45)">General 3D</button>
+          </div>
         </div>
 
-        <div class="preset-grid">
-          <button class="btn" onclick="setScenario(170, -170)">340° Spin Trap</button>
-          <button class="btn" onclick="setScenario(0, 160)">160° Slew Invert</button>
-          <button class="btn" onclick="setScenario(-135, 45)">Quad III vs I</button>
-          <button class="btn" onclick="setScenario(90, -90)">180° Flip</button>
-          <button class="btn" onclick="setScenario(10, 350)">0° Boundary Crossing</button>
-          <button class="btn" onclick="setScenario(0, 0)">Zero Error</button>
-        </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Controller Telemetry</div>
-        <div class="telemetry-grid">
+        <div class="card-title">Mathematical Telemetry</div>
+        <div class="telemetry-grid" id="telemetry2DGrid">
           <div class="stat-box">
             <div class="stat-label">Naive Linear Error</div>
             <div class="stat-val" id="naiveErrorVal" style="color: var(--accent-red);">+340.0°</div>
@@ -363,36 +369,33 @@
             <div class="stat-val" id="wrappedErrorVal" style="color: var(--accent-green);">-20.0°</div>
           </div>
           <div class="stat-box">
-            <div class="stat-label">Optimized Slew Command</div>
-            <div class="stat-val" id="optTurnVal" style="color: var(--accent-purple);">-20.0°</div>
+            <div class="stat-label">atan2(y, x) Quad</div>
+            <div class="stat-val" id="quadVal" style="color: var(--accent-blue);">Quad II</div>
           </div>
           <div class="stat-box">
             <div class="stat-label">Drive Speed Multiplier</div>
             <div class="stat-val" id="speedMultVal" style="color: var(--accent-amber);">+1.0×</div>
           </div>
         </div>
-      </div>
 
-      <div class="card">
-        <div class="card-title">4-Quadrant atan2 vs atan(y/x)</div>
-        <table class="comparison-table">
-          <thead>
-            <tr>
-              <th>Target Point</th>
-              <th>Quadrant</th>
-              <th>atan(y/x)</th>
-              <th>atan2(y, x)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td id="tableCoordText">x: -0.98, y: +0.17</td>
-              <td id="tableQuadText">Quad II</td>
-              <td id="tableAtanText" style="color: var(--accent-red);">-10.0° [FAIL]</td>
-              <td id="tableAtan2Text" style="color: var(--accent-green);">+170.0° [OK]</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="telemetry-grid" id="telemetry3DGrid" style="display: none;">
+          <div class="stat-box">
+            <div class="stat-label">Quaternion w</div>
+            <div class="stat-val" id="quatW" style="color: var(--accent-blue);">1.0000</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Quaternion x</div>
+            <div class="stat-val" id="quatX" style="color: var(--accent-green);">0.0000</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Quaternion y</div>
+            <div class="stat-val" id="quatY" style="color: var(--accent-red);">0.0000</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Quaternion z</div>
+            <div class="stat-val" id="quatZ" style="color: var(--accent-purple);">0.0000</div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -428,12 +431,16 @@
       }
     });
 
-    const canvas = document.getElementById('angleCanvas');
+    const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
 
+    let currentMode = '2D';
     let targetAngleDeg = 170.0;
     let currAngleDeg = -170.0;
-    let swerveOptimizationEnabled = true;
+
+    let pitchDeg = 0.0;
+    let yawDeg = 30.0;
+    let rollDeg = 20.0;
 
     let center = { x: 0, y: 0 };
     let circleRadius = 150;
@@ -452,13 +459,30 @@
     }
     window.addEventListener('resize', resizeCanvas);
 
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('tab2D').classList.toggle('active', mode === '2D');
+      document.getElementById('tab3D').classList.toggle('active', mode === '3D');
+      document.getElementById('controls2D').style.display = mode === '2D' ? 'block' : 'none';
+      document.getElementById('controls3D').style.display = mode === '3D' ? 'block' : 'none';
+      document.getElementById('telemetry2DGrid').style.display = mode === '2D' ? 'grid' : 'none';
+      document.getElementById('telemetry3DGrid').style.display = mode === '3D' ? 'grid' : 'none';
+
+      const hints = document.getElementById('overlayHints');
+      if (mode === '2D') {
+        hints.innerHTML = '• <b>Drag Cyan pointer</b> (Current Heading θ_curr)<br>• <b>Drag Amber pointer</b> (Target Heading θ_target)<br>• Green arc = Shortest Turn Path | Red arc = Naive Spin';
+      } else {
+        hints.innerHTML = '• <b>Pitch = ±90° triggers Gimbal Lock!</b><br>• Notice Roll (X) and Yaw (Z) axes align in red<br>• Quaternion (w,x,y,z) preserves unique 3D pose on S³';
+      }
+      draw();
+    }
+
     function wrapTo180(deg) {
       let r = deg % 360;
       if (r > 180) r -= 360;
       if (r <= -180) r += 360;
       return r;
     }
-
     function degToRad(d) { return d * Math.PI / 180; }
     function radToDeg(r) { return r * 180 / Math.PI; }
 
@@ -469,7 +493,14 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Draw Coordinate Axes
+      if (currentMode === '2D') {
+        draw2D(isLight, width, height);
+      } else {
+        draw3D(isLight, width, height);
+      }
+    }
+
+    function draw2D(isLight, width, height) {
       ctx.lineWidth = 1;
       ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)';
       ctx.beginPath();
@@ -479,43 +510,24 @@
       ctx.lineTo(center.x, center.y + circleRadius + 40);
       ctx.stroke();
 
-      // Quadrant labels
-      ctx.font = '11px monospace';
-      ctx.fillStyle = isLight ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.25)';
-      ctx.fillText('Quad I (+,+)', center.x + circleRadius * 0.45, center.y - circleRadius * 0.45);
-      ctx.fillText('Quad II (-,+)', center.x - circleRadius * 0.85, center.y - circleRadius * 0.45);
-      ctx.fillText('Quad III (-,-)', center.x - circleRadius * 0.85, center.y + circleRadius * 0.55);
-      ctx.fillText('Quad IV (+,-)', center.x + circleRadius * 0.45, center.y + circleRadius * 0.55);
-
-      // 2. Draw Unit Circle
       ctx.lineWidth = 2;
       ctx.strokeStyle = isLight ? 'rgba(2, 132, 199, 0.4)' : 'rgba(56, 189, 248, 0.3)';
       ctx.beginPath();
       ctx.arc(center.x, center.y, circleRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Angle zero and tick marks
-      ctx.fillStyle = isLight ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.4)';
-      ctx.font = '10px monospace';
-      ctx.fillText('0° / +X', center.x + circleRadius + 8, center.y + 3);
-      ctx.fillText('+90° / +Y', center.x - 18, center.y - circleRadius - 8);
-      ctx.fillText('±180° / -X', center.x - circleRadius - 65, center.y + 3);
-      ctx.fillText('-90° / -Y', center.x - 18, center.y + circleRadius + 16);
-
       const tRad = degToRad(targetAngleDeg);
       const cRad = degToRad(currAngleDeg);
-
       const naiveError = targetAngleDeg - currAngleDeg;
       const wrappedError = wrapTo180(naiveError);
 
       let optTurn = wrappedError;
       let speedMult = 1.0;
-      if (swerveOptimizationEnabled && Math.abs(wrappedError) > 90) {
+      if (Math.abs(wrappedError) > 90) {
         speedMult = -1.0;
         optTurn = wrappedError > 0 ? (wrappedError - 180) : (wrappedError + 180);
       }
 
-      // 3. Draw Path Arcs
       if (Math.abs(naiveError - wrappedError) > 1) {
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 4]);
@@ -526,104 +538,104 @@
         ctx.setLineDash([]);
       }
 
-      // Shortest turn arc (Green)
       ctx.lineWidth = 4;
       ctx.strokeStyle = isLight ? 'rgba(22, 163, 74, 0.85)' : 'rgba(74, 222, 128, 0.8)';
       ctx.beginPath();
       ctx.arc(center.x, center.y, circleRadius * 0.7, -cRad, -(cRad + degToRad(optTurn)), optTurn < 0);
       ctx.stroke();
 
-      // 4. Current Heading Vector (Cyan)
       const curX = center.x + circleRadius * Math.cos(-cRad);
       const curY = center.y + circleRadius * Math.sin(-cRad);
-
       ctx.lineWidth = 3;
       ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.beginPath();
-      ctx.moveTo(center.x, center.y);
-      ctx.lineTo(curX, curY);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(center.x, center.y); ctx.lineTo(curX, curY); ctx.stroke();
+      ctx.beginPath(); ctx.arc(curX, curY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8'; ctx.fill();
 
-      ctx.beginPath();
-      ctx.arc(curX, curY, 8, 0, Math.PI * 2);
-      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // 5. Target Heading Vector (Amber)
       const tarX = center.x + circleRadius * Math.cos(-tRad);
       const tarY = center.y + circleRadius * Math.sin(-tRad);
-
       ctx.lineWidth = 3;
       ctx.strokeStyle = isLight ? '#d97706' : '#fbbf24';
-      ctx.beginPath();
-      ctx.moveTo(center.x, center.y);
-      ctx.lineTo(tarX, tarY);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(tarX, tarY, 8, 0, Math.PI * 2);
-      ctx.fillStyle = isLight ? '#d97706' : '#fbbf24';
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Inverted wheel orientation
-      if (speedMult < 0) {
-        const invRad = degToRad(currAngleDeg + optTurn);
-        const invX = center.x + circleRadius * Math.cos(-invRad);
-        const invY = center.y + circleRadius * Math.sin(-invRad);
-        ctx.setLineDash([4, 4]);
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = isLight ? '#9333ea' : '#c084fc';
-        ctx.beginPath();
-        ctx.moveTo(center.x, center.y);
-        ctx.lineTo(invX, invY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-
-      updateTelemetry(naiveError, wrappedError, optTurn, speedMult);
-    }
-
-    function updateTelemetry(naiveError, wrappedError, optTurn, speedMult) {
-      document.getElementById('targetValText').textContent = `${targetAngleDeg > 0 ? '+' : ''}${targetAngleDeg.toFixed(1)}°`;
-      document.getElementById('currValText').textContent = `${currAngleDeg > 0 ? '+' : ''}${currAngleDeg.toFixed(1)}°`;
-      document.getElementById('sliderTarget').value = targetAngleDeg;
-      document.getElementById('sliderCurr').value = currAngleDeg;
+      ctx.beginPath(); ctx.moveTo(center.x, center.y); ctx.lineTo(tarX, tarY); ctx.stroke();
+      ctx.beginPath(); ctx.arc(tarX, tarY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = isLight ? '#d97706' : '#fbbf24'; ctx.fill();
 
       document.getElementById('naiveErrorVal').textContent = `${naiveError > 0 ? '+' : ''}${naiveError.toFixed(1)}°`;
       document.getElementById('wrappedErrorVal').textContent = `${wrappedError > 0 ? '+' : ''}${wrappedError.toFixed(1)}°`;
-      document.getElementById('optTurnVal').textContent = `${optTurn > 0 ? '+' : ''}${optTurn.toFixed(1)}°`;
       document.getElementById('speedMultVal').textContent = `${speedMult > 0 ? '+' : ''}${speedMult.toFixed(1)}×`;
+      document.getElementById('targetValText').textContent = `${targetAngleDeg > 0 ? '+' : ''}${targetAngleDeg.toFixed(1)}°`;
+      document.getElementById('currValText').textContent = `${currAngleDeg > 0 ? '+' : ''}${currAngleDeg.toFixed(1)}°`;
+    }
 
-      const tRad = degToRad(targetAngleDeg);
-      const x = Math.cos(tRad);
-      const y = Math.sin(tRad);
-      document.getElementById('tableCoordText').textContent = `x: ${x.toFixed(2)}, y: ${y.toFixed(2)}`;
+    function draw3D(isLight, width, height) {
+      // 3D Frame Rotation Simulator
+      const p = degToRad(pitchDeg);
+      const y = degToRad(yawDeg);
+      const r = degToRad(rollDeg);
 
-      let quad = "Quad I";
-      if (x < 0 && y >= 0) quad = "Quad II";
-      else if (x < 0 && y < 0) quad = "Quad III";
-      else if (x >= 0 && y < 0) quad = "Quad IV";
-      document.getElementById('tableQuadText').textContent = quad;
+      // Compute Euler Matrix
+      // R = Rz(y) * Ry(p) * Rx(r)
+      const cy = Math.cos(y), sy = Math.sin(y);
+      const cp = Math.cos(p), sp = Math.sin(p);
+      const cr = Math.cos(r), sr = Math.sin(r);
 
-      const naiveAtan = Math.abs(x) < 1e-4 ? (y > 0 ? 90 : -90) : radToDeg(Math.atan(y / x));
-      const trueAtan2 = radToDeg(Math.atan2(y, x));
+      const R = [
+        [cy*cp, cy*sp*sr - sy*cr, cy*sp*cr + sy*sr],
+        [sy*cp, sy*sp*sr + cy*cr, sy*sp*cr - cy*sr],
+        [-sp,   cp*sr,            cp*cr]
+      ];
 
-      document.getElementById('tableAtan2Text').textContent = `${trueAtan2 > 0 ? '+' : ''}${trueAtan2.toFixed(1)}° [OK]`;
-      
-      const atanMatches = Math.abs(wrapTo180(naiveAtan - trueAtan2)) < 1;
-      const atanElem = document.getElementById('tableAtanText');
-      if (atanMatches) {
-        atanElem.textContent = `${naiveAtan > 0 ? '+' : ''}${naiveAtan.toFixed(1)}° [OK]`;
-        atanElem.style.color = 'var(--accent-green)';
-      } else {
-        atanElem.textContent = `${naiveAtan > 0 ? '+' : ''}${naiveAtan.toFixed(1)}° [FAIL]`;
-        atanElem.style.color = 'var(--accent-red)';
+      // Compute Unit Quaternion
+      const qw = Math.cos(r/2)*Math.cos(p/2)*Math.cos(y/2) + Math.sin(r/2)*Math.sin(p/2)*Math.sin(y/2);
+      const qx = Math.sin(r/2)*Math.cos(p/2)*Math.cos(y/2) - Math.cos(r/2)*Math.sin(p/2)*Math.sin(y/2);
+      const qy = Math.cos(r/2)*Math.sin(p/2)*Math.cos(y/2) + Math.sin(r/2)*Math.cos(p/2)*Math.sin(y/2);
+      const qz = Math.cos(r/2)*Math.cos(p/2)*Math.sin(y/2) - Math.sin(r/2)*Math.sin(p/2)*Math.cos(y/2);
+
+      document.getElementById('quatW').textContent = qw.toFixed(4);
+      document.getElementById('quatX').textContent = qx.toFixed(4);
+      document.getElementById('quatY').textContent = qy.toFixed(4);
+      document.getElementById('quatZ').textContent = qz.toFixed(4);
+
+      // Draw 3D Gimbal Rings & Axes
+      const l = circleRadius * 0.8;
+      const isLocked = Math.abs(pitchDeg) >= 88;
+
+      // Project 3D vector to 2D
+      function project(vx, vy, vz) {
+        const isoX = center.x + (vx - vy * 0.5);
+        const isoY = center.y + (-vz + vy * 0.3);
+        return { x: isoX, y: isoY };
+      }
+
+      // Origin
+      const o = project(0, 0, 0);
+
+      // Local Rotated Axes:
+      const xAxis = project(R[0][0]*l, R[1][0]*l, R[2][0]*l); // Red / Roll
+      const yAxis = project(R[0][1]*l, R[1][1]*l, R[2][1]*l); // Green / Pitch
+      const zAxis = project(R[0][2]*l, R[1][2]*l, R[2][2]*l); // Blue / Yaw
+
+      // Draw Local Axes
+      ctx.lineWidth = 4;
+      // X-Axis (Roll)
+      ctx.strokeStyle = '#f43f5e';
+      ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(xAxis.x, xAxis.y); ctx.stroke();
+      // Y-Axis (Pitch)
+      ctx.strokeStyle = '#4ade80';
+      ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(yAxis.x, yAxis.y); ctx.stroke();
+      // Z-Axis (Yaw)
+      ctx.strokeStyle = '#38bdf8';
+      ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(zAxis.x, zAxis.y); ctx.stroke();
+
+      ctx.font = 'bold 12px monospace';
+      ctx.fillStyle = '#f43f5e'; ctx.fillText('X (Roll)', xAxis.x + 6, xAxis.y);
+      ctx.fillStyle = '#4ade80'; ctx.fillText('Y (Pitch)', yAxis.x + 6, yAxis.y);
+      ctx.fillStyle = '#38bdf8'; ctx.fillText('Z (Yaw)', zAxis.x + 6, zAxis.y);
+
+      if (isLocked) {
+        ctx.fillStyle = '#f43f5e';
+        ctx.font = 'bold 15px monospace';
+        ctx.fillText('GIMBAL LOCK DETECTED! Pitch = ±90°', center.x - 140, center.y - circleRadius - 10);
       }
     }
 
@@ -635,8 +647,20 @@
       currAngleDeg = parseFloat(e.target.value);
       draw();
     });
-    document.getElementById('swerveOptToggle').addEventListener('change', (e) => {
-      swerveOptimizationEnabled = e.target.checked;
+
+    document.getElementById('sliderPitch').addEventListener('input', (e) => {
+      pitchDeg = parseFloat(e.target.value);
+      document.getElementById('pitchValText').textContent = `${pitchDeg.toFixed(1)}°`;
+      draw();
+    });
+    document.getElementById('sliderYaw').addEventListener('input', (e) => {
+      yawDeg = parseFloat(e.target.value);
+      document.getElementById('yawValText').textContent = `${yawDeg.toFixed(1)}°`;
+      draw();
+    });
+    document.getElementById('sliderRoll').addEventListener('input', (e) => {
+      rollDeg = parseFloat(e.target.value);
+      document.getElementById('rollValText').textContent = `${rollDeg.toFixed(1)}°`;
       draw();
     });
 
@@ -646,58 +670,16 @@
       draw();
     }
 
-    function getPointerAngle(evt) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
-      const px = clientX - rect.left - center.x;
-      const py = clientY - rect.top - center.y;
-      const rad = Math.atan2(-py, px);
-      return radToDeg(rad);
-    }
-
-    function onPointerDown(evt) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
-      const px = clientX - rect.left;
-      const py = clientY - rect.top;
-
-      const tRad = degToRad(targetAngleDeg);
-      const tarX = center.x + circleRadius * Math.cos(-tRad);
-      const tarY = center.y + circleRadius * Math.sin(-tRad);
-
-      const cRad = degToRad(currAngleDeg);
-      const curX = center.x + circleRadius * Math.cos(-cRad);
-      const curY = center.y + circleRadius * Math.sin(-cRad);
-
-      const distT = Math.hypot(px - tarX, py - tarY);
-      const distC = Math.hypot(px - curX, py - curY);
-
-      if (distT < 30) dragging = 'target';
-      else if (distC < 30) dragging = 'curr';
-    }
-
-    function onPointerMove(evt) {
-      if (!dragging) return;
-      evt.preventDefault();
-      const deg = getPointerAngle(evt);
-      if (dragging === 'target') targetAngleDeg = Math.round(deg);
-      else if (dragging === 'curr') currAngleDeg = Math.round(deg);
+    function set3D(p, y, r) {
+      pitchDeg = p; yawDeg = y; rollDeg = r;
+      document.getElementById('sliderPitch').value = p;
+      document.getElementById('sliderYaw').value = y;
+      document.getElementById('sliderRoll').value = r;
+      document.getElementById('pitchValText').textContent = `${p.toFixed(1)}°`;
+      document.getElementById('yawValText').textContent = `${y.toFixed(1)}°`;
+      document.getElementById('rollValText').textContent = `${r.toFixed(1)}°`;
       draw();
     }
-
-    function onPointerUp() {
-      dragging = null;
-    }
-
-    canvas.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('mousemove', onPointerMove);
-    window.addEventListener('mouseup', onPointerUp);
-
-    canvas.addEventListener('touchstart', onPointerDown, { passive: false });
-    window.addEventListener('touchmove', onPointerMove, { passive: false });
-    window.addEventListener('touchend', onPointerUp);
 
     initTheme();
     resizeCanvas();

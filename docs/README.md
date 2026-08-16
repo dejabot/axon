@@ -18,7 +18,7 @@ Traditional curricula often treat mathematics, physical modeling, machine learni
 ### [Module 1: Math Foundations](modules/01_math_foundations/README.md)
 Core linear algebra, continuous angle topology, single-variable motion calculus, and multivariable gradient calculus.
 * [Concept 01: Vectors, Basis Spaces & Matrix Transformations](modules/01_math_foundations/concept_01_vectors_matrices/README.md) ([Demo](modules/01_math_foundations/concept_01_vectors_matrices/demo.html))
-* [Concept 02: Trigonometry, atan2 & Continuous Angle Topology](modules/01_math_foundations/concept_02_trig_angle_topology/README.md) ([Demo](modules/01_math_foundations/concept_02_trig_angle_topology/demo.html))
+* [Concept 02: Trigonometry, atan2, Continuous Angle Topology & Quaternions](modules/01_math_foundations/concept_02_trig_angle_topology/README.md) ([Demo](modules/01_math_foundations/concept_02_trig_angle_topology/demo.html))
 * [Concept 03: Single-Variable Motion Calculus & Jerk](modules/01_math_foundations/concept_03_motion_calculus/README.md) ([Demo](modules/01_math_foundations/concept_03_motion_calculus/demo.html))
 * [Concept 04: Multivariable Calculus, Gradients & The Chain Rule](modules/01_math_foundations/concept_04_multivariable_gradients/README.md) ([Demo](modules/01_math_foundations/concept_04_multivariable_gradients/demo.html))
 

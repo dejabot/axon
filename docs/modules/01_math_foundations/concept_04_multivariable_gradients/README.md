@@ -4,39 +4,46 @@
        Module 1: Math Foundations  ➔  Concept 04: Gradients & Chain Rule
 ```
 
+<iframe src="demo.html" width="100%" height="560" style="border: 1px solid var(--card-border, #232b3b); border-radius: 12px; margin: 16px 0; background: #0a0d14;"></iframe>
+
 ---
 
 ## 1. Intuitive Mental Model
 
 Imagine you are hiking blindfolded on a foggy, mountainous terrain. Underneath your boots is an uneven physical surface where your elevation (height above sea level) is given by a mathematical function `z = f(x, y)`, where `x` is your coordinate East-West and `y` is your coordinate North-South.
 
-```
-                  Elevation Surface z = f(x, y)
-                     ▲ (Mountain Peak)
-                    / \
-                   /   \
-                  /  ●  \   ◄── You are standing here
-                 /       \
-                ─────────── (Valley Floor)
-```
+<div style="text-align: center; margin: 20px 0;">
+  <svg width="340" height="200" viewBox="0 0 340 200" style="max-width: 100%; height: auto;">
+    <defs>
+      <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+      </marker>
+      <marker id="arrow-green4" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#4ade80" />
+      </marker>
+    </defs>
+    <!-- Contours -->
+    <ellipse cx="170" cy="100" rx="140" ry="70" fill="none" stroke="#334155" stroke-width="1.5" />
+    <ellipse cx="170" cy="100" rx="95" ry="48" fill="none" stroke="#475569" stroke-width="1.5" />
+    <ellipse cx="170" cy="100" rx="50" ry="25" fill="none" stroke="#64748b" stroke-width="1.5" />
+    <!-- Current Point -->
+    <circle cx="210" cy="100" r="5" fill="#38bdf8" />
+    <!-- Steepest Ascent Vector -->
+    <line x1="210" y1="100" x2="270" y2="100" stroke="#fbbf24" stroke-width="3" marker-end="url(#arrow-amber)" />
+    <!-- Steepest Descent Vector -->
+    <line x1="210" y1="100" x2="150" y2="100" stroke="#4ade80" stroke-width="3" marker-end="url(#arrow-green4)" />
+    <!-- Labels -->
+    <text x="250" y="85" fill="#fbbf24" font-family="monospace" font-weight="bold" font-size="11">∇f (Ascent)</text>
+    <text x="110" y="85" fill="#4ade80" font-family="monospace" font-weight="bold" font-size="11">-∇f (Descent)</text>
+    <text x="145" y="105" fill="#94a3b8" font-family="monospace" font-size="10">Minimum</text>
+  </svg>
+</div>
 
 1. **Partial Derivative `∂f/∂x`:** If you keep your North-South position strictly locked and take one small step directly **East**, how much does your elevation change? That slope is the partial derivative with respect to `x`.
 2. **Partial Derivative `∂f/∂y`:** If you keep your East-West position strictly locked and take one small step directly **North**, how much does your elevation change? That slope is the partial derivative with respect to `y`.
 3. **The Gradient Vector `∇f`:** If you combine both slopes into a single 2D vector `[∂f/∂x, ∂f/∂y]ᵀ`, this arrow points in the direction of **Steepest Ascent** (the fastest way uphill). Its length `||∇f||` is the exact steepness of that slope.
 
-```
-                          North (y)
-                             ▲
-                             │   ▲ ∇f (Steepest Ascent Uphill)
-                             │  /
-                             │ /
-            ─────────────────┼─●──────────────► East (x)
-                             │  \
-                             │   \
-                             │    ▼ -∇f (Steepest Descent Downhill)
-```
-
-If you want to walk downhill to find the lowest valley floor (e.g., minimizing error in machine learning or navigating a robot away from obstacle peaks), you simply take steps in the opposite direction: **`-∇f` (Gradient Descent)**.
+If you want to walk downhill to find the lowest valley floor (e.g., minimizing error in machine learning or navigating a robot away from obstacles), you take steps in the opposite direction: **`-∇f` (Gradient Descent)**.
 
 ---
 
@@ -75,11 +82,6 @@ Notice that the total differential `df` can be written as a vector dot product b
 
 Where `θ` is the angle between the gradient vector and the chosen step direction `dr`.
 
-```
-   Total Change in Elevation:
-   df = [ ∂f/∂x , ∂f/∂y ] · [ dx , dy ]ᵀ = ∇f · dr
-```
-
 ### Proof: Why the Gradient Points in the Direction of Steepest Ascent
 Let `û` be an arbitrary unit direction vector (`||û|| = 1`). The **directional derivative** `D_u(f)` measures the rate of change of `f` in direction `û`:
 
@@ -108,16 +110,15 @@ Along a level curve, elevation does not change, so `df = 0`:
 
 Because the dot product of `∇f` and the tangent displacement `dr` along the level curve is zero, **the gradient vector `∇f` is always strictly perpendicular (orthogonal) to the level curves of the function.**
 
-```
-                     Contour f = 20
-                     ───────────────
-                     Contour f = 10
-                     ───────┬───────
-                            │ ▲ ∇f (Always 90° to contours)
-                            │ │
-                     ───────┴─┼─────
-                     Contour f = 0 (Valley bottom)
-```
+<div style="text-align: center; margin: 20px 0;">
+  <svg width="300" height="150" viewBox="0 0 300 150" style="max-width: 100%; height: auto;">
+    <path d="M 30 100 Q 150 40 270 100" fill="none" stroke="#64748b" stroke-width="2" />
+    <text x="210" y="65" fill="#94a3b8" font-family="monospace" font-size="10">Contour f(x,y) = C</text>
+    <line x1="150" y1="70" x2="150" y2="15" stroke="#fbbf24" stroke-width="3" marker-end="url(#arrow-amber)" />
+    <text x="158" y="30" fill="#fbbf24" font-family="monospace" font-weight="bold" font-size="11">∇f ⊥ Tangent (90°)</text>
+    <circle cx="150" cy="70" r="4" fill="#38bdf8" />
+  </svg>
+</div>
 
 ### The Multivariable Chain Rule
 Suppose a scalar loss `L` depends on intermediate variables `u(t)` and `v(t)`, which themselves depend on a primary parameter `t`.
@@ -170,14 +171,6 @@ We construct an artificial scalar potential energy surface `U(p) = U_att(p) + U_
    U_rep(p) = (1/2) · k_rep · ( (1 / d(p)) - (1 / d₀) )²    if d(p) ≤ d₀
    ```
 
-```
-                  Attractive Bowl            Repulsive Mountain
-                  ▲                           ▲
-                  │                          /│\  Obstacle
-                  │                         / │ \
-                  └────────► Goal          ────────►
-```
-
 The robot software continuously computes the virtual force vector:
 
 ```
@@ -185,7 +178,7 @@ The robot software continuously computes the virtual force vector:
            = -k_att · (p - p_goal) + k_rep · ( (1/d) - (1/d₀) ) · (1 / d²) · ∇d
 ```
 
-The swerve chassis drives along `-∇U(p)`, automatically bending around defenders without requiring heavy graph search.
+The swerve chassis drives along `-∇U(p)`, automatically bending around defenders without requiring graph search.
 
 ### Machine Learning: Gradient Descent & Backpropagation
 
@@ -200,16 +193,6 @@ To minimize the loss, we iteratively update parameters in the direction of steep
 
 Where `η` is the **learning rate**.
 
-```
-   Loss L(W)
-   ▲        ● Initial Weights W₀
-   │         \
-   │          \  -η·∇L
-   │           ▼
-   │             ● Local Minimum W*
-   └───────────────────────────────► Weight Parameters W
-```
-
 #### Vector Backpropagation via the Chain Rule
 For a 2-layer neural network with loss `L = (1/2) · ||y_pred - y_true||²` where `y_pred = W₂ · a₁` and `a₁ = σ(W₁ · x)`:
 
@@ -221,7 +204,7 @@ Applying the multivariable chain rule backward:
    ∂L / ∂W₁ = [ (∂L / ∂a₁) ⊙ σ'(W₁ · x) ] · (x)ᵀ
 ```
 
-Where `⊙` is the element-wise Hadamard product. Every modern deep learning framework (PyTorch, TensorFlow, JAX) is an automated implementation of this vector chain rule.
+Where `⊙` is the element-wise Hadamard product.
 
 ---
 
@@ -241,7 +224,7 @@ The partial derivatives are:
 1. If the learning rate `η = 0.11` is chosen slightly too large for the steep `y` dimension (where stability requires `η < 2 / 20.0 = 0.10`):
 2. In the `x` dimension, `x[k+1] = (1 - 0.11)·x = 0.89·x` converges slowly.
 3. In the `y` dimension: `y[k+1] = y - 0.11·(20.0·y) = (1 - 2.2)·y = -1.2·y`.
-4. **Result:** The update overshoots the ravine floor, oscillating with exponentially increasing amplitude (`1.2, 1.44, 1.728, ...`) until floating-point overflow (`NaN`). The optimizer ping-pongs wildly off the walls.
+4. **Result:** The update overshoots the ravine floor, oscillating with exponentially increasing amplitude until floating-point overflow (`NaN`). The optimizer ping-pongs wildly off the walls.
 
 ### From-Scratch Python Implementation
 
@@ -404,13 +387,3 @@ Use the chain rule to derive the exact partial derivative `∂L / ∂w₁`.
 
 1. **The Hessian Matrix & Second-Order Curvature:** The Hessian matrix `H` contains all second-order partial derivatives `∂²f / ∂x_i ∂x_j`. How do the eigenvalues of `H` determine whether a critical point (`∇f = 0`) is a local minimum, local maximum, or a saddle point?
 2. **Momentum & Adam Optimizers:** Heavy-ball momentum adds a velocity term `v[k+1] = β·v[k] + (1-β)·∇f`. How does this physical analogy of a rolling ball with mass prevent the optimizer from ping-ponging across steep ravine walls?
-
----
-
-### Curriculum Linkages
-
-* **Backward Link:** Concept 01 (Vectors, dot products) and Concept 03 (Derivatives).
-* **Forward Links:**
-  * **Concept 05 (Loss Landscapes & Optimization):** Momentum, RMSProp, and Adam optimizers.
-  * **Concept 07 (Vector Calculus Backpropagation):** Reverse-mode automatic differentiation in deep networks.
-  * **Concept 18 (Policy Gradients & PPO):** Computing policy gradients `∇_θ J(θ) = E[ ∇_θ log π_θ(a|s) · Q(s,a) ]` for robot reinforcement learning.

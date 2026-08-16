@@ -20,7 +20,7 @@ This module bridges linear algebra, topology, and multivariable calculus directl
 * **[Concept 01: Vectors, Basis Spaces & Matrix Transformations](concept_01_vectors_matrices/README.md)**
   * Study Guide: [concept_01_vectors_matrices/README.md](concept_01_vectors_matrices/README.md)
   * Visualizer: [concept_01_vectors_matrices/demo.html](concept_01_vectors_matrices/demo.html)
-* **[Concept 02: Trigonometry, atan2 & Continuous Angle Topology](concept_02_trig_angle_topology/README.md)**
+* **[Concept 02: Trigonometry, atan2, Continuous Angle Topology & Quaternions](concept_02_trig_angle_topology/README.md)**
   * Study Guide: [concept_02_trig_angle_topology/README.md](concept_02_trig_angle_topology/README.md)
   * Visualizer: [concept_02_trig_angle_topology/demo.html](concept_02_trig_angle_topology/demo.html)
 * **[Concept 03: Single-Variable Motion Calculus & Jerk](concept_03_motion_calculus/README.md)**

@@ -4,21 +4,43 @@
        Module 1: Math Foundations  ➔  Concept 01: Vectors & Matrices
 ```
 
+<iframe src="demo.html" width="100%" height="560" style="border: 1px solid var(--card-border, #232b3b); border-radius: 12px; margin: 16px 0; background: #0a0d14;"></iframe>
+
 ---
 
 ## 1. Intuitive Mental Model
 
-Imagine you are standing on an infinite sheet of flexible graph paper. Every point on this grid has a street address determined by two standard measuring sticks: one pointing exactly one unit to the East (which we label **î** or "i-hat"), and one pointing exactly one unit to the North (which we label **ĵ** or "j-hat"). 
+Imagine you are standing on an infinite sheet of flexible graph paper. Every point on this grid has a street address determined by two standard measuring sticks: one pointing exactly one unit to the East (which we label **î** or "i-hat"), and one pointing exactly one unit to the North (which we label **ĵ** or "j-hat").
 
-```
-   y (North)
-   ▲
-   │    ĵ = [0, 1]ᵀ
-   │   ▲
-   │   │
-   └───┼───► x (East)
-       │   î = [1, 0]ᵀ
-```
+<div style="text-align: center; margin: 20px 0;">
+  <svg width="340" height="200" viewBox="0 0 340 200" style="max-width: 100%; height: auto;">
+    <defs>
+      <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+      </marker>
+      <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#4ade80" />
+      </marker>
+      <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
+      </marker>
+    </defs>
+    <!-- Grid -->
+    <line x1="40" y1="160" x2="300" y2="160" stroke="#334155" stroke-width="1.5" />
+    <line x1="80" y1="20" x2="80" y2="180" stroke="#334155" stroke-width="1.5" />
+    <!-- Basis Vectors -->
+    <line x1="80" y1="160" x2="160" y2="160" stroke="#4ade80" stroke-width="3.5" marker-end="url(#arrow-green)" />
+    <line x1="80" y1="160" x2="80" y2="80" stroke="#f43f5e" stroke-width="3.5" marker-end="url(#arrow-red)" />
+    <!-- Vector v -->
+    <line x1="80" y1="160" x2="240" y2="60" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="4,4" marker-end="url(#arrow-blue)" />
+    <!-- Labels -->
+    <text x="170" y="175" fill="#4ade80" font-family="monospace" font-weight="bold" font-size="12">î = [1, 0]ᵀ</text>
+    <text x="25" y="75" fill="#f43f5e" font-family="monospace" font-weight="bold" font-size="12">ĵ = [0, 1]ᵀ</text>
+    <text x="245" y="55" fill="#38bdf8" font-family="monospace" font-weight="bold" font-size="13">v = 2·î + 1.25·ĵ</text>
+    <circle cx="80" cy="160" r="4" fill="#94a3b8" />
+    <text x="60" y="175" fill="#94a3b8" font-family="monospace" font-size="11">(0,0)</text>
+  </svg>
+</div>
 
 When you describe a vector **v** as `[3, 2]ᵀ`, you are giving navigation instructions: "Walk 3 steps along the East stick, then 2 steps along the North stick."
 
@@ -56,8 +78,6 @@ A 2D vector represents both direction and magnitude. We define vector addition a
      c·v = c · [ vx ] = [ c · vx ]
                [ vy ]   [ c · vy ]
 ```
-
-Geometrically, `u + v` places the tail of `v` at the tip of `u` (the parallelogram law). 
 
 The **dot product** (scalar product) between two vectors `u` and `v` measures directional alignment:
 
@@ -107,17 +127,21 @@ Consider rotating the entire coordinate plane counter-clockwise by an angle `θ`
           [ sin(θ)   cos(θ) ]
 ```
 
-Applying `R(θ)` to any vector `[x, y]ᵀ` gives the rotated vector `[x·cos(θ) - y·sin(θ), x·sin(θ) + y·cos(θ)]ᵀ`.
-
-```
-   y
-   ▲         ĵ_new = [-sin θ, cos θ]ᵀ
-   │          \
-   │           \       î_new = [cos θ, sin θ]ᵀ
-   │            \    . '
-   │             \ . ' θ
-   └──────────────┴──────────► x
-```
+<div style="text-align: center; margin: 20px 0;">
+  <svg width="320" height="200" viewBox="0 0 320 200" style="max-width: 100%; height: auto;">
+    <line x1="30" y1="160" x2="280" y2="160" stroke="#334155" stroke-width="1.5" />
+    <line x1="70" y1="20" x2="70" y2="180" stroke="#334155" stroke-width="1.5" />
+    <!-- Rotated î -->
+    <line x1="70" y1="160" x2="160" y2="110" stroke="#4ade80" stroke-width="3" marker-end="url(#arrow-green)" />
+    <!-- Rotated ĵ -->
+    <line x1="70" y1="160" x2="20" y2="70" stroke="#f43f5e" stroke-width="3" marker-end="url(#arrow-red)" />
+    <!-- Angle Arc -->
+    <path d="M 120 160 A 50 50 0 0 0 115 135" fill="none" stroke="#fbbf24" stroke-width="2" />
+    <text x="128" y="145" fill="#fbbf24" font-family="monospace" font-size="12">θ</text>
+    <text x="165" y="105" fill="#4ade80" font-family="monospace" font-size="11">î' [cos θ, sin θ]ᵀ</text>
+    <text x="15" y="60" fill="#f43f5e" font-family="monospace" font-size="11">ĵ' [-sin θ, cos θ]ᵀ</text>
+  </svg>
+</div>
 
 ### The Determinant: Area Scaling & Singularity
 Consider the unit square spanned by `î = [1, 0]ᵀ` and `ĵ = [0, 1]ᵀ`. Its original area is `1 × 1 = 1`.
@@ -139,6 +163,20 @@ Under transformation `A = [[a, b], [c, d]]`, this square becomes a parallelogram
 ```
    det(A) = ad - bc
 ```
+
+<div style="text-align: center; margin: 20px 0;">
+  <svg width="340" height="180" viewBox="0 0 340 180" style="max-width: 100%; height: auto;">
+    <!-- Parallelogram Fill -->
+    <polygon points="60,140 160,100 240,60 140,100" fill="rgba(74, 222, 128, 0.2)" stroke="#4ade80" stroke-width="2" />
+    <!-- Axes -->
+    <line x1="20" y1="140" x2="300" y2="140" stroke="#334155" stroke-width="1.5" />
+    <line x1="60" y1="20" x2="60" y2="160" stroke="#334155" stroke-width="1.5" />
+    <!-- Vectors -->
+    <line x1="60" y1="140" x2="160" y2="100" stroke="#4ade80" stroke-width="3" marker-end="url(#arrow-green)" />
+    <line x1="60" y1="140" x2="140" y2="100" stroke="#f43f5e" stroke-width="3" marker-end="url(#arrow-red)" />
+    <text x="135" y="85" fill="#fbbf24" font-family="monospace" font-weight="bold" font-size="12">Area = |det(A)|</text>
+  </svg>
+</div>
 
 The **determinant** `det(A)` represents the factor by which the transformation scales any 2D area:
 - `det(A) = 1`: Area is preserved (e.g., pure rotations and shears).
@@ -185,11 +223,6 @@ In modern FIRST Robotics Competition (FRC) robots, 4-wheel independent swerve dr
 
 Drivers want **Field-Oriented Control**: pushing the joystick forward must drive the robot downfield (toward the opponent's scoring grid), regardless of which direction the robot's front chassis is currently facing.
 
-```
-   Field Coordinate Frame (X_field, Y_field)
-   Robot Chassis Frame   (X_robot, Y_robot) rotated by gyro heading θ
-```
-
 The driver inputs velocity commands in the field frame: `v_field = [vx_field, vy_field]ᵀ`.
 
 To compute the chassis-relative velocities `v_robot` required by the wheel kinematics, the flight software applies a 2D rotation matrix:
@@ -204,18 +237,8 @@ To compute the chassis-relative velocities `v_robot` required by the wheel kinem
 
 If the gyro reading `θ` has sign errors or matrix transpose bugs, the robot's coordinate frame rotates in reverse, sending a 120-pound robot crashing into the arena perimeter walls at 5 meters per second.
 
-```
-      Field Frame                     Robot Frame
-      ▲ Y_field                        ▲ X_robot (Chassis Front)
-      │                                │  . '
-      │   Robot Heading θ              │ . '  v_robot
-      │     . '                        └────────► Y_robot
-      │    /
-      └────────► X_field
-```
-
 ### Machine Learning: Dense Neural Network Layers
-Every fully connected (dense) layer in a neural network (from simple multilayer perceptrons to transformer attention projections) is a matrix transformation followed by a vector translation and non-linear activation:
+Every fully connected (dense) layer in a neural network is a matrix transformation followed by a vector translation and non-linear activation:
 
 ```
    z = W · x + b
@@ -461,13 +484,3 @@ if __name__ == "__main__":
 
 1. **Singular Value Decomposition (SVD):** Every linear transformation matrix `A` can be factored into `A = U · Σ · Vᵀ`, where `U` and `V` are orthonormal rotation matrices and `Σ` is a diagonal scaling matrix. How does SVD reveal the principal axes of error ellipses when estimating a mobile robot's positional uncertainty?
 2. **Batch Matrix Multiplication in GPUs:** In deep learning frameworks (PyTorch, JAX), dense layer computations process 1,024 batch samples simultaneously as `Z = X · Wᵀ + B`. How does the memory layout of row-major vs column-major matrices affect cache hit rates and Tensor Core utilization during forward passes?
-
----
-
-### Curriculum Linkages
-
-* **Backward Link:** Foundational geometry & coordinate arithmetic.
-* **Forward Links:**
-  * **Concept 05 (Loss Landscapes & Optimization):** Quadratic forms `xᵀ · A · x` and Hessian curvature matrices.
-  * **Concept 06 (Dense Layers & Activations):** Multi-layer linear collapses without non-linear activations.
-  * **Concept 13 (Swerve Kinematics):** Forward and inverse kinematics transformation matrices mapping chassis speeds to wheel azimuth angles.
