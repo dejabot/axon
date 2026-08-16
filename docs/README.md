@@ -8,7 +8,7 @@ Welcome to the Axon educational curriculum. Axon is designed from first principl
 
 Traditional curricula often treat mathematics, physical modeling, machine learning, and robot controls as disconnected subjects. Axon unifies them:
 * **First Principles (No Black Boxes):** Every formula is derived step-by-step with zero hand-waving.
-* **Dual Grounding:** Every mathematical concept is directly connected to a high-stakes FRC robotics mechanism (e.g., swerve kinematics, elevator feedforward, gyro odometry) and a core Machine Learning component (e.g., dense layers, loss optimization, backpropagation).
+* **Dual Grounding:** Every mathematical concept is directly connected to an FRC robotics mechanism (e.g., swerve kinematics, elevator feedforward, gyro odometry) and a core Machine Learning component (e.g., dense layers, loss optimization, backpropagation).
 * **Interactive Visualizers:** Every concept includes a companion standalone HTML5/Canvas interactive demo with touch and slider controls.
 
 ---
