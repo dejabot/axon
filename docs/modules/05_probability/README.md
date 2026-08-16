@@ -1,0 +1,33 @@
+# Module 5: Probability & Uncertainty
+
+```
+       Module 5: Probability & Uncertainty (Concepts 16 ➔ 19)
+```
+
+Welcome to **Module 5: Probability & Uncertainty**. In robotics and artificial intelligence, the physical world is never 100% predictable: sensors have electrical noise, wheels slip on carpet, and camera detections have uncertainty.
+
+This module introduces the mathematical tools required to quantify, model, and make decisions under uncertainty—from bell curves and sensor fusion to probability distributions and Monte Carlo expectations.
+
+---
+
+## Concepts in this Module
+
+* **[Concept 16: Sensor Noise & Normal Distributions](concept_16_sensor_noise_normal/README.md)**
+  * *The Everyday Problem:* Why does an AprilTag distance sensor reading jitter between 3.8m and 4.2m, and what is the "true" distance?
+  * *Code & Math:* Sample mean $\mu$, sample variance $\sigma^2$, standard deviation $\sigma$, and the Gaussian Bell Curve.
+  * *Visualizer:* [concept_16_sensor_noise_normal/demo.html](concept_16_sensor_noise_normal/demo.html)
+
+* **[Concept 17: Bayes' Rule & 1D Sensor Fusion](concept_17_bayes_sensor_fusion/README.md)**
+  * *The Everyday Problem:* How do we combine a noisy vision estimate with a wheel odometry estimate into a single, highly confident belief?
+  * *Code & Math:* Prior, Likelihood, Posterior, and 1D Kalman filter sensor fusion (multiplying two Gaussians).
+  * *Visualizer:* [concept_17_bayes_sensor_fusion/demo.html](concept_17_bayes_sensor_fusion/demo.html)
+
+* **[Concept 18: Discrete Distributions & Softmax](concept_18_discrete_softmax/README.md)**
+  * *The Everyday Problem:* How does an autonomous object detector turn raw model scores into percentages that sum to 100%?
+  * *Code & Math:* Categorical distributions, the Softmax function, and temperature scaling.
+  * *Visualizer:* [concept_18_discrete_softmax/demo.html](concept_18_discrete_softmax/demo.html)
+
+* **[Concept 19: Expected Value & Decision Making](concept_19_expected_value_decision/README.md)**
+  * *The Everyday Problem:* In the final 20 seconds of an FRC match, should your alliance attempt a risky high-point climb or take guaranteed safe points?
+  * *Code & Math:* Expected Value $E[X] = \sum x_i \cdot P(x_i)$, risk variance, and Monte Carlo simulation.
+  * *Visualizer:* [concept_19_expected_value_decision/demo.html](concept_19_expected_value_decision/demo.html)

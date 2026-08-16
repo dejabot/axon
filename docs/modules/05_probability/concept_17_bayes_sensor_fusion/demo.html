@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 17: 1D Kalman Sensor Fusion Visualizer</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+    }
+    .canvas-container {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 0.85rem;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="kalmanCanvas"></canvas>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Prior / Odometry (Cyan)</span>
+        <span class="stat-val" id="priorText" style="color: var(--accent);">4.00m ± 0.20m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Measurement / Vision (Amber)</span>
+        <span class="stat-val" id="measText" style="color: var(--accent-amber);">4.50m ± 0.40m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Kalman Gain (K)</span>
+        <span class="stat-val" id="gainText">0.20 (20%)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Fused Belief (Green)</span>
+        <span class="stat-val" id="fusedText" style="color: var(--accent-green); font-size: 1.05rem;">4.10m ± 0.18m</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('kalmanCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let prior = { mu: 4.0, sigma: 0.20 };
+    let meas = { mu: 4.5, sigma: 0.40 };
+    let dragging = null;
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      draw();
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+
+    function gaussianPDF(x, m, s) {
+      return (1.0 / (s * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * ((x - m) / s) ** 2);
+    }
+
+    function toScreen(x, y) {
+      const pad = 40;
+      const w = (canvas.width / (window.devicePixelRatio || 1)) - pad * 2;
+      const h = (canvas.height / (window.devicePixelRatio || 1)) - pad * 2;
+      return {
+        x: pad + ((x - 2.5) / 3.5) * w,
+        y: pad + h - (y / 2.8) * h
+      };
+    }
+
+    function toMath(sx) {
+      const pad = 40;
+      const w = (canvas.width / (window.devicePixelRatio || 1)) - pad * 2;
+      return 2.5 + ((sx - pad) / w) * 3.5;
+    }
+
+    function draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const width = canvas.width / (window.devicePixelRatio || 1);
+      const height = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, width, height);
+
+      const o = toScreen(2.5, 0);
+
+      // Axes
+      ctx.strokeStyle = isLight ? '#cbd5e1' : '#232b3b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(toScreen(2.5, 0).x, toScreen(2.5, 0).y);
+      ctx.lineTo(toScreen(6.0, 0).x, toScreen(6.0, 0).y);
+      ctx.stroke();
+
+      // Kalman fusion math
+      const var1 = prior.sigma ** 2;
+      const var2 = meas.sigma ** 2;
+      const K = var1 / (var1 + var2);
+      const fusedMu = prior.mu + K * (meas.mu - prior.mu);
+      const fusedSigma = Math.sqrt((1.0 - K) * var1);
+
+      function drawCurve(m, s, color, width, isFilled) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        const steps = 100;
+        for (let i = 0; i <= steps; i++) {
+          const x = 2.5 + (i / steps) * 3.5;
+          const y = gaussianPDF(x, m, s);
+          const pt = toScreen(x, y);
+          if (i === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        }
+        if (isFilled) {
+          ctx.fillStyle = isLight ? 'rgba(22, 163, 74, 0.15)' : 'rgba(74, 222, 128, 0.15)';
+          const endPt = toScreen(6.0, 0);
+          const startPt = toScreen(2.5, 0);
+          ctx.lineTo(endPt.x, endPt.y);
+          ctx.lineTo(startPt.x, startPt.y);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.stroke();
+      }
+
+      // Prior (Cyan)
+      drawCurve(prior.mu, prior.sigma, isLight ? '#0284c7' : '#38bdf8', 2, false);
+      // Meas (Amber)
+      drawCurve(meas.mu, meas.sigma, isLight ? '#d97706' : '#fbbf24', 2, false);
+      // Fused (Green filled)
+      drawCurve(fusedMu, fusedSigma, isLight ? '#16a34a' : '#4ade80', 3.5, true);
+
+      // Knobs for dragging peaks
+      const pTip = toScreen(prior.mu, gaussianPDF(prior.mu, prior.mu, prior.sigma));
+      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
+      ctx.beginPath(); ctx.arc(pTip.x, pTip.y, 7, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+
+      const mTip = toScreen(meas.mu, gaussianPDF(meas.mu, meas.mu, meas.sigma));
+      ctx.fillStyle = isLight ? '#d97706' : '#fbbf24';
+      ctx.beginPath(); ctx.arc(mTip.x, mTip.y, 7, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+
+      // Telemetry
+      document.getElementById('priorText').textContent = `${prior.mu.toFixed(2)}m ± ${prior.sigma.toFixed(2)}m`;
+      document.getElementById('measText').textContent = `${meas.mu.toFixed(2)}m ± ${meas.sigma.toFixed(2)}m`;
+      document.getElementById('gainText').textContent = `${K.toFixed(2)} (${(K*100).toFixed(0)}%)`;
+      document.getElementById('fusedText').textContent = `${fusedMu.toFixed(2)}m ± ${fusedSigma.toFixed(2)}m`;
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - rect.left, y: cy - rect.top };
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const p = getPos(e);
+      const pTip = toScreen(prior.mu, gaussianPDF(prior.mu, prior.mu, prior.sigma));
+      const mTip = toScreen(meas.mu, gaussianPDF(meas.mu, meas.mu, meas.sigma));
+      if (Math.hypot(p.x - pTip.x, p.y - pTip.y) < 25) dragging = 'prior';
+      else if (Math.hypot(p.x - mTip.x, p.y - mTip.y) < 25) dragging = 'meas';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const p = getPos(e);
+      const m = toMath(p.x);
+      if (dragging === 'prior') prior.mu = Math.max(2.6, Math.min(5.8, m));
+      if (dragging === 'meas') meas.mu = Math.max(2.6, Math.min(5.8, m));
+      draw();
+    });
+
+    window.addEventListener('mouseup', () => dragging = null);
+
+    canvas.addEventListener('touchstart', (e) => {
+      const p = getPos(e);
+      const pTip = toScreen(prior.mu, gaussianPDF(prior.mu, prior.mu, prior.sigma));
+      const mTip = toScreen(meas.mu, gaussianPDF(meas.mu, meas.mu, meas.sigma));
+      if (Math.hypot(p.x - pTip.x, p.y - pTip.y) < 30) dragging = 'prior';
+      else if (Math.hypot(p.x - mTip.x, p.y - mTip.y) < 30) dragging = 'meas';
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      const p = getPos(e);
+      const m = toMath(p.x);
+      if (dragging === 'prior') prior.mu = Math.max(2.6, Math.min(5.8, m));
+      if (dragging === 'meas') meas.mu = Math.max(2.6, Math.min(5.8, m));
+      draw();
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => dragging = null);
+
+    resize();
+  </script>
+</body>
+</html>

@@ -1,15 +1,15 @@
 # Axon Curriculum Documentation
 
-Axon is an educational curriculum designed from first principles to bridge high-school mathematics (algebra, geometry, trigonometry, single-variable calculus) into university-level applied mathematics, physical dynamics, autonomous robotics (FIRST Robotics Competition / FRC), and machine learning (grounded in [*Mathematics for Machine Learning*](https://mml-book.github.io/book/mml-book.pdf) by Deisenroth, Faisal, and Ong).
+Axon is an educational curriculum designed from first principles to bridge high-school mathematics (algebra, geometry, trigonometry, single-variable calculus, and probability) into university-level applied mathematics, physical dynamics, autonomous robotics (FIRST Robotics Competition / FRC), and machine learning (grounded in [*Mathematics for Machine Learning*](https://mml-book.github.io/book/mml-book.pdf) by Deisenroth, Faisal, and Ong).
 
 ---
 
 ## Pedagogical Philosophy
 
-* **FRC & Everyday Intuition First:** We start with real robot scenarios (scoring targets, joystick steering, elevator chains, obstacle avoidance) before presenting formal equations.
+* **FRC & Everyday Intuition First:** We start with real robot scenarios (scoring targets, joystick steering, sensor jitter, elevator chains, obstacle avoidance) before presenting formal equations.
 * **Code-First Explanations:** Every concept is solved in 5–15 lines of clean, readable Python with descriptive variable names.
 * **"Math!" Translation Sidebars:** Formal mathematical symbols, equations, and pronunciation guides are introduced as friendly translations of the code.
-* **Bridge to Machine Learning:** Every math concept explicitly connects to its role in modern deep learning (embeddings, transformer position encoding, dense layers, backpropagation).
+* **Bridge to Machine Learning:** Every math concept explicitly connects to its role in modern deep learning (embeddings, transformer position encoding, dense layers, diffusion models, softmax sampling, backpropagation).
 * **Clean Interactive Visualizers:** Every concept includes a companion interactive HTML5/Canvas demo with dark/light theming.
 
 ---
@@ -47,8 +47,16 @@ Axon is an educational curriculum designed from first principles to bridge high-
 
 ---
 
-### [Module 5: Machine Learning Foundations](modules/05_machine_learning/README.md)
-* Concept 16: Loss Landscapes & Optimization (MSE, Cross-Entropy)
-* Concept 17: Dense Layers & Non-Linear Activation Functions (ReLU, GELU)
-* Concept 18: Vector Calculus Backpropagation & Computation Graphs
-* Concept 19: 2D Neural Classifier Sandbox
+### [Module 5: Probability & Uncertainty](modules/05_probability/README.md)
+* [Concept 16: Sensor Noise & Normal Distributions](modules/05_probability/concept_16_sensor_noise_normal/README.md) — [Interactive Visualizer](modules/05_probability/concept_16_sensor_noise_normal/demo.html)
+* [Concept 17: Bayes' Rule & 1D Sensor Fusion](modules/05_probability/concept_17_bayes_sensor_fusion/README.md) — [Interactive Visualizer](modules/05_probability/concept_17_bayes_sensor_fusion/demo.html)
+* [Concept 18: Discrete Distributions & Softmax](modules/05_probability/concept_18_discrete_softmax/README.md) — [Interactive Visualizer](modules/05_probability/concept_18_discrete_softmax/demo.html)
+* [Concept 19: Expected Value & Decision Making](modules/05_probability/concept_19_expected_value_decision/README.md) — [Interactive Visualizer](modules/05_probability/concept_19_expected_value_decision/demo.html)
+
+---
+
+### [Module 6: Machine Learning Foundations](modules/06_machine_learning/README.md)
+* Concept 20: Loss Landscapes & Optimization (MSE, Cross-Entropy)
+* Concept 21: Dense Layers & Non-Linear Activation Functions (ReLU, GELU)
+* Concept 22: Vector Calculus Backpropagation & Computation Graphs
+* Concept 23: 2D Neural Classifier Sandbox
