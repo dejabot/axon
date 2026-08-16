@@ -14,14 +14,19 @@ Axon uses two organizational levels:
 2. **Concepts (1 through 25):** The individual core topics and companion visualizers.
 
 ```
-docs/
-├── README.md                       <-- Curriculum overview and module links
-└── modules/
-    ├── 01_math_foundations/
-    │   ├── README.md               <-- Module overview and concept directory links
-    │   └── concept_01_vectors_matrices/
-    │       ├── README.md           <-- Concept guide with embedded interactive demo & SVGs
-    │       └── demo.html           <-- Standalone interactive visualizer (HTML5/Canvas)
+axon/
+├── README.md                       <-- Repository root curriculum overview
+└── docs/
+    ├── README.md                   <-- Curriculum documentation overview
+    ├── assets/
+    │   ├── axon.css                <-- Shared design system tokens & theme styles
+    │   └── theme.js                <-- Floating dark/light toggle & local storage sync
+    └── modules/
+        ├── 01_math_foundations/
+        │   ├── README.md           <-- Rendered by default when browsing the module directory
+        │   └── concept_01_vectors_matrices/
+        │       ├── README.md       <-- Rendered by default when browsing the concept directory
+        │       └── demo.html       <-- Standalone interactive visualizer (HTML5/Canvas)
 ```
 
 The 5 Modules:
