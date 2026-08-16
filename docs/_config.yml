@@ -16,5 +16,11 @@ defaults:
     values:
       layout: default
 
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
 exclude:
   - "*.DS_Store"

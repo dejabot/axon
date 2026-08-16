@@ -16,8 +16,17 @@
   --code-inline-bg: #e2e8f0;
   --code-inline-ink: #0369a1;
   --shadow: 0 1px 3px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.05);
-  /* syntax highlighting */
-  --hl-kw: #c792ea; --hl-str: #c3e88d; --hl-num: #d19a66; --hl-com: #7f8aa0; --hl-fn: #82aaff;
+  
+  /* Syntax Highlighting Tokens (Light Theme) */
+  --hl-kw: #7c3aed;           /* Keywords (def, import, return, for, if) */
+  --hl-fn: #0284c7;           /* Functions & methods */
+  --hl-bi: #0891b2;           /* Built-ins & classes (print, math, len) */
+  --hl-str: #16a34a;          /* Strings */
+  --hl-num: #d97706;          /* Numbers & floats */
+  --hl-com: #64748b;          /* Comments */
+  --hl-op: #0284c7;           /* Operators (+, -, *, /, =) */
+  --hl-var: #0f172a;          /* Variables & identifiers */
+  --hl-pct: #475569;          /* Punctuation ((), [], {}, :) */
 }
 
 /* dark via the OS (only when the reader hasn't forced light) */
@@ -36,7 +45,17 @@
     --code-inline-bg: #1c2331;
     --code-inline-ink: #7dd3fc;
     --shadow: 0 1px 3px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
-    --hl-com: #64748b;
+    
+    /* Syntax Highlighting Tokens (Dark Theme) */
+    --hl-kw: #c084fc;         /* Keywords (purple) */
+    --hl-fn: #60a5fa;         /* Functions & methods (light blue) */
+    --hl-bi: #38bdf8;         /* Built-ins (cyan) */
+    --hl-str: #4ade80;        /* Strings (bright green) */
+    --hl-num: #fbbf24;        /* Numbers (amber/orange) */
+    --hl-com: #7f8aa0;        /* Comments (muted slate) */
+    --hl-op: #f43f5e;         /* Operators (coral/pink) */
+    --hl-var: #f8fafc;        /* Variables (bright white) */
+    --hl-pct: #94a3b8;        /* Punctuation */
   }
 }
 
@@ -55,7 +74,17 @@
   --code-inline-bg: #1c2331;
   --code-inline-ink: #7dd3fc;
   --shadow: 0 1px 3px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
-  --hl-com: #64748b;
+  
+  /* Syntax Highlighting Tokens (Dark Theme) */
+  --hl-kw: #c084fc;         /* Keywords (purple) */
+  --hl-fn: #60a5fa;         /* Functions & methods (light blue) */
+  --hl-bi: #38bdf8;         /* Built-ins (cyan) */
+  --hl-str: #4ade80;        /* Strings (bright green) */
+  --hl-num: #fbbf24;        /* Numbers (amber/orange) */
+  --hl-com: #7f8aa0;        /* Comments (muted slate) */
+  --hl-op: #f43f5e;         /* Operators (coral/pink) */
+  --hl-var: #f8fafc;        /* Variables (bright white) */
+  --hl-pct: #94a3b8;        /* Punctuation */
 }
 
 * { box-sizing: border-box; }
@@ -137,7 +166,69 @@ body {
 }
 .markdown-body pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
 
-/* blockquotes callouts */
+/* ---- Syntax Highlighting (Rouge & Prism Token Selectors) ---- */
+/* Keywords */
+.highlight .k, .highlight .kd, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kt, .highlight .ow,
+.token.keyword {
+  color: var(--hl-kw);
+  font-weight: 600;
+}
+
+/* Functions & Methods */
+.highlight .nf, .highlight .fm, .highlight .na,
+.token.function {
+  color: var(--hl-fn);
+  font-weight: 600;
+}
+
+/* Built-ins & Classes */
+.highlight .nb, .highlight .nc, .highlight .nd, .highlight .ne,
+.token.builtin, .token.class-name {
+  color: var(--hl-bi);
+}
+
+/* Strings */
+.highlight .s, .highlight .sa, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd,
+.highlight .s2, .highlight .se, .highlight .sh, .highlight .si, .highlight .sx, .highlight .sr,
+.highlight .s1, .highlight .ss,
+.token.string {
+  color: var(--hl-str);
+}
+
+/* Numbers & Floats */
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il,
+.highlight .mo, .highlight .mx,
+.token.number {
+  color: var(--hl-num);
+  font-weight: 600;
+}
+
+/* Comments */
+.highlight .c, .highlight .ch, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs,
+.token.comment {
+  color: var(--hl-com);
+  font-style: italic;
+}
+
+/* Operators */
+.highlight .o,
+.token.operator {
+  color: var(--hl-op);
+}
+
+/* Punctuation */
+.highlight .p,
+.token.punctuation {
+  color: var(--hl-pct);
+}
+
+/* Variables & Names */
+.highlight .n, .highlight .nv, .highlight .vc, .highlight .vg, .highlight .vi, .highlight .vm,
+.token.variable, .token.property {
+  color: var(--hl-var);
+}
+
+/* ---- blockquotes callouts ---- */
 .markdown-body blockquote {
   margin: 16px 0; padding: 12px 16px; border-left: 4px solid var(--accent);
   background: var(--accent-soft); border-radius: 0 10px 10px 0; color: var(--ink);
