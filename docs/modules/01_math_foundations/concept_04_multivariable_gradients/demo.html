@@ -4,115 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Concept 04: Multivariable Calculus, Gradients & Chain Rule</title>
-  <script>
-    (function() {
-      const saved = localStorage.getItem('axon_theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', saved);
-    })();
-  </script>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
   <style>
-    :root {
-      --bg-dark: #0a0d14;
-      --card-bg: #141923;
-      --card-border: #232b3b;
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --accent-blue: #38bdf8;
-      --accent-green: #4ade80;
-      --accent-red: #f43f5e;
-      --accent-amber: #fbbf24;
-      --accent-purple: #c084fc;
-      --input-bg: #0a0d14;
-      --btn-bg: #1e2638;
-      --btn-hover: #2b364f;
-    }
-    [data-theme="light"] {
-      --bg-dark: #f8fafc;
-      --card-bg: #ffffff;
-      --card-border: #e2e8f0;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --accent-blue: #0284c7;
-      --accent-green: #16a34a;
-      --accent-red: #e11d48;
-      --accent-amber: #d97706;
-      --accent-purple: #9333ea;
-      --input-bg: #f1f5f9;
-      --btn-bg: #e2e8f0;
-      --btn-hover: #cbd5e1;
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      transition: background-color 0.2s, color 0.2s;
-    }
-    header {
-      padding: 16px 24px;
-      background-color: var(--card-bg);
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .header-title h1 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--accent-blue);
-      letter-spacing: -0.02em;
-    }
-    .header-title p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-    .header-nav {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-left: auto;
-    }
-    .nav-links {
-      display: flex;
-      gap: 6px;
-    }
-    .nav-links a, .btn-theme {
-      color: var(--text-main);
-      text-decoration: none;
-      font-size: 0.8rem;
-      padding: 7px 12px;
-      background: var(--btn-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .nav-links a:hover, .btn-theme:hover {
-      background: var(--btn-hover);
-      border-color: var(--accent-blue);
-    }
     .main-container {
       display: flex;
-      flex: 1;
       flex-direction: column;
-      padding: 16px;
       gap: 16px;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
+      margin-top: 16px;
     }
     @media (min-width: 950px) {
       .main-container {
@@ -121,14 +20,15 @@
     }
     .canvas-panel {
       flex: 1.6;
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background-color: var(--panel);
+      border: 1px solid var(--line);
       border-radius: 12px;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       min-height: 520px;
+      box-shadow: var(--shadow);
     }
     canvas {
       width: 100%;
@@ -142,15 +42,15 @@
       top: 12px;
       left: 12px;
       pointer-events: none;
-      background: var(--card-bg);
+      background: var(--panel);
       opacity: 0.92;
       padding: 8px 12px;
       border-radius: 8px;
-      border: 1px solid var(--card-border);
+      border: 1px solid var(--line);
       font-size: 0.75rem;
-      color: var(--text-muted);
+      color: var(--muted);
       line-height: 1.4;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      box-shadow: var(--shadow);
     }
     .controls-panel {
       flex: 1;
@@ -159,17 +59,18 @@
       gap: 12px;
     }
     .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background-color: var(--panel);
+      border: 1px solid var(--line);
       border-radius: 12px;
       padding: 16px;
+      box-shadow: var(--shadow);
     }
     .card-title {
       font-size: 0.85rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--accent-blue);
+      color: var(--accent);
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
@@ -182,9 +83,9 @@
       margin-bottom: 12px;
     }
     button.btn-ls {
-      background: var(--btn-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--muted);
       padding: 8px 6px;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -193,13 +94,13 @@
       transition: all 0.15s;
     }
     button.btn-ls:hover {
-      background: var(--btn-hover);
-      color: var(--text-main);
+      background: var(--panel-hover);
+      color: var(--ink);
     }
     button.btn-ls.active {
       background: rgba(56, 189, 248, 0.15);
-      border-color: var(--accent-blue);
-      color: var(--accent-blue);
+      border-color: var(--accent);
+      color: var(--accent);
     }
     .control-group {
       margin-bottom: 10px;
@@ -208,17 +109,17 @@
       display: flex;
       justify-content: space-between;
       font-size: 0.8rem;
-      color: var(--text-muted);
+      color: var(--muted);
       margin-bottom: 3px;
     }
     .control-header span.val {
-      font-family: monospace;
+      font-family: ui-monospace, "SF Mono", monospace;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--ink);
     }
     input[type="range"] {
       width: 100%;
-      accent-color: var(--accent-blue);
+      accent-color: var(--accent);
     }
     .playback-row {
       display: flex;
@@ -227,9 +128,9 @@
     }
     .btn-action {
       flex: 1;
-      background: var(--btn-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--ink);
       padding: 9px;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -238,8 +139,8 @@
       transition: all 0.15s;
     }
     .btn-action:hover {
-      background: var(--btn-hover);
-      border-color: var(--accent-blue);
+      background: var(--panel-hover);
+      border-color: var(--accent);
     }
     .btn-action.play {
       background: rgba(74, 222, 128, 0.2);
@@ -252,19 +153,19 @@
       gap: 8px;
     }
     .stat-box {
-      background: var(--input-bg);
-      border: 1px solid var(--card-border);
+      background: var(--bg);
+      border: 1px solid var(--line);
       border-radius: 8px;
       padding: 10px;
     }
     .stat-label {
       font-size: 0.7rem;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--muted);
       margin-bottom: 2px;
     }
     .stat-val {
-      font-family: monospace;
+      font-family: ui-monospace, "SF Mono", monospace;
       font-size: 1.1rem;
       font-weight: 700;
     }
@@ -272,128 +173,94 @@
 </head>
 <body>
 
-  <header>
-    <div class="header-title">
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Module 1: Math Foundations</div>
       <h1>04: Multivariable Calculus, Gradients & The Chain Rule</h1>
-      <p>Module 1: Math Foundations</p>
-    </div>
-    <div class="header-nav">
-      <div class="nav-links">
-        <a href="README.md">Concept Guide</a>
-        <a href="../../../index.html">Master Dashboard</a>
-      </div>
-      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme (Dark/Light)">Theme: Dark</button>
-    </div>
-  </header>
+      <p class="lede">Explore scalar loss landscapes f(x, y), orthogonal gradient ascent vectors ∇f, and roll a particle downhill using momentum and learning rate controls.</p>
+    </header>
 
-  <div class="main-container">
-    
-    <div class="canvas-panel">
-      <div class="canvas-overlay-hints">
-        • <b>Drag Cyan Particle</b> across the contour map<br>
-        • <b style="color: var(--accent-amber);">Amber Arrow</b> = ∇f (Steepest Ascent Uphill)<br>
-        • <b style="color: var(--accent-green);">Green Arrow</b> = -∇f (Gradient Descent Downhill)
-      </div>
-      <canvas id="contourCanvas"></canvas>
-    </div>
-
-    <div class="controls-panel">
+    <div class="main-container">
       
-      <div class="card">
-        <div class="card-title">Scalar Loss Surface f(x, y)</div>
-        <div class="landscape-grid">
-          <button class="btn-ls active" id="btnBowl" onclick="setLandscape('bowl')">1. Parabolic Bowl</button>
-          <button class="btn-ls" id="btnRavine" onclick="setLandscape('ravine')">2. Anisotropic Ravine</button>
-          <button class="btn-ls" id="btnSaddle" onclick="setLandscape('saddle')">3. Saddle Point</button>
-          <button class="btn-ls" id="btnField" onclick="setLandscape('potential')">4. Obstacle Field</button>
+      <div class="canvas-panel">
+        <div class="canvas-overlay-hints">
+          • <b>Drag Cyan Particle</b> across the contour map<br>
+          • <b style="color: var(--accent-amber);">Amber Arrow</b> = ∇f (Steepest Ascent Uphill)<br>
+          • <b style="color: var(--accent-green);">Green Arrow</b> = -∇f (Gradient Descent Downhill)
         </div>
-
-        <div class="control-group">
-          <div class="control-header">
-            <span>Learning Rate (η)</span>
-            <span class="val" id="valLR">0.10</span>
-          </div>
-          <input type="range" id="sliderLR" min="0.01" max="0.50" step="0.01" value="0.10">
-        </div>
-
-        <div class="control-group">
-          <div class="control-header">
-            <span>Momentum Coefficient (β)</span>
-            <span class="val" id="valBeta">0.70</span>
-          </div>
-          <input type="range" id="sliderBeta" min="0.0" max="0.95" step="0.05" value="0.70">
-        </div>
-
-        <div class="playback-row">
-          <button class="btn-action play" id="btnRoll" onclick="toggleRolling()">Roll Particle Downhill</button>
-          <button class="btn-action" onclick="resetParticle()">Reset Trail</button>
-        </div>
+        <canvas id="contourCanvas"></canvas>
       </div>
 
-      <div class="card">
-        <div class="card-title">Gradient Vector Telemetry</div>
-        <div class="telemetry-grid">
-          <div class="stat-box">
-            <div class="stat-label">Loss f(x, y)</div>
-            <div class="stat-val" id="valLoss" style="color: var(--accent-blue);">0.00</div>
+      <div class="controls-panel">
+        
+        <div class="card">
+          <div class="card-title">Scalar Loss Surface f(x, y)</div>
+          <div class="landscape-grid">
+            <button class="btn-ls active" id="btnBowl" onclick="setLandscape('bowl')">1. Parabolic Bowl</button>
+            <button class="btn-ls" id="btnRavine" onclick="setLandscape('ravine')">2. Anisotropic Ravine</button>
+            <button class="btn-ls" id="btnSaddle" onclick="setLandscape('saddle')">3. Saddle Point</button>
+            <button class="btn-ls" id="btnField" onclick="setLandscape('potential')">4. Obstacle Field</button>
           </div>
-          <div class="stat-box">
-            <div class="stat-label">Gradient Norm ||∇f||</div>
-            <div class="stat-val" id="valNorm" style="color: var(--accent-amber);">0.00</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Partial ∂f/∂x</div>
-            <div class="stat-val" id="valDfdx" style="color: var(--text-main);">0.00</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Partial ∂f/∂y</div>
-            <div class="stat-val" id="valDfdy" style="color: var(--text-main);">0.00</div>
-          </div>
-        </div>
-      </div>
 
-      <div class="card">
-        <div class="card-title">Coordinate Location</div>
-        <div style="font-family: monospace; font-size: 0.85rem; line-height: 1.6; color: var(--text-muted);">
-          Current Point (x, y): <span style="color: var(--accent-blue);" id="coordText">[+2.00, +2.00]</span><br>
-          Gradient ∇f &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span style="color: var(--accent-amber);" id="gradText">[+2.00, +2.00]ᵀ</span><br>
-          Descent Vector -∇f &nbsp;: <span style="color: var(--accent-green);" id="descentText">[-2.00, -2.00]ᵀ</span>
+          <div class="control-group">
+            <div class="control-header">
+              <span>Learning Rate (η)</span>
+              <span class="val" id="valLR">0.10</span>
+            </div>
+            <input type="range" id="sliderLR" min="0.01" max="0.50" step="0.01" value="0.10">
+          </div>
+
+          <div class="control-group">
+            <div class="control-header">
+              <span>Momentum Coefficient (β)</span>
+              <span class="val" id="valBeta">0.70</span>
+            </div>
+            <input type="range" id="sliderBeta" min="0.0" max="0.95" step="0.05" value="0.70">
+          </div>
+
+          <div class="playback-row">
+            <button class="btn-action play" id="btnRoll" onclick="toggleRolling()">Roll Particle Downhill</button>
+            <button class="btn-action" onclick="resetParticle()">Reset Trail</button>
+          </div>
         </div>
+
+        <div class="card">
+          <div class="card-title">Gradient Vector Telemetry</div>
+          <div class="telemetry-grid">
+            <div class="stat-box">
+              <div class="stat-label">Loss f(x, y)</div>
+              <div class="stat-val" id="valLoss" style="color: var(--accent);">0.00</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Gradient Norm ||∇f||</div>
+              <div class="stat-val" id="valNorm" style="color: var(--accent-amber);">0.00</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Partial ∂f/∂x</div>
+              <div class="stat-val" id="valDfdx" style="color: var(--ink);">0.00</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Partial ∂f/∂y</div>
+              <div class="stat-val" id="valDfdy" style="color: var(--ink);">0.00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Coordinate Location</div>
+          <div style="font-family: ui-monospace, monospace; font-size: 0.85rem; line-height: 1.6; color: var(--muted);">
+            Current Point (x, y): <span style="color: var(--accent);" id="coordText">[+2.00, +2.00]</span><br>
+            Gradient ∇f &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span style="color: var(--accent-amber);" id="gradText">[+2.00, +2.00]ᵀ</span><br>
+            Descent Vector -∇f &nbsp;: <span style="color: var(--accent-green);" id="descentText">[-2.00, -2.00]ᵀ</span>
+          </div>
+        </div>
+
       </div>
 
     </div>
-
   </div>
 
   <script>
-    const THEME_KEY = 'axon_theme';
-    function initTheme() {
-      const saved = localStorage.getItem(THEME_KEY) || 'dark';
-      document.documentElement.setAttribute('data-theme', saved);
-      updateThemeButton(saved);
-    }
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem(THEME_KEY, next);
-      updateThemeButton(next);
-      draw();
-    }
-    function updateThemeButton(theme) {
-      const btn = document.getElementById('themeToggleBtn');
-      if (btn) btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
-    }
-
-    window.addEventListener('storage', (e) => {
-      if (e.key === THEME_KEY) {
-        const newTheme = e.newValue || 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        updateThemeButton(newTheme);
-        draw();
-      }
-    });
-
     const canvas = document.getElementById('contourCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -423,6 +290,7 @@
       draw();
     }
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('axon-theme-changed', () => draw());
 
     function toScreen(x, y) {
       return {
@@ -525,7 +393,6 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Heatmap
       const gridSize = 35;
       const stepX = width / gridSize;
       const stepY = height / gridSize;
@@ -551,7 +418,6 @@
         }
       }
 
-      // 2. Contours
       ctx.lineWidth = 1;
       ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.08)';
       for (let r = 0.5; r <= 4.0; r += 0.5) {
@@ -566,7 +432,6 @@
         ctx.stroke();
       }
 
-      // 3. Axes
       ctx.lineWidth = 1;
       ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.2)';
       ctx.beginPath();
@@ -574,7 +439,6 @@
       ctx.moveTo(center.x, 0); ctx.lineTo(center.x, height);
       ctx.stroke();
 
-      // 4. Trail
       if (trail.length > 1) {
         ctx.strokeStyle = isLight ? 'rgba(2, 132, 199, 0.7)' : 'rgba(56, 189, 248, 0.6)';
         ctx.lineWidth = 2;
@@ -589,7 +453,6 @@
         ctx.setLineDash([]);
       }
 
-      // 5. Vectors at particle
       const { val, dfdx, dfdy } = evaluateField(particle.x, particle.y);
       const gradNorm = Math.hypot(dfdx, dfdy);
       const pScr = toScreen(particle.x, particle.y);
@@ -701,7 +564,6 @@
     window.addEventListener('touchmove', onPointerMove, { passive: false });
     window.addEventListener('touchend', onPointerUp);
 
-    initTheme();
     resizeCanvas();
     resetParticle();
     requestAnimationFrame(loop);

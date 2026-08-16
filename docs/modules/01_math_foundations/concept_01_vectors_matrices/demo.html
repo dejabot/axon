@@ -4,115 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Concept 01: 2D Matrix Transformation & Basis Space Visualizer</title>
-  <script>
-    (function() {
-      const saved = localStorage.getItem('axon_theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', saved);
-    })();
-  </script>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
   <style>
-    :root {
-      --bg-dark: #0a0d14;
-      --card-bg: #141923;
-      --card-border: #232b3b;
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --accent-blue: #38bdf8;
-      --accent-green: #4ade80;
-      --accent-red: #f43f5e;
-      --accent-amber: #fbbf24;
-      --accent-purple: #c084fc;
-      --input-bg: #0a0d14;
-      --btn-bg: #1e2638;
-      --btn-hover: #2b364f;
-    }
-    [data-theme="light"] {
-      --bg-dark: #f8fafc;
-      --card-bg: #ffffff;
-      --card-border: #e2e8f0;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --accent-blue: #0284c7;
-      --accent-green: #16a34a;
-      --accent-red: #e11d48;
-      --accent-amber: #d97706;
-      --accent-purple: #9333ea;
-      --input-bg: #f1f5f9;
-      --btn-bg: #e2e8f0;
-      --btn-hover: #cbd5e1;
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      transition: background-color 0.2s, color 0.2s;
-    }
-    header {
-      padding: 16px 24px;
-      background-color: var(--card-bg);
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .header-title h1 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--accent-blue);
-      letter-spacing: -0.02em;
-    }
-    .header-title p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-    .header-nav {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-left: auto;
-    }
-    .nav-links {
-      display: flex;
-      gap: 6px;
-    }
-    .nav-links a, .btn-theme {
-      color: var(--text-main);
-      text-decoration: none;
-      font-size: 0.8rem;
-      padding: 7px 12px;
-      background: var(--btn-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .nav-links a:hover, .btn-theme:hover {
-      background: var(--btn-hover);
-      border-color: var(--accent-blue);
-    }
     .main-container {
       display: flex;
-      flex: 1;
       flex-direction: column;
-      padding: 16px;
       gap: 16px;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
+      margin-top: 16px;
     }
     @media (min-width: 900px) {
       .main-container {
@@ -121,14 +20,15 @@
     }
     .canvas-panel {
       flex: 1.6;
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background-color: var(--panel);
+      border: 1px solid var(--line);
       border-radius: 12px;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       min-height: 480px;
+      box-shadow: var(--shadow);
     }
     canvas {
       width: 100%;
@@ -142,15 +42,15 @@
       top: 12px;
       left: 12px;
       pointer-events: none;
-      background: var(--card-bg);
+      background: var(--panel);
       opacity: 0.92;
       padding: 8px 12px;
       border-radius: 8px;
-      border: 1px solid var(--card-border);
+      border: 1px solid var(--line);
       font-size: 0.75rem;
-      color: var(--text-muted);
+      color: var(--muted);
       line-height: 1.4;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      box-shadow: var(--shadow);
     }
     .controls-panel {
       flex: 1;
@@ -159,17 +59,18 @@
       gap: 12px;
     }
     .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background-color: var(--panel);
+      border: 1px solid var(--line);
       border-radius: 12px;
       padding: 16px;
+      box-shadow: var(--shadow);
     }
     .card-title {
       font-size: 0.85rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--accent-blue);
+      color: var(--accent);
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
@@ -182,8 +83,8 @@
       margin-bottom: 12px;
     }
     .matrix-cell {
-      background: var(--input-bg);
-      border: 1px solid var(--card-border);
+      background: var(--bg);
+      border: 1px solid var(--line);
       border-radius: 8px;
       padding: 8px;
       text-align: center;
@@ -191,18 +92,18 @@
     .matrix-cell label {
       display: block;
       font-size: 0.75rem;
-      color: var(--text-muted);
+      color: var(--muted);
       margin-bottom: 4px;
     }
     .matrix-cell input[type="range"] {
       width: 100%;
-      accent-color: var(--accent-blue);
+      accent-color: var(--accent);
     }
     .matrix-cell .val {
-      font-family: monospace;
+      font-family: ui-monospace, "SF Mono", monospace;
       font-size: 0.9rem;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--ink);
     }
     .preset-grid {
       display: grid;
@@ -210,9 +111,9 @@
       gap: 6px;
     }
     button.btn {
-      background: var(--btn-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--ink);
       padding: 8px 10px;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -221,8 +122,8 @@
       transition: all 0.15s;
     }
     button.btn:hover {
-      background: var(--btn-hover);
-      border-color: var(--accent-blue);
+      border-color: var(--accent);
+      background: var(--panel-hover);
     }
     button.btn.danger:hover {
       border-color: var(--accent-red);
@@ -234,19 +135,19 @@
       gap: 8px;
     }
     .stat-box {
-      background: var(--input-bg);
-      border: 1px solid var(--card-border);
+      background: var(--bg);
+      border: 1px solid var(--line);
       border-radius: 8px;
       padding: 10px;
     }
     .stat-label {
       font-size: 0.7rem;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--muted);
       margin-bottom: 2px;
     }
     .stat-val {
-      font-family: monospace;
+      font-family: ui-monospace, "SF Mono", monospace;
       font-size: 1.1rem;
       font-weight: 700;
     }
@@ -265,136 +166,102 @@
 </head>
 <body>
 
-  <header>
-    <div class="header-title">
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Module 1: Math Foundations</div>
       <h1>01: Vectors, Basis Spaces & Matrix Transformations</h1>
-      <p>Module 1: Math Foundations</p>
-    </div>
-    <div class="header-nav">
-      <div class="nav-links">
-        <a href="README.md">Concept Guide</a>
-        <a href="../../../index.html">Master Dashboard</a>
-      </div>
-      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme (Dark/Light)">Theme: Dark</button>
-    </div>
-  </header>
+      <p class="lede">Drag the basis vectors î and ĵ to warp the coordinate grid. Observe determinant area scaling and eigenvector alignment in real time.</p>
+    </header>
 
-  <div class="main-container">
-    
-    <div class="canvas-panel">
-      <div class="canvas-overlay-hints">
-        • <b>Drag green arrow</b> (î landing) or <b>red arrow</b> (ĵ landing)<br>
-        • <b>Drag cyan arrow</b> (test vector v)<br>
-        • Shaded area = Determinant scale
-      </div>
-      <canvas id="transformCanvas"></canvas>
-    </div>
-
-    <div class="controls-panel">
+    <div class="main-container">
       
-      <div class="card">
-        <div class="card-title">
-          <span>Matrix Transformation [ A ]</span>
-          <span id="singularityBadge" class="badge badge-ok">Invertible</span>
+      <div class="canvas-panel">
+        <div class="canvas-overlay-hints">
+          • <b>Drag green arrow</b> (î landing) or <b>red arrow</b> (ĵ landing)<br>
+          • <b>Drag cyan arrow</b> (test vector v)<br>
+          • Shaded area = Determinant scale
         </div>
-
-        <div class="matrix-display">
-          <div class="matrix-cell">
-            <label>a (î_x)</label>
-            <input type="range" id="sliderA" min="-3" max="3" step="0.05" value="1.0">
-            <div class="val" id="valA">1.00</div>
-          </div>
-          <div class="matrix-cell">
-            <label>b (ĵ_x)</label>
-            <input type="range" id="sliderB" min="-3" max="3" step="0.05" value="0.0">
-            <div class="val" id="valB">0.00</div>
-          </div>
-          <div class="matrix-cell">
-            <label>c (î_y)</label>
-            <input type="range" id="sliderC" min="-3" max="3" step="0.05" value="0.0">
-            <div class="val" id="valC">0.00</div>
-          </div>
-          <div class="matrix-cell">
-            <label>d (ĵ_y)</label>
-            <input type="range" id="sliderD" min="-3" max="3" step="0.05" value="1.0">
-            <div class="val" id="valD">1.00</div>
-          </div>
-        </div>
-
-        <div class="preset-grid">
-          <button class="btn" onclick="applyPreset('identity')">Identity</button>
-          <button class="btn" onclick="applyPreset('rotate45')">Rotate 45°</button>
-          <button class="btn" onclick="applyPreset('shearX')">Shear X</button>
-          <button class="btn" onclick="applyPreset('scale')">Scale 1.5×</button>
-          <button class="btn" onclick="applyPreset('reflect')">Reflect X</button>
-          <button class="btn danger" onclick="applyPreset('singular')">Singular (Det=0)</button>
-        </div>
+        <canvas id="transformCanvas"></canvas>
       </div>
 
-      <div class="card">
-        <div class="card-title">Live Geometric Telemetry</div>
-        <div class="telemetry-grid">
-          <div class="stat-box">
-            <div class="stat-label">Determinant (det A)</div>
-            <div class="stat-val" id="detVal" style="color: var(--accent-amber);">1.00</div>
+      <div class="controls-panel">
+        
+        <div class="card">
+          <div class="card-title">
+            <span>Matrix Transformation [ A ]</span>
+            <span id="singularityBadge" class="badge badge-ok">Invertible</span>
           </div>
-          <div class="stat-box">
-            <div class="stat-label">Trace (a + d)</div>
-            <div class="stat-val" id="traceVal" style="color: var(--accent-blue);">2.00</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Eigenvalue λ₁</div>
-            <div class="stat-val" id="eig1Val" style="color: var(--accent-green);">1.00</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Eigenvalue λ₂</div>
-            <div class="stat-val" id="eig2Val" style="color: var(--accent-purple);">1.00</div>
-          </div>
-        </div>
-      </div>
 
-      <div class="card">
-        <div class="card-title">Transformed Vector Mapping</div>
-        <div style="font-family: monospace; font-size: 0.85rem; line-height: 1.6; color: var(--text-muted);">
-          Original v &nbsp;: <span style="color: var(--accent-blue);" id="vOrigText">[1.50, 1.00]ᵀ</span><br>
-          Mapped A·v : <span style="color: var(--accent-amber);" id="vMappedText">[1.50, 1.00]ᵀ</span><br>
-          Length ||v||: <span id="vLengthText">1.80 ➔ 1.80</span>
+          <div class="matrix-display">
+            <div class="matrix-cell">
+              <label>a (î_x)</label>
+              <input type="range" id="sliderA" min="-3" max="3" step="0.05" value="1.0">
+              <div class="val" id="valA">1.00</div>
+            </div>
+            <div class="matrix-cell">
+              <label>b (ĵ_x)</label>
+              <input type="range" id="sliderB" min="-3" max="3" step="0.05" value="0.0">
+              <div class="val" id="valB">0.00</div>
+            </div>
+            <div class="matrix-cell">
+              <label>c (î_y)</label>
+              <input type="range" id="sliderC" min="-3" max="3" step="0.05" value="0.0">
+              <div class="val" id="valC">0.00</div>
+            </div>
+            <div class="matrix-cell">
+              <label>d (ĵ_y)</label>
+              <input type="range" id="sliderD" min="-3" max="3" step="0.05" value="1.0">
+              <div class="val" id="valD">1.00</div>
+            </div>
+          </div>
+
+          <div class="preset-grid">
+            <button class="btn" onclick="applyPreset('identity')">Identity</button>
+            <button class="btn" onclick="applyPreset('rotate45')">Rotate 45°</button>
+            <button class="btn" onclick="applyPreset('shearX')">Shear X</button>
+            <button class="btn" onclick="applyPreset('scale')">Scale 1.5×</button>
+            <button class="btn" onclick="applyPreset('reflect')">Reflect X</button>
+            <button class="btn danger" onclick="applyPreset('singular')">Singular (Det=0)</button>
+          </div>
         </div>
+
+        <div class="card">
+          <div class="card-title">Live Geometric Telemetry</div>
+          <div class="telemetry-grid">
+            <div class="stat-box">
+              <div class="stat-label">Determinant (det A)</div>
+              <div class="stat-val" id="detVal" style="color: var(--accent-amber);">1.00</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Trace (a + d)</div>
+              <div class="stat-val" id="traceVal" style="color: var(--accent);">2.00</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Eigenvalue λ₁</div>
+              <div class="stat-val" id="eig1Val" style="color: var(--accent-green);">1.00</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Eigenvalue λ₂</div>
+              <div class="stat-val" id="eig2Val" style="color: var(--accent-purple);">1.00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Transformed Vector Mapping</div>
+          <div style="font-family: ui-monospace, monospace; font-size: 0.85rem; line-height: 1.6; color: var(--muted);">
+            Original v &nbsp;: <span style="color: var(--accent);" id="vOrigText">[1.50, 1.00]ᵀ</span><br>
+            Mapped A·v : <span style="color: var(--accent-amber);" id="vMappedText">[1.50, 1.00]ᵀ</span><br>
+            Length ||v||: <span id="vLengthText">1.80 ➔ 1.80</span>
+          </div>
+        </div>
+
       </div>
 
     </div>
-
   </div>
 
   <script>
-    const THEME_KEY = 'axon_theme';
-    function initTheme() {
-      const saved = localStorage.getItem(THEME_KEY) || 'dark';
-      document.documentElement.setAttribute('data-theme', saved);
-      updateThemeButton(saved);
-    }
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem(THEME_KEY, next);
-      updateThemeButton(next);
-      draw();
-    }
-    function updateThemeButton(theme) {
-      const btn = document.getElementById('themeToggleBtn');
-      if (btn) btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
-    }
-
-    window.addEventListener('storage', (e) => {
-      if (e.key === THEME_KEY) {
-        const newTheme = e.newValue || 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        updateThemeButton(newTheme);
-        draw();
-      }
-    });
-
     const canvas = document.getElementById('transformCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -417,6 +284,7 @@
       draw();
     }
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('axon-theme-changed', () => draw());
 
     function toScreen(gridX, gridY) {
       return {
@@ -690,7 +558,6 @@
     window.addEventListener('touchmove', onPointerMove, { passive: false });
     window.addEventListener('touchend', onPointerUp);
 
-    initTheme();
     resizeCanvas();
   </script>
 </body>

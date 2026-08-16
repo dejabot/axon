@@ -4,115 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Concept 02: Trigonometry, Continuous Angle Topology & 3D Quaternions</title>
-  <script>
-    (function() {
-      const saved = localStorage.getItem('axon_theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', saved);
-    })();
-  </script>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
   <style>
-    :root {
-      --bg-dark: #0a0d14;
-      --card-bg: #141923;
-      --card-border: #232b3b;
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --accent-blue: #38bdf8;
-      --accent-green: #4ade80;
-      --accent-red: #f43f5e;
-      --accent-amber: #fbbf24;
-      --accent-purple: #c084fc;
-      --input-bg: #0a0d14;
-      --btn-bg: #1e2638;
-      --btn-hover: #2b364f;
-    }
-    [data-theme="light"] {
-      --bg-dark: #f8fafc;
-      --card-bg: #ffffff;
-      --card-border: #e2e8f0;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --accent-blue: #0284c7;
-      --accent-green: #16a34a;
-      --accent-red: #e11d48;
-      --accent-amber: #d97706;
-      --accent-purple: #9333ea;
-      --input-bg: #f1f5f9;
-      --btn-bg: #e2e8f0;
-      --btn-hover: #cbd5e1;
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      transition: background-color 0.2s, color 0.2s;
-    }
-    header {
-      padding: 16px 24px;
-      background-color: var(--card-bg);
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .header-title h1 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--accent-blue);
-      letter-spacing: -0.02em;
-    }
-    .header-title p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-    .header-nav {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-left: auto;
-    }
-    .nav-links {
-      display: flex;
-      gap: 6px;
-    }
-    .nav-links a, .btn-theme {
-      color: var(--text-main);
-      text-decoration: none;
-      font-size: 0.8rem;
-      padding: 7px 12px;
-      background: var(--btn-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .nav-links a:hover, .btn-theme:hover {
-      background: var(--btn-hover);
-      border-color: var(--accent-blue);
-    }
     .main-container {
       display: flex;
-      flex: 1;
       flex-direction: column;
-      padding: 16px;
       gap: 16px;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
+      margin-top: 16px;
     }
     @media (min-width: 900px) {
       .main-container {
@@ -121,14 +20,15 @@
     }
     .canvas-panel {
       flex: 1.5;
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background-color: var(--panel);
+      border: 1px solid var(--line);
       border-radius: 12px;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       min-height: 480px;
+      box-shadow: var(--shadow);
     }
     canvas {
       width: 100%;
@@ -142,15 +42,15 @@
       top: 12px;
       left: 12px;
       pointer-events: none;
-      background: var(--card-bg);
+      background: var(--panel);
       opacity: 0.92;
       padding: 8px 12px;
       border-radius: 8px;
-      border: 1px solid var(--card-border);
+      border: 1px solid var(--line);
       font-size: 0.75rem;
-      color: var(--text-muted);
+      color: var(--muted);
       line-height: 1.4;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      box-shadow: var(--shadow);
     }
     .controls-panel {
       flex: 1;
@@ -159,17 +59,18 @@
       gap: 12px;
     }
     .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background-color: var(--panel);
+      border: 1px solid var(--line);
       border-radius: 12px;
       padding: 16px;
+      box-shadow: var(--shadow);
     }
     .card-title {
       font-size: 0.85rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--accent-blue);
+      color: var(--accent);
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
@@ -182,9 +83,9 @@
       margin-bottom: 12px;
     }
     button.mode-tab {
-      background: var(--btn-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--muted);
       padding: 8px 6px;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -194,8 +95,8 @@
     }
     button.mode-tab.active {
       background: rgba(56, 189, 248, 0.15);
-      border-color: var(--accent-blue);
-      color: var(--accent-blue);
+      border-color: var(--accent);
+      color: var(--accent);
     }
     .control-group {
       margin-bottom: 10px;
@@ -204,17 +105,17 @@
       display: flex;
       justify-content: space-between;
       font-size: 0.8rem;
-      color: var(--text-muted);
+      color: var(--muted);
       margin-bottom: 3px;
     }
     .control-header span.val {
-      font-family: monospace;
+      font-family: ui-monospace, "SF Mono", monospace;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--ink);
     }
     input[type="range"] {
       width: 100%;
-      accent-color: var(--accent-blue);
+      accent-color: var(--accent);
     }
     .preset-grid {
       display: grid;
@@ -223,9 +124,9 @@
       margin-top: 8px;
     }
     button.btn {
-      background: var(--btn-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--ink);
       padding: 8px 6px;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -234,8 +135,8 @@
       transition: all 0.15s;
     }
     button.btn:hover {
-      background: var(--btn-hover);
-      border-color: var(--accent-blue);
+      background: var(--panel-hover);
+      border-color: var(--accent);
     }
     .telemetry-grid {
       display: grid;
@@ -243,19 +144,19 @@
       gap: 8px;
     }
     .stat-box {
-      background: var(--input-bg);
-      border: 1px solid var(--card-border);
+      background: var(--bg);
+      border: 1px solid var(--line);
       border-radius: 8px;
       padding: 10px;
     }
     .stat-label {
       font-size: 0.7rem;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--muted);
       margin-bottom: 2px;
     }
     .stat-val {
-      font-family: monospace;
+      font-family: ui-monospace, "SF Mono", monospace;
       font-size: 1.05rem;
       font-weight: 700;
     }
@@ -263,174 +164,140 @@
 </head>
 <body>
 
-  <header>
-    <div class="header-title">
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Module 1: Math Foundations</div>
       <h1>02: Trigonometry, Continuous Angle Topology & 3D Quaternions</h1>
-      <p>Module 1: Math Foundations</p>
-    </div>
-    <div class="header-nav">
-      <div class="nav-links">
-        <a href="README.md">Concept Guide</a>
-        <a href="../../../index.html">Master Dashboard</a>
-      </div>
-      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme (Dark/Light)">Theme: Dark</button>
-    </div>
-  </header>
+      <p class="lede">Explore 2D angle wrapping, 4-quadrant atan2 mechanics, and 3D Quaternion rotations avoiding Euler Gimbal Lock.</p>
+    </header>
 
-  <div class="main-container">
-    
-    <div class="canvas-panel">
-      <div class="canvas-overlay-hints" id="overlayHints">
-        • <b>Drag Cyan pointer</b> (Current Heading θ_curr)<br>
-        • <b>Drag Amber pointer</b> (Target Heading θ_target)<br>
-        • Green arc = Shortest Turn Path | Red arc = Naive Spin
-      </div>
-      <canvas id="mainCanvas"></canvas>
-    </div>
-
-    <div class="controls-panel">
+    <div class="main-container">
       
-      <div class="card">
-        <div class="card-title">Interactive Mode</div>
-        <div class="mode-tabs">
-          <button class="mode-tab active" id="tab2D" onclick="setMode('2D')">1. 2D Angle Topology</button>
-          <button class="mode-tab" id="tab3D" onclick="setMode('3D')">2. 3D Quaternion & Gimbal</button>
+      <div class="canvas-panel">
+        <div class="canvas-overlay-hints" id="overlayHints">
+          • <b>Drag Cyan pointer</b> (Current Heading θ_curr)<br>
+          • <b>Drag Amber pointer</b> (Target Heading θ_target)<br>
+          • Green arc = Shortest Turn Path | Red arc = Naive Spin
         </div>
-
-        <!-- 2D Controls -->
-        <div id="controls2D">
-          <div class="control-group">
-            <div class="control-header">
-              <span>Target Angle (θ_target)</span>
-              <span class="val" id="targetValText" style="color: var(--accent-amber);">+170.0°</span>
-            </div>
-            <input type="range" id="sliderTarget" min="-180" max="180" step="1" value="170">
-          </div>
-
-          <div class="control-group">
-            <div class="control-header">
-              <span>Current Robot Heading (θ_curr)</span>
-              <span class="val" id="currValText" style="color: var(--accent-blue);">-170.0°</span>
-            </div>
-            <input type="range" id="sliderCurr" min="-180" max="180" step="1" value="-170">
-          </div>
-
-          <div class="preset-grid">
-            <button class="btn" onclick="setScenario(170, -170)">340° Spin Trap</button>
-            <button class="btn" onclick="setScenario(0, 160)">160° Slew Invert</button>
-            <button class="btn" onclick="setScenario(-135, 45)">Quad III vs I</button>
-          </div>
-        </div>
-
-        <!-- 3D Controls -->
-        <div id="controls3D" style="display: none;">
-          <div class="control-group">
-            <div class="control-header">
-              <span>Pitch (Y-Axis)</span>
-              <span class="val" id="pitchValText" style="color: var(--accent-red);">0.0°</span>
-            </div>
-            <input type="range" id="sliderPitch" min="-90" max="90" step="1" value="0">
-          </div>
-
-          <div class="control-group">
-            <div class="control-header">
-              <span>Yaw (Z-Axis)</span>
-              <span class="val" id="yawValText" style="color: var(--accent-blue);">30.0°</span>
-            </div>
-            <input type="range" id="sliderYaw" min="-180" max="180" step="1" value="30">
-          </div>
-
-          <div class="control-group">
-            <div class="control-header">
-              <span>Roll (X-Axis)</span>
-              <span class="val" id="rollValText" style="color: var(--accent-green);">20.0°</span>
-            </div>
-            <input type="range" id="sliderRoll" min="-180" max="180" step="1" value="20">
-          </div>
-
-          <div class="preset-grid">
-            <button class="btn" onclick="set3D(90, 30, 20)">Gimbal Lock (90°)</button>
-            <button class="btn" onclick="set3D(0, 45, 0)">Pure Yaw (45°)</button>
-            <button class="btn" onclick="set3D(30, 60, 45)">General 3D</button>
-          </div>
-        </div>
-
+        <canvas id="mainCanvas"></canvas>
       </div>
 
-      <div class="card">
-        <div class="card-title">Mathematical Telemetry</div>
-        <div class="telemetry-grid" id="telemetry2DGrid">
-          <div class="stat-box">
-            <div class="stat-label">Naive Linear Error</div>
-            <div class="stat-val" id="naiveErrorVal" style="color: var(--accent-red);">+340.0°</div>
+      <div class="controls-panel">
+        
+        <div class="card">
+          <div class="card-title">Interactive Mode</div>
+          <div class="mode-tabs">
+            <button class="mode-tab active" id="tab2D" onclick="setMode('2D')">1. 2D Angle Topology</button>
+            <button class="mode-tab" id="tab3D" onclick="setMode('3D')">2. 3D Quaternion & Gimbal</button>
           </div>
-          <div class="stat-box">
-            <div class="stat-label">Shortest Wrapped Error</div>
-            <div class="stat-val" id="wrappedErrorVal" style="color: var(--accent-green);">-20.0°</div>
+
+          <!-- 2D Controls -->
+          <div id="controls2D">
+            <div class="control-group">
+              <div class="control-header">
+                <span>Target Angle (θ_target)</span>
+                <span class="val" id="targetValText" style="color: var(--accent-amber);">+170.0°</span>
+              </div>
+              <input type="range" id="sliderTarget" min="-180" max="180" step="1" value="170">
+            </div>
+
+            <div class="control-group">
+              <div class="control-header">
+                <span>Current Robot Heading (θ_curr)</span>
+                <span class="val" id="currValText" style="color: var(--accent);">-170.0°</span>
+              </div>
+              <input type="range" id="sliderCurr" min="-180" max="180" step="1" value="-170">
+            </div>
+
+            <div class="preset-grid">
+              <button class="btn" onclick="setScenario(170, -170)">340° Spin Trap</button>
+              <button class="btn" onclick="setScenario(0, 160)">160° Slew Invert</button>
+              <button class="btn" onclick="setScenario(-135, 45)">Quad III vs I</button>
+            </div>
           </div>
-          <div class="stat-box">
-            <div class="stat-label">atan2(y, x) Quad</div>
-            <div class="stat-val" id="quadVal" style="color: var(--accent-blue);">Quad II</div>
+
+          <!-- 3D Controls -->
+          <div id="controls3D" style="display: none;">
+            <div class="control-group">
+              <div class="control-header">
+                <span>Pitch (Y-Axis)</span>
+                <span class="val" id="pitchValText" style="color: var(--accent-red);">0.0°</span>
+              </div>
+              <input type="range" id="sliderPitch" min="-90" max="90" step="1" value="0">
+            </div>
+
+            <div class="control-group">
+              <div class="control-header">
+                <span>Yaw (Z-Axis)</span>
+                <span class="val" id="yawValText" style="color: var(--accent);">30.0°</span>
+              </div>
+              <input type="range" id="sliderYaw" min="-180" max="180" step="1" value="30">
+            </div>
+
+            <div class="control-group">
+              <div class="control-header">
+                <span>Roll (X-Axis)</span>
+                <span class="val" id="rollValText" style="color: var(--accent-green);">20.0°</span>
+              </div>
+              <input type="range" id="sliderRoll" min="-180" max="180" step="1" value="20">
+            </div>
+
+            <div class="preset-grid">
+              <button class="btn" onclick="set3D(90, 30, 20)">Gimbal Lock (90°)</button>
+              <button class="btn" onclick="set3D(0, 45, 0)">Pure Yaw (45°)</button>
+              <button class="btn" onclick="set3D(30, 60, 45)">General 3D</button>
+            </div>
           </div>
-          <div class="stat-box">
-            <div class="stat-label">Drive Speed Multiplier</div>
-            <div class="stat-val" id="speedMultVal" style="color: var(--accent-amber);">+1.0×</div>
+
+        </div>
+
+        <div class="card">
+          <div class="card-title">Mathematical Telemetry</div>
+          <div class="telemetry-grid" id="telemetry2DGrid">
+            <div class="stat-box">
+              <div class="stat-label">Naive Linear Error</div>
+              <div class="stat-val" id="naiveErrorVal" style="color: var(--accent-red);">+340.0°</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Shortest Wrapped Error</div>
+              <div class="stat-val" id="wrappedErrorVal" style="color: var(--accent-green);">-20.0°</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">atan2(y, x) Quad</div>
+              <div class="stat-val" id="quadVal" style="color: var(--accent);">Quad II</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Drive Speed Multiplier</div>
+              <div class="stat-val" id="speedMultVal" style="color: var(--accent-amber);">+1.0×</div>
+            </div>
+          </div>
+
+          <div class="telemetry-grid" id="telemetry3DGrid" style="display: none;">
+            <div class="stat-box">
+              <div class="stat-label">Quaternion w</div>
+              <div class="stat-val" id="quatW" style="color: var(--accent);">1.0000</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Quaternion x</div>
+              <div class="stat-val" id="quatX" style="color: var(--accent-green);">0.0000</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Quaternion y</div>
+              <div class="stat-val" id="quatY" style="color: var(--accent-red);">0.0000</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Quaternion z</div>
+              <div class="stat-val" id="quatZ" style="color: var(--accent-purple);">0.0000</div>
+            </div>
           </div>
         </div>
 
-        <div class="telemetry-grid" id="telemetry3DGrid" style="display: none;">
-          <div class="stat-box">
-            <div class="stat-label">Quaternion w</div>
-            <div class="stat-val" id="quatW" style="color: var(--accent-blue);">1.0000</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Quaternion x</div>
-            <div class="stat-val" id="quatX" style="color: var(--accent-green);">0.0000</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Quaternion y</div>
-            <div class="stat-val" id="quatY" style="color: var(--accent-red);">0.0000</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Quaternion z</div>
-            <div class="stat-val" id="quatZ" style="color: var(--accent-purple);">0.0000</div>
-          </div>
-        </div>
       </div>
 
     </div>
-
   </div>
 
   <script>
-    const THEME_KEY = 'axon_theme';
-    function initTheme() {
-      const saved = localStorage.getItem(THEME_KEY) || 'dark';
-      document.documentElement.setAttribute('data-theme', saved);
-      updateThemeButton(saved);
-    }
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem(THEME_KEY, next);
-      updateThemeButton(next);
-      draw();
-    }
-    function updateThemeButton(theme) {
-      const btn = document.getElementById('themeToggleBtn');
-      if (btn) btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
-    }
-
-    window.addEventListener('storage', (e) => {
-      if (e.key === THEME_KEY) {
-        const newTheme = e.newValue || 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        updateThemeButton(newTheme);
-        draw();
-      }
-    });
-
     const canvas = document.getElementById('mainCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -458,6 +325,7 @@
       draw();
     }
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('axon-theme-changed', () => draw());
 
     function setMode(mode) {
       currentMode = mode;
@@ -568,13 +436,10 @@
     }
 
     function draw3D(isLight, width, height) {
-      // 3D Frame Rotation Simulator
       const p = degToRad(pitchDeg);
       const y = degToRad(yawDeg);
       const r = degToRad(rollDeg);
 
-      // Compute Euler Matrix
-      // R = Rz(y) * Ry(p) * Rx(r)
       const cy = Math.cos(y), sy = Math.sin(y);
       const cp = Math.cos(p), sp = Math.sin(p);
       const cr = Math.cos(r), sr = Math.sin(r);
@@ -585,7 +450,6 @@
         [-sp,   cp*sr,            cp*cr]
       ];
 
-      // Compute Unit Quaternion
       const qw = Math.cos(r/2)*Math.cos(p/2)*Math.cos(y/2) + Math.sin(r/2)*Math.sin(p/2)*Math.sin(y/2);
       const qx = Math.sin(r/2)*Math.cos(p/2)*Math.cos(y/2) - Math.cos(r/2)*Math.sin(p/2)*Math.sin(y/2);
       const qy = Math.cos(r/2)*Math.sin(p/2)*Math.cos(y/2) + Math.sin(r/2)*Math.cos(p/2)*Math.sin(y/2);
@@ -596,34 +460,25 @@
       document.getElementById('quatY').textContent = qy.toFixed(4);
       document.getElementById('quatZ').textContent = qz.toFixed(4);
 
-      // Draw 3D Gimbal Rings & Axes
       const l = circleRadius * 0.8;
       const isLocked = Math.abs(pitchDeg) >= 88;
 
-      // Project 3D vector to 2D
       function project(vx, vy, vz) {
         const isoX = center.x + (vx - vy * 0.5);
         const isoY = center.y + (-vz + vy * 0.3);
         return { x: isoX, y: isoY };
       }
 
-      // Origin
       const o = project(0, 0, 0);
+      const xAxis = project(R[0][0]*l, R[1][0]*l, R[2][0]*l);
+      const yAxis = project(R[0][1]*l, R[1][1]*l, R[2][1]*l);
+      const zAxis = project(R[0][2]*l, R[1][2]*l, R[2][2]*l);
 
-      // Local Rotated Axes:
-      const xAxis = project(R[0][0]*l, R[1][0]*l, R[2][0]*l); // Red / Roll
-      const yAxis = project(R[0][1]*l, R[1][1]*l, R[2][1]*l); // Green / Pitch
-      const zAxis = project(R[0][2]*l, R[1][2]*l, R[2][2]*l); // Blue / Yaw
-
-      // Draw Local Axes
       ctx.lineWidth = 4;
-      // X-Axis (Roll)
       ctx.strokeStyle = '#f43f5e';
       ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(xAxis.x, xAxis.y); ctx.stroke();
-      // Y-Axis (Pitch)
       ctx.strokeStyle = '#4ade80';
       ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(yAxis.x, yAxis.y); ctx.stroke();
-      // Z-Axis (Yaw)
       ctx.strokeStyle = '#38bdf8';
       ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(zAxis.x, zAxis.y); ctx.stroke();
 
@@ -681,7 +536,6 @@
       draw();
     }
 
-    initTheme();
     resizeCanvas();
   </script>
 </body>
