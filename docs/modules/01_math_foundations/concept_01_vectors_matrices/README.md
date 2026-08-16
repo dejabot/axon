@@ -1,13 +1,12 @@
 # Concept 01: Vectors, Basis Spaces & Matrix Transformations
 
 ```
-       [ 01_math_foundations ]  ➔  Concept 01: Vectors & Matrices
-       Stage 1: The Unified Math Engine
+       Module 1: Math Foundations  ➔  Concept 01: Vectors & Matrices
 ```
 
 ---
 
-## Part 1: The Intuitive Mental Model (Physical/Visual Analogy)
+## 1. Intuitive Mental Model
 
 Imagine you are standing on an infinite sheet of flexible graph paper. Every point on this grid has a street address determined by two standard measuring sticks: one pointing exactly one unit to the East (which we label **î** or "i-hat"), and one pointing exactly one unit to the North (which we label **ĵ** or "j-hat"). 
 
@@ -45,9 +44,9 @@ Matrix multiplication is not a mystical list of arithmetic rules to memorize; it
 
 ---
 
-## Part 2: Mathematical & Physical Derivations (No Black Boxes)
+## 2. Mathematical & Physical Derivations
 
-### 1. Vector Operations & Linear Combinations
+### Vector Operations & Linear Combinations
 A 2D vector represents both direction and magnitude. We define vector addition and scalar multiplication component-wise:
 
 ```
@@ -74,7 +73,7 @@ To project vector `u` onto a unit vector `n̂` (where `||n̂|| = 1`):
    proj_n(u) = (u · n̂) · n̂
 ```
 
-### 2. Matrix Transformations & Matrix-Vector Multiplication
+### Matrix Transformations & Matrix-Vector Multiplication
 Let `T` be a linear transformation that maps `ℝ² ➔ ℝ²`. Because `T` is linear, it satisfies additivity `T(u + v) = T(u) + T(v)` and homogeneity `T(c·v) = c·T(u)`.
 
 Any vector `v = [x, y]ᵀ` can be written as a linear combination of the standard basis vectors:
@@ -120,7 +119,7 @@ Applying `R(θ)` to any vector `[x, y]ᵀ` gives the rotated vector `[x·cos(θ)
    └──────────────┴──────────► x
 ```
 
-### 3. The Determinant: Area Scaling & Singularity
+### The Determinant: Area Scaling & Singularity
 Consider the unit square spanned by `î = [1, 0]ᵀ` and `ĵ = [0, 1]ᵀ`. Its original area is `1 × 1 = 1`.
 
 Under transformation `A = [[a, b], [c, d]]`, this square becomes a parallelogram spanned by `[a, c]ᵀ` and `[b, d]ᵀ`.
@@ -148,7 +147,7 @@ The **determinant** `det(A)` represents the factor by which the transformation s
 - `det(A) < 0`: Space is flipped / inverted (orientation reversed, like looking in a mirror).
 - `det(A) = 0`: **Singularity.** The 2D plane is squashed down into a 1D line or a single 0D point. Information is permanently destroyed; no inverse matrix `A⁻¹` exists.
 
-### 4. Eigenvalues and Eigenvectors
+### Eigenvalues and Eigenvectors
 Under most matrix transformations, vectors change both their length and their direction. However, certain special vectors maintain their exact span—they are merely scaled by a factor `λ`:
 
 ```
@@ -179,9 +178,9 @@ This quadratic equation (the **characteristic polynomial**) yields the eigenvalu
 
 ---
 
-## Part 3: Dual Grounding: FRC Autonomous Robotics & Modern ML/AI
+## 3. Dual Grounding: FRC Robotics & Modern ML
 
-### 1. FRC Autonomous Robotics: Field-Oriented Swerve Drive
+### FRC Autonomous Robotics: Field-Oriented Swerve Drive
 In modern FIRST Robotics Competition (FRC) robots, 4-wheel independent swerve drive allows translation in any direction while rotating simultaneously.
 
 Drivers want **Field-Oriented Control**: pushing the joystick forward must drive the robot downfield (toward the opponent's scoring grid), regardless of which direction the robot's front chassis is currently facing.
@@ -215,7 +214,7 @@ If the gyro reading `θ` has sign errors or matrix transpose bugs, the robot's c
       └────────► X_field
 ```
 
-### 2. Machine Learning: Dense Neural Network Layers
+### Machine Learning: Dense Neural Network Layers
 Every fully connected (dense) layer in a neural network (from simple multilayer perceptrons to transformer attention projections) is a matrix transformation followed by a vector translation and non-linear activation:
 
 ```
@@ -241,7 +240,7 @@ If matrix `W` experiences rank collapse (`det(W) ≈ 0` across subspace projecti
 
 ---
 
-## Part 4: The Classic Failure Mode & From-Scratch Python Engine
+## 4. Classic Failure Mode & Python Engine
 
 ### The Classic Failure Mode: Matrix Singularity & Unchecked Inverses
 In robotic inverse kinematics and machine learning optimizations, algorithms frequently need to solve linear systems `A · x = b` by computing `x = A⁻¹ · b`.
@@ -258,8 +257,6 @@ The analytical inverse of a 2D matrix is:
 In autonomous robotics, when an arm reaches full extension (a kinematic singularity where joint axes align), the Jacobian matrix determinant drops to zero. A naive controller computing `J⁻¹` commands infinite motor voltages, tripping circuit breakers, burning brushless motor windings, or ripping gearbox teeth off.
 
 ### From-Scratch Python Implementation
-
-Here is a self-contained, standard-library Python engine implementing 2D vector and matrix algebra, determinant evaluation, safe inversion with condition number checks, and a comparison between naive inversion vs robust inverse kinematics:
 
 ```python
 #!/usr/bin/env python3
@@ -357,7 +354,6 @@ class Matrix2x2:
         discriminant = trace**2 - 4 * det
 
         if discriminant < 0:
-            # Complex eigenvalues (pure rotation with no real invariant axes)
             return None, None
         
         sqrt_disc = math.sqrt(discriminant)
@@ -372,7 +368,7 @@ class Matrix2x2:
         """
         det = self.determinant()
         if abs(det) < epsilon:
-            return None  # Singular matrix: space collapsed, irreversible!
+            return None
         
         inv_det = 1.0 / det
         return Matrix2x2(
@@ -387,11 +383,10 @@ def demonstrate_robotics_and_failure():
     print("=" * 65)
     print("1. FIELD-ORIENTED SWERVE ROTATION DEMO")
     print("=" * 65)
-    field_cmd = Vector2D(0.0, 3.0)  # Move 3 m/s straight downfield
+    field_cmd = Vector2D(0.0, 3.0)
     heading_deg = 45.0
     heading_rad = math.radians(heading_deg)
     
-    # R(-θ) transforms field frame to robot frame
     r_inv = Matrix2x2.rotation(-heading_rad)
     robot_cmd = r_inv.transform(field_cmd)
     
@@ -403,18 +398,15 @@ def demonstrate_robotics_and_failure():
     print("\n" + "=" * 65)
     print("2. SINGULARITY / COLLAPSE RECOVERY BENCHMARK")
     print("=" * 65)
-    # Singular matrix where col 2 is a scalar multiple of col 1
     singular_mat = Matrix2x2(2.0, 4.0, 1.0, 2.0)
     det = singular_mat.determinant()
     print(f"Matrix [[2, 4], [1, 2]] Determinant: {det:.6f}")
     
-    # Attempting safe inverse
     inv = singular_mat.safe_inverse()
     if inv is None:
         print(">> SAFELY CAUGHT SINGULARITY: Matrix has no inverse (det=0).")
         print(">> Controller safely clamps outputs instead of throwing NaN.")
     
-    # Regular invertible shear matrix
     shear_mat = Matrix2x2(1.0, 1.5, 0.0, 1.0)
     l1, l2 = shear_mat.eigenvalues()
     print(f"\nShear Matrix Determinant: {shear_mat.determinant():.4f}")
@@ -427,9 +419,9 @@ if __name__ == "__main__":
 
 ---
 
-## Part 5: Review Checkpoints & Deep-Dive Exploration Prompts
+## 5. Review Checkpoints & Deep-Dive Prompts
 
-### Review Checkpoints (Test Your Understanding)
+### Review Checkpoints
 
 #### Checkpoint 1: Determinant Sign Flip
 **Question:** A transformation matrix `M` maps `î` to `[0, 2]ᵀ` and `ĵ` to `[3, 0]ᵀ`. Calculate `det(M)`. What is the geometric meaning of the sign of `det(M)` in this scenario?
@@ -474,7 +466,7 @@ if __name__ == "__main__":
 
 ### Curriculum Linkages
 
-* **Backward Link:** Foundational high school geometry & coordinate arithmetic.
+* **Backward Link:** Foundational geometry & coordinate arithmetic.
 * **Forward Links:**
   * **Concept 05 (Loss Landscapes & Optimization):** Quadratic forms `xᵀ · A · x` and Hessian curvature matrices.
   * **Concept 06 (Dense Layers & Activations):** Multi-layer linear collapses without non-linear activations.

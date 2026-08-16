@@ -6,19 +6,14 @@ Module 5 synthesizes the foundational mathematics, physical models, and machine 
 
 ## Module Overview
 
-1. **Markov Decision Processes & Q-Learning:** Bellman optimality equations, value iteration, and tabular reinforcement learning in discrete state spaces.
-2. **Policy Gradients & Deep RL (PPO):** Actor-Critic neural network architectures and Proximal Policy Optimization for continuous robotic torque and velocity control.
-3. **Reward Engineering & Sim-to-Real Domain Randomization:** Structuring reward functions to avoid reward hacking and randomizing physics parameters to transfer policies to physical robots.
-4. **Hierarchical Control Architecture & Behavior Trees:** Strategic vs tactical vs execution layers with deterministic sequence, selector, and parallel control nodes.
-5. **Dynamic Obstacle Avoidance & Path Planning:** Real-time trajectory replanning and potential field navigation around dynamic defenders.
-6. **Agentic LLM Tool-Calling & Autonomous Diagnostics:** Integrating LLMs with real-time subsystem telemetry tools for match monitoring and anomaly recovery.
-7. **Full Autonomous Match Simulator Lab:** End-to-end integration of autonomous scoring, intake arbitration, and defense avoidance.
-8. **System Identification & Real-World Calibration:** Practical regression techniques to extract motor and mechanism constants from real telemetry logs.
-9. **Capstone Architecture & Complete Curriculum Synthesis:** Final synthesis connecting applied mathematics, electromechanics, control theory, and autonomous AI.
+1. **Markov Decision Processes & Deep Policy Gradients (PPO):** Formalizing state-action spaces, Bellman optimality, and clipped surrogate objective functions for continuous robot control.
+2. **Sim-to-Real Domain Randomization & Reward Engineering:** Designing robust reward functions and randomizing simulation parameters (mass, friction, CAN bus latency) to transfer policies to physical robots.
+3. **Hierarchical Control & Behavior Trees:** Decomposing robot agency into Strategic (1-5 Hz), Tactical (20-50 Hz), and Execution (250-1000 Hz) layers.
+4. **Dynamic Path Planning & Agentic Match Diagnostics:** Real-time potential field obstacle avoidance around defender robots and LLM-driven match monitoring agents with tool calling.
 
 ---
 
-## Concepts & Modules
+## Concepts
 
 * **Concept 17: Markov Decision Processes (MDPs) & Q-Learning**
 * **Concept 18: Policy Gradients & Deep RL (PPO)**

@@ -1,4 +1,4 @@
-# Module 1: The Unified Math Engine
+# Module 1: Math Foundations
 
 Module 1 establishes the first-principles mathematical foundation that powers all modern robot kinematics, control systems, and machine learning architectures.
 

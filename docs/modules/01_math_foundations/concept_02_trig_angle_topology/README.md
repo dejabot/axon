@@ -1,13 +1,12 @@
 # Concept 02: Trigonometry, atan2 & Continuous Angle Topology
 
 ```
-       [ 01_math_foundations ]  ➔  Concept 02: Trigonometry & atan2
-       Stage 1: The Unified Math Engine
+       Module 1: Math Foundations  ➔  Concept 02: Trigonometry & atan2
 ```
 
 ---
 
-## Part 1: The Intuitive Mental Model (Physical/Visual Analogy)
+## 1. Intuitive Mental Model
 
 Imagine measuring distance along a straight highway versus tracking time on a circular clock face.
 
@@ -43,9 +42,9 @@ This fundamental topological difference—between a straight Euclidean line `ℝ
 
 ---
 
-## Part 2: Mathematical & Physical Derivations (No Black Boxes)
+## 2. Mathematical & Physical Derivations
 
-### 1. The Unit Circle & Coordinate Projections
+### The Unit Circle & Coordinate Projections
 A point `P` on a unit circle (radius `r = 1`) at counter-clockwise angle `θ` from the positive x-axis has coordinates:
 
 ```
@@ -78,7 +77,7 @@ The tangent function is the ratio of opposite to adjacent sides:
    tan(θ) = y / x = sin(θ) / cos(θ)
 ```
 
-### 2. Why Naive `atan(y/x)` Fails: The 4-Quadrant Ambiguity
+### Why Naive `atan(y/x)` Fails: The 4-Quadrant Ambiguity
 The standard inverse tangent function `arctan(z)` accepts a single real scalar `z = y / x`. By mathematical definition, the range of `arctan` is restricted strictly to two quadrants:
 
 ```
@@ -105,7 +104,7 @@ Evaluating naive `arctan`:
 
 Naive `arctan` outputs `+45°` for vector `v₂`, commanding your robot to drive in the exact opposite direction of its goal. Furthermore, if `x = 0` (a purely vertical motion), `y/x` causes a fatal division-by-zero crash.
 
-### 3. Step-by-Step Derivation of `atan2(y, x)`
+### Step-by-Step Derivation of `atan2(y, x)`
 The 4-quadrant inverse tangent `atan2(y, x)` inspects the individual signs of both `y` and `x`, mapping uniquely to the full circular interval `(-π, +π]`:
 
 ```
@@ -119,7 +118,7 @@ The 4-quadrant inverse tangent `atan2(y, x)` inspects the individual signs of bo
 
 `atan2(y, x)` handles vertical lines without division-by-zero and preserves quadrant polarity across all 360 degrees.
 
-### 4. Angle Wrapping & Shortest Angular Distance
+### Angle Wrapping & Shortest Angular Distance
 Given a current robot angle `θ_curr` and a target angle `θ_target`, the naive error is `e_naive = θ_target - θ_curr`.
 
 Because angle space wraps every `2π` radians (360°), the true physical error `Δθ` must lie in the range `[-π, +π]`.
@@ -149,7 +148,7 @@ Therefore, extracting the continuous shortest angle error using `atan2`:
 
 This single, elegant formula automatically maps any arbitrary angular difference onto `[-π, +π]` without conditional branching.
 
-### 5. Swerve Module Optimization (Azimuth Inversion)
+### Swerve Module Optimization (Azimuth Inversion)
 A swerve drive wheel is bidirectional: spinning the drive motor forward at angle `θ` produces the exact same linear ground thrust as spinning the drive motor backward at angle `θ + π` (180° opposite).
 
 ```
@@ -176,18 +175,18 @@ To steer a swerve module from `θ_curr` to `θ_target`:
 
 ---
 
-## Part 3: Dual Grounding: FRC Autonomous Robotics & Modern ML/AI
+## 3. Dual Grounding: FRC Robotics & Modern ML
 
-### 1. FRC Autonomous Robotics: Swerve Azimuth Steering & Arm Gravity Feedforward
+### FRC Autonomous Robotics: Swerve Azimuth Steering & Arm Gravity Feedforward
 
-#### A. Swerve Azimuth Tracking
+#### Swerve Azimuth Tracking
 In FRC swerve drivetrains, the azimuth steering motor uses a high-frequency PID controller (running at 1 kHz in hardware motor controllers like Spark Max or Talon FX). 
 
 If the robot is currently heading at `+175°` and the autonomous path planner requests `-175°`:
 - **Naive controller:** Computes `error = -175° - 175° = -350°`. The azimuth motor violently slews 350 degrees around. During this 250ms turn, the chassis pulls off its autonomous trajectory.
 - **Topologically-aware controller:** Computes `Δθ = wrap_to_pi(-350°) = +10°`. The module turns only 10 degrees, reaching target alignment in 20 milliseconds.
 
-#### B. Single-Joint Pivot Arm Gravity Feedforward
+#### Single-Joint Pivot Arm Gravity Feedforward
 For a robotic arm pivoting about a horizontal axle, gravity exerts a torque proportional to the horizontal distance from the pivot to the center of mass:
 
 ```
@@ -206,9 +205,9 @@ Where `θ = 0` is the horizontal position. Using correct trigonometric projectio
                    Arm at angle θ: Torque = m·g·L·cos(θ)
 ```
 
-### 2. Machine Learning: Positional Encodings & Directional Losses
+### Machine Learning: Positional Encodings & Directional Losses
 
-#### A. Cyclic Feature Encoding
+#### Cyclic Feature Encoding
 If you feed raw angles `θ ∈ [0°, 360°)` as a scalar input into a neural network, the network sees a massive numerical discontinuity between `359.9°` and `0.0°`. The network believes those two adjacent physical states are 360 units apart.
 
 To preserve circular topology in neural networks, angles are decomposed into continuous orthogonal trigonometric components:
@@ -223,7 +222,7 @@ In Transformer models, **Rotary Positional Embeddings (RoPE)** apply 2D rotation
    q_m = R(m · θ) · W_q · x_m
 ```
 
-#### B. Cosine Directional Loss for 3D Bounding Boxes
+#### Cosine Directional Loss for 3D Bounding Boxes
 When training object detection networks to predict autonomous vehicle headings, using Mean Squared Error `(θ_pred - θ_true)²` severely penalizes a prediction of `+179°` when the ground truth is `-179°` (error `358² = 128,164`).
 
 Instead, the network is trained using **Cosine Proximity Loss**:
@@ -234,7 +233,7 @@ Instead, the network is trained using **Cosine Proximity Loss**:
 
 ---
 
-## Part 4: The Classic Failure Mode & From-Scratch Python Engine
+## 4. Classic Failure Mode & Python Engine
 
 ### The Classic Failure Mode: The 340-Degree Swerve Spin
 In autonomous match routines, the robot must execute rapid maneuvers (e.g., scoring a game piece and instantly darting across the field to intake another).
@@ -245,8 +244,6 @@ In autonomous match routines, the robot must execute rapid maneuvers (e.g., scor
 3. The violent 340° spin twists and eventually snaps the CAN bus wires and encoder cables inside the swerve module assembly.
 
 ### From-Scratch Python Implementation
-
-The following complete Python engine implements topological angle wrapping, 4-quadrant angle resolution, and full swerve module state optimization:
 
 ```python
 #!/usr/bin/env python3
@@ -288,14 +285,10 @@ class SwerveOptimizer:
         Optimize swerve target to turn no more than 90 degrees.
         If delta > 90°, inverts speed and rotates to the opposite angle (delta - 180°).
         """
-        # Calculate shortest angular error to target
         delta_angle = wrap_to_pi(desired.angle - current_angle_rad)
 
-        # If turn is greater than 90 degrees (π/2 rad)
         if abs(delta_angle) > (math.PI / 2.0):
-            # Invert drive direction
             optimized_speed = -desired.speed
-            # Rotate to complementary opposite angle
             if delta_angle > 0:
                 optimized_angle = current_angle_rad + (delta_angle - math.PI)
             else:
@@ -312,14 +305,10 @@ def simulate_swerve_transition(current_deg: float, target_deg: float, target_spe
     target_rad = math.radians(target_deg)
     desired = SwerveModuleState(target_speed, target_rad)
 
-    # 1. Naive un-wrapped controller
     naive_turn_deg = target_deg - current_deg
-    
-    # 2. Shortest-path wrapped controller (no speed inversion)
     wrapped_delta_rad = wrap_to_pi(target_rad - current_rad)
     wrapped_turn_deg = math.degrees(wrapped_delta_rad)
 
-    # 3. Fully optimized swerve controller (with speed inversion)
     optimized = SwerveOptimizer.optimize(desired, current_rad)
     opt_turn_deg = math.degrees(wrap_to_pi(optimized.angle - current_rad))
 
@@ -334,13 +323,9 @@ if __name__ == "__main__":
     print("=" * 65)
     print("SWERVE MODULE ANGLE TOPOLOGY BENCHMARK")
     print("=" * 65)
-    # Scenario A: Crossing boundary near 180°
     simulate_swerve_transition(current_deg=170.0, target_deg=-170.0, target_speed=3.0)
-    
-    # Scenario B: Target is 160° away (Optimized should turn only -20° and reverse speed)
     simulate_swerve_transition(current_deg=0.0, target_deg=160.0, target_speed=4.0)
 
-    # Scenario C: Target in Quadrant III with atan2 resolution
     vx, vy = -2.0, -2.0
     computed_angle = math.atan2(vy, vx)
     naive_angle = math.atan(vy / vx)
@@ -351,9 +336,9 @@ if __name__ == "__main__":
 
 ---
 
-## Part 5: Review Checkpoints & Deep-Dive Exploration Prompts
+## 5. Review Checkpoints & Deep-Dive Prompts
 
-### Review Checkpoints (Test Your Understanding)
+### Review Checkpoints
 
 #### Checkpoint 1: Shortest Angular Difference Calculation
 **Question:** A robot turret is tracking a vision target. The turret's current gyro heading is `θ_curr = +165°`. The computer vision camera detects a target at field heading `θ_target = -150°`.
@@ -401,6 +386,6 @@ Determine the optimal steering angle `θ_opt` and motor velocity `v_opt` command
 
 * **Backward Link:** Concept 01 (Vectors, dot products, and 2D rotation matrices).
 * **Forward Links:**
-  * **Concept 10 (Feedforward Modeling):** Gravity torque compensation `kG · cos(θ)` for robotic arms.
+  * **Concept 10 (Modern Feedforward Modeling):** Gravity torque compensation `kG · cos(θ)` for robotic arms.
   * **Concept 13 (Swerve Kinematics):** Resolving wheel azimuth steering angles with `atan2(vy, vx)`.
   * **Concept 16 (Extended Kalman Filters):** Heading angle wrapping in sensor fusion innovation steps.

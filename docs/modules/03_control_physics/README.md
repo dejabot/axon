@@ -1,4 +1,4 @@
-# Module 3: Actuator Physics & Control Theory
+# Module 3: Control & Physics
 
 Module 3 develops the electromechanical models and control theory required to drive physical robotic actuators with speed, precision, and stability.
 
@@ -13,7 +13,7 @@ Module 3 develops the electromechanical models and control theory required to dr
 
 ---
 
-## Concepts & Modules
+## Concepts
 
 * **Concept 09: DC Motor Electromechanics & Torque-Speed Curves**
 * **Concept 10: Modern Feedforward Modeling (kS, kV, kA, kG)**

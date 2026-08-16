@@ -3,35 +3,37 @@
 ## Overview
 Axon is a 25-concept curriculum designed for rigorous, first-principles mastery of applied mathematics, physical dynamics, modern control theory, deep machine learning, and autonomous robotics.
 
-Every concept in Axon follows strict structural, stylistic, and technical standards to maintain exceptional quality, depth, and accessibility.
+The curriculum is structured around a simple, two-level taxonomy: **Modules and Concepts**.
 
 ---
 
-## 1. Directory & File Structure
+## 1. Hierarchy: Modules & Concepts
 
-Content is organized in per-module directories under `docs/modules/`:
+Axon uses exactly two organizational levels:
+1. **Modules (1 through 5):** The major subject domains.
+2. **Concepts (1 through 25):** The individual core topics and companion visualizers.
 
 ```
 docs/
 ├── README.md                       <-- Curriculum overview and module links
 └── modules/
-    ├── <module_dir>/
+    ├── 01_math_foundations/
     │   ├── README.md               <-- Module overview and concept directory links
-    │   └── <concept_dir>/
-    │       ├── README.md           <-- Main conceptual guide (1,200–1,500 words)
+    │   └── concept_01_vectors_matrices/
+    │       ├── README.md           <-- Concept guide (1,200–1,500 words)
     │       └── demo.html           <-- Interactive visualizer (Standalone HTML5/Canvas)
 ```
 
-Module Structure:
-- `docs/modules/01_math_foundations/`
-- `docs/modules/02_machine_learning/`
-- `docs/modules/03_control_physics/`
-- `docs/modules/04_swerve_fusion/`
-- `docs/modules/05_rl_agents/`
+The 5 Modules:
+- **Module 1: Math Foundations** (Concepts 01–04)
+- **Module 2: Machine Learning** (Concepts 05–08)
+- **Module 3: Control & Physics** (Concepts 09–12)
+- **Module 4: Swerve & Sensor Fusion** (Concepts 13–16)
+- **Module 5: Reinforcement Learning & Agents** (Concepts 17–25)
 
 ---
 
-## 2. Strict Formatting & Style Rules
+## 2. Formatting & Style Rules
 
 ### A. The Strict NO-LaTeX Policy
 - **Never use LaTeX delimiters** (`$`, `$$`, `\(`, `\)`, `\[`, `\]`, `\begin{matrix}`, `\frac{...}`, etc.).
@@ -56,44 +58,34 @@ Module Structure:
 
 ---
 
-## 3. The 5-Part Concept Guide Structure
+## 3. The 5 Concept Guide Sections
 
-Every concept `README.md` must contain exactly the following 5 parts:
+Every concept `README.md` contains 5 clean, direct sections:
 
-1. **Part 1: The Intuitive Mental Model (Physical/Visual Analogy)**
+1. **1. Intuitive Mental Model**
    - Explain the concept using an intuitive real-world physical or geometric analogy before introducing any formal notation.
-   - Clarify what question this mathematical tool answers.
-
-2. **Part 2: Mathematical & Physical Derivations (No Black Boxes)**
+2. **2. Mathematical & Physical Derivations**
    - Derive the core formulas step-by-step from first principles.
    - Provide visual ASCII/Unicode diagrams, coordinate frames, and transformation grids.
-   - Explain every term, dimension, and physical unit.
-
-3. **Part 3: Dual Grounding: FRC Autonomous Robotics & Modern ML/AI**
-   - **FRC Robotics Application:** Specific, high-stakes mechanism or autonomous application (e.g., Swerve module kinematics, elevator gravity compensation, gyro odometry).
-   - **Machine Learning & AI Application:** Specific ML architectural component (e.g., Dense layer transformations, backpropagation chain rule, loss gradient descent).
-
-4. **Part 4: The Classic Failure Mode & From-Scratch Python Engine**
-   - **The Classic Failure Mode:** Describe a notorious real-world bug that happens when this concept is implemented naively (e.g., 340° swerve spin, matrix singularity crash, discrete Euler drift, exploding gradient).
-   - **From-Scratch Python Implementation:** A self-contained, clean Python class/script (standard library only or minimal numpy) demonstrating the correct formulation vs the naive buggy formulation.
-
-5. **Part 5: Review Checkpoints & Deep-Dive Exploration Prompts**
-   - **Review Checkpoints:** 2 conceptual/mathematical questions with detailed worked solutions and physical explanations.
-   - **Deep-Dive Prompts:** 2 open-ended research or engineering questions connecting to advanced robotics/ML systems.
-   - **Two-Way Links:** Explicit Backward Link(s) and Forward Link(s) connecting to other concepts in the curriculum.
+3. **3. Dual Grounding: FRC Robotics & Modern ML**
+   - **FRC Robotics Application:** Specific mechanism or autonomous control problem.
+   - **Machine Learning Application:** Specific ML architectural component or algorithm.
+4. **4. Classic Failure Mode & Python Engine**
+   - Concrete analysis of real-world bugs from naive implementation.
+   - Complete, self-contained, runnable Python code comparing naive vs correct implementation.
+5. **5. Review Checkpoints & Deep-Dive Prompts**
+   - 2 conceptual/mathematical questions with detailed worked solutions.
+   - 2 deep-dive exploration prompts.
+   - Explicit Backward Link(s) and Forward Link(s) connecting to other concepts.
 
 ---
 
 ## 4. Interactive Visualizer Specification (`demo.html`)
 
-Every concept folder must include an interactive `demo.html` satisfying:
-- **Zero External Dependencies:** No CDN libraries, no external scripts or fonts. Works 100% offline and locally via `file://`.
-- **Toggle-able Dark & Light Mode:**
-  - Full support for both dark theme (default) and light theme via CSS custom variables (`:root` / `[data-theme="light"]`).
-  - Interactive theme toggle switch in header.
-  - Theme preference persistence across sessions via `localStorage.getItem('axon_theme')`.
-  - Contrast-calibrated canvas rendering for both themes.
+Every concept folder includes an interactive `demo.html` satisfying:
+- **Zero External Dependencies:** No CDN libraries, no external scripts or fonts. Works 100% offline.
+- **Top-Right Theme Toggle:** Dark Mode (default) and Light Mode with instant cross-page synchronization via `localStorage ('axon_theme')`.
 - **Input Controls:** Sliders, buttons, and toggles with live numeric readouts.
-- **Canvas Visualizer:** HTML5 2D Canvas rendering with crisp DPI scaling, coordinate grid, vector arrows, animations, and active state indicators.
-- **Mobile & Touch Ready:** Full support for touch events (`touchstart`, `touchmove`, `touchend`) alongside mouse drag events.
-- **Real-Time Telemetry Panel:** Live mathematical statistics (e.g., matrix determinant, vector magnitude, angle error, gradient vector) updating at 60 FPS.
+- **Canvas Visualizer:** HTML5 2D Canvas rendering with crisp DPI scaling and contrast-calibrated colors.
+- **Mobile & Touch Ready:** Full support for touch events alongside mouse drag events.
+- **Real-Time Telemetry:** Live mathematical statistics updating at 60 FPS.

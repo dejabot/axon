@@ -1,4 +1,4 @@
-# Module 2: Machine Learning from First Principles
+# Module 2: Machine Learning
 
 Module 2 demystifies deep learning from the ground up, moving from loss landscapes and optimization mathematics to non-linear activations and vector backpropagation engines.
 
@@ -13,7 +13,7 @@ Module 2 demystifies deep learning from the ground up, moving from loss landscap
 
 ---
 
-## Concepts & Modules
+## Concepts
 
 * **Concept 05: Loss Landscapes & Optimization Algorithms**
 * **Concept 06: Dense Layers & Non-Linear Activation Functions**

@@ -1,285 +1,258 @@
 # Concept 04: Multivariable Calculus, Gradients & The Chain Rule
 
 ```
-       [ 01_math_foundations ]  ➔  Concept 04: Multivariable Gradients
-       Stage 1: The Unified Math Engine
+       Module 1: Math Foundations  ➔  Concept 04: Gradients & Chain Rule
 ```
 
 ---
 
-## Part 1: The Intuitive Mental Model (Physical/Visual Analogy)
+## 1. Intuitive Mental Model
 
-Imagine you are hiking on a rugged mountain range in dense, blinding fog. You can only see the ground directly beneath your hiking boots. Your goal is to reach the highest mountain peak (or find the lowest valley floor to set up camp).
+Imagine you are hiking blindfolded on a foggy, mountainous terrain. Underneath your boots is an uneven physical surface where your elevation (height above sea level) is given by a mathematical function `z = f(x, y)`, where `x` is your coordinate East-West and `y` is your coordinate North-South.
 
 ```
-                      Foggy Mountain Landscape
-                              Peak ▲ f(x, y) = High
-                                 / \
-                                /   \
-                               /  ▲  \  ∇f points STEEPEST UPHILL
-                              /   │   \
-                             /    │    \
-                            /     ● (x, y) Current Location
-                           /     / \
-                          /     /   \
-                         /     /     \
-   Valley Floor ────────┴─────┴───────┴──────
+                  Elevation Surface z = f(x, y)
+                     ▲ (Mountain Peak)
+                    / \
+                   /   \
+                  /  ●  \   ◄── You are standing here
+                 /       \
+                ─────────── (Valley Floor)
 ```
 
-At any point `(x, y)` on the mountain, the terrain slopes in different directions:
-- If you step strictly East (along the `x`-axis), the ground might slope gently upward.
-- If you step strictly North (along the `y`-axis), the ground might drop steeply downward.
+1. **Partial Derivative `∂f/∂x`:** If you keep your North-South position strictly locked and take one small step directly **East**, how much does your elevation change? That slope is the partial derivative with respect to `x`.
+2. **Partial Derivative `∂f/∂y`:** If you keep your East-West position strictly locked and take one small step directly **North**, how much does your elevation change? That slope is the partial derivative with respect to `y`.
+3. **The Gradient Vector `∇f`:** If you combine both slopes into a single 2D vector `[∂f/∂x, ∂f/∂y]ᵀ`, this arrow points in the direction of **Steepest Ascent** (the fastest way uphill). Its length `||∇f||` is the exact steepness of that slope.
 
-What single direction gives you the steepest climb?
+```
+                          North (y)
+                             ▲
+                             │   ▲ ∇f (Steepest Ascent Uphill)
+                             │  /
+                             │ /
+            ─────────────────┼─●──────────────► East (x)
+                             │  \
+                             │   \
+                             │    ▼ -∇f (Steepest Descent Downhill)
+```
 
-If you calculate the slope along the East-West axis (`∂f/∂x`) and the slope along the North-South axis (`∂f/∂y`), and combine them into a single 2D vector, you get the **Gradient Vector** (**∇f**).
-
-The gradient vector has two superpowers:
-1. **Direction:** It points exactly in the direction of **maximum instantaneous ascent** (steepest uphill climb).
-2. **Magnitude:** Its length `||∇f||` equals the steepness of that maximum slope.
-
-To descend to the valley as fast as possible, you simply walk in the exact opposite direction: **-∇f**. This simple compass heading is the driving engine behind both machine learning optimization (Gradient Descent) and autonomous robot path planning (Potential Field Navigation).
+If you want to walk downhill to find the lowest valley floor (e.g., minimizing error in machine learning or navigating a robot away from obstacle peaks), you simply take steps in the opposite direction: **`-∇f` (Gradient Descent)**.
 
 ---
 
-## Part 2: Mathematical & Physical Derivations (No Black Boxes)
+## 2. Mathematical & Physical Derivations
 
-### 1. Functions of Multiple Variables & Partial Derivatives
-Let `z = f(x, y)` represent a scalar field (surface height) over 2D coordinates `(x, y) ∈ ℝ²`.
-
-The **partial derivative** with respect to `x` (`∂f/∂x` or `f_x`) measures the rate of change of `f` as `x` varies while holding `y` strictly constant:
+### Partial Derivatives & The Total Differential
+Let `f: ℝ² ➔ ℝ` be a scalar function of two variables `(x, y)`. The partial derivatives are defined by holding one variable constant while taking the limit of the other:
 
 ```
    ∂f / ∂x = lim [ (f(x + Δx, y) - f(x, y)) / Δx ]
              Δx➔0
-```
 
-Similarly, the partial derivative with respect to `y` holds `x` constant:
-
-```
    ∂f / ∂y = lim [ (f(x, y + Δy) - f(x, y)) / Δy ]
              Δy➔0
 ```
 
-Geometrically, `∂f/∂x` is the slope of the tangent line to the 1D curve formed by slicing the 3D surface with a vertical plane parallel to the x-axis.
+When both `x` and `y` change simultaneously by small amounts `dx` and `dy`, the **total differential** `df` (the resulting change in elevation) is:
 
 ```
-       z (Height)
-       ▲             Slice at constant y = y₀
-       │                . - ~ ~ - .
-       │            . '             '.
-       │          /     Slope = ∂f/∂x  \
-       └─────────┼──────────────────────┼────► x
-                (x₀, y₀)
+   df = (∂f / ∂x) · dx + (∂f / ∂y) · dy
 ```
 
-### 2. The Gradient Vector (∇f)
-The **gradient** of a scalar field `f(x, y)` (denoted `∇f` or "grad f") is the vector of all its first-order partial derivatives:
+### The Gradient Vector `∇f` (Del Operator)
+We define the vector gradient operator `∇` (del / nabla) as the column vector of all first-order partial derivatives:
 
 ```
           [ ∂f / ∂x ]
-   ∇f  =  [         ]
-          [ ∂f / ∂y ]
+   ∇f =   [ ∂f / ∂y ]
 ```
 
-For an `n`-dimensional function `f(x₁, x₂, ..., x_n)`:
+Notice that the total differential `df` can be written as a vector dot product between the gradient vector `∇f` and the displacement step vector `dr = [dx, dy]ᵀ`:
 
 ```
-   ∇f = [ ∂f/∂x₁, ∂f/∂x₂, ..., ∂f/∂x_n ]ᵀ
+   df = ∇f · dr = ||∇f|| · ||dr|| · cos(θ)
 ```
 
-### 3. Directional Derivatives & Proof of Steepest Ascent
-How fast does `f(x, y)` change if you move along an arbitrary unit direction vector `û = [ux, uy]ᵀ` (where `||û|| = √(ux² + uy²) = 1`)?
-
-The **directional derivative** `D_u(f)` is defined as:
+Where `θ` is the angle between the gradient vector and the chosen step direction `dr`.
 
 ```
-   D_u(f) = lim [ (f(x + h·ux, y + h·uy) - f(x, y)) / h ]
-            h➔0
+   Total Change in Elevation:
+   df = [ ∂f/∂x , ∂f/∂y ] · [ dx , dy ]ᵀ = ∇f · dr
 ```
 
-Using multivariable linear approximation:
-`f(x + h·ux, y + h·uy) ≈ f(x, y) + (∂f/∂x)·(h·ux) + (∂f/∂y)·(h·uy)`
-
-Substituting into the limit:
-
-```
-   D_u(f) = (∂f/∂x)·ux + (∂f/∂y)·uy = ∇f · û
-```
-
-The directional derivative is the **dot product** between the gradient vector `∇f` and the direction unit vector `û`.
-
-#### Proof: Why ∇f is the Direction of Steepest Ascent
-Using the geometric definition of the dot product:
+### Proof: Why the Gradient Points in the Direction of Steepest Ascent
+Let `û` be an arbitrary unit direction vector (`||û|| = 1`). The **directional derivative** `D_u(f)` measures the rate of change of `f` in direction `û`:
 
 ```
    D_u(f) = ∇f · û = ||∇f|| · ||û|| · cos(θ) = ||∇f|| · cos(θ)
 ```
 
-Where `θ` is the angle between `∇f` and `û`.
-- Since `-1 ≤ cos(θ) ≤ +1`, the maximum possible value of `D_u(f)` occurs when `cos(θ) = +1` (`θ = 0°`).
-- `θ = 0°` means that `û` points in the **exact same direction as ∇f**:
-  `û_max = ∇f / ||∇f||` with maximum slope `||∇f||`.
-- Conversely, the minimum (most negative) slope occurs when `cos(θ) = -1` (`θ = 180°`), pointing in the direction of **steepest descent**: **-∇f**.
+To maximize the rate of increase:
+- The cosine function reaches its global maximum value of `+1` if and only if `cos(θ) = 1`, which means `θ = 0°`.
+- When `θ = 0°`, the step direction `û` is parallel to `∇f`.
 
-### 4. Orthogonality to Level Curves (Contour Lines)
-A **level curve** (or contour line) is the set of all points `(x, y)` where `f(x, y) = C` (constant height).
+**Conclusion:** The gradient `∇f` points in the direction of maximum instantaneous rate of increase (**Steepest Ascent**), with maximum rate `||∇f||`. 
 
-```
-   Contour f(x, y) = C
-   
-           Tangent Vector T
-          ◄────────────────●────────────────►
-                           │
-                           │  ∇f (Gradient is ALWAYS perpendicular at 90°)
-                           ▼
-```
+Conversely, to minimize `f` as quickly as possible:
+- `cos(θ) = -1` when `θ = 180°` (pointing directly opposite).
+- **Steepest Descent** occurs in the direction `-∇f`.
 
-Let `r(t) = [x(t), y(t)]ᵀ` parameterize a contour line where `f(x(t), y(t)) = C`.
+### Orthogonality to Level Curves (Contour Lines)
+A **level curve** (contour line) is the set of all points `(x, y)` where elevation is constant: `f(x, y) = C`.
 
-Differentiating both sides with respect to `t` using the multivariable chain rule:
+Along a level curve, elevation does not change, so `df = 0`:
 
 ```
-   d/dt [ f(x(t), y(t)) ] = d/dt [ C ]
-   (∂f / ∂x)·(dx / dt) + (∂f / ∂y)·(dy / dt) = 0
-   ∇f · r'(t) = 0
+   df = ∇f · dr = 0
 ```
 
-Since `r'(t)` is the tangent vector to the contour curve, **the gradient vector ∇f is always perpendicular (orthogonal at 90°) to the contour lines**.
-
-### 5. The Multivariable Chain Rule
-In single-variable calculus, `d/dt [f(g(t))] = f'(g(t)) · g'(t)`.
-
-In multivariable systems, if `z = f(x, y)` where both `x = x(t)` and `y = y(t)` depend on time `t`, the total derivative accumulates rates of change across all paths:
+Because the dot product of `∇f` and the tangent displacement `dr` along the level curve is zero, **the gradient vector `∇f` is always strictly perpendicular (orthogonal) to the level curves of the function.**
 
 ```
-   dz / dt = (∂f / ∂x) · (dx / dt) + (∂f / ∂y) · (dy / dt)
+                     Contour f = 20
+                     ───────────────
+                     Contour f = 10
+                     ───────┬───────
+                            │ ▲ ∇f (Always 90° to contours)
+                            │ │
+                     ───────┴─┼─────
+                     Contour f = 0 (Valley bottom)
 ```
 
-```
-                 z = f(x, y)
-                 /         \
-          ∂f/∂x /           \ ∂f/∂y
-               ▼             ▼
-              x(t)          y(t)
-               \             /
-          dx/dt \           / dy/dt
-                 ▼         ▼
-                     t
-```
+### The Multivariable Chain Rule
+Suppose a scalar loss `L` depends on intermediate variables `u(t)` and `v(t)`, which themselves depend on a primary parameter `t`.
 
-#### Matrix-Vector Formulation (The Jacobian)
-If an intermediate vector `y = g(x) ∈ ℝᵐ` is mapped to an output vector `z = f(y) ∈ ℝᵏ`, the multivariable chain rule becomes a **matrix multiplication of Jacobians**:
+The multivariable chain rule sums the rates of change flowing through every intermediate path:
 
 ```
-   J_composite = J_f(y) · J_g(x)
+   dL / dt = (∂L / ∂u) · (du / dt) + (∂L / ∂v) · (dv / dt)
 ```
 
-Where the Jacobian matrix `J` records all first-order partial derivatives `J_ij = ∂f_i / ∂x_j`.
+In vector matrix form:
+
+```
+   dL / dt = [ ∂L / ∂u , ∂L / ∂v ] · [ du / dt ]
+                                     [ dv / dt ]
+           = ∇L_uv · (dr / dt)
+```
+
+If `y = g(x)` where `g: ℝⁿ ➔ ℝᵐ` is a vector-valued function, the matrix of all partial derivatives is the **Jacobian Matrix `J`**:
+
+```
+        [ ∂y₁/∂x₁  ∂y₁/∂x₂  ...  ∂y₁/∂xₙ ]
+   J =  [ ∂y₂/∂x₁  ∂y₂/∂x₂  ...  ∂y₂/∂xₙ ]
+        [    :        :             :    ]
+        [ ∂yₘ/∂x₁  ∂yₘ/∂x₂  ...  ∂yₘ/∂xₙ ]
+```
+
+The multivariable chain rule for composite functions `z = f(g(x))` is:
+
+```
+   ∇_x(z) = J_g(x)ᵀ · ∇_y(z)
+```
 
 ---
 
-## Part 3: Dual Grounding: FRC Autonomous Robotics & Modern ML/AI
+## 3. Dual Grounding: FRC Robotics & Modern ML
 
-### 1. FRC Autonomous Robotics: Potential Field Navigation & Inverse Kinematics
+### FRC Autonomous Robotics: Artificial Potential Field Obstacle Avoidance
 
-#### A. Artificial Potential Field Navigation
-To navigate an autonomous robot through a field containing obstacles and a target scoring goal:
-1. Define an **attractive potential** pulling the robot toward goal `p_goal`:
-   `U_attract(p) = (1/2) · k_att · ||p - p_goal||²`
-2. Define a **repulsive potential** pushing the robot away from obstacle `p_obs` within safety radius `d₀`:
-   `U_repulse(p) = (1/2) · k_rep · (1/d - 1/d₀)²`  (for `d = ||p - p_obs|| ≤ d₀`)
-3. Total potential: `U_total(p) = U_attract(p) + U_repulse(p)`.
+#### Potential Field Navigation
+An autonomous robot at position `p = [x, y]ᵀ` must navigate to a goal position `p_goal` while actively avoiding dynamic defender robots at `p_obs`.
 
-The robot computes its instantaneous propulsion force command by taking the negative gradient:
-
-```
-   F_cmd = -∇U_total(p) = -∇U_attract(p) - ∇U_repulse(p)
-```
-
-```
-   Attractive Gradient -∇U_att: Pulls toward Goal (Green)
-   Repulsive Gradient  -∇U_rep: Pushes away from Obstacle (Red)
-   Resulting Command   F_cmd  : Smoothly steers around defender!
-```
-
-#### B. Robot Arm Kinematic Jacobian
-For a 2-joint robotic arm with joint angles `θ = [θ₁, θ₂]ᵀ`, forward kinematics gives end-effector position `p(θ) = [x(θ), y(θ)]ᵀ`.
-
-The velocity relationship is given by the Jacobian matrix:
+We construct an artificial scalar potential energy surface `U(p) = U_att(p) + U_rep(p)`:
+1. **Attractive Potential (Goal Pull):** Parabolic bowl pulling toward goal:
+   ```
+   U_att(p) = (1/2) · k_att · ||p - p_goal||²
+   ```
+2. **Repulsive Potential (Obstacle Push):** Tall mountain repelling away from obstacles within distance threshold `d₀`:
+   ```
+   U_rep(p) = (1/2) · k_rep · ( (1 / d(p)) - (1 / d₀) )²    if d(p) ≤ d₀
+   ```
 
 ```
-   [ vx ] = [ ∂x/∂θ₁   ∂x/∂θ₂ ] [ ω₁ ]
-   [ vy ]   [ ∂y/∂θ₁   ∂y/∂θ₂ ] [ ω₂ ]
-     v    =       J(θ)        ·   ω
+                  Attractive Bowl            Repulsive Mountain
+                  ▲                           ▲
+                  │                          /│\  Obstacle
+                  │                         / │ \
+                  └────────► Goal          ────────►
 ```
 
-### 2. Machine Learning: Gradient Descent & Deep Backpropagation
-
-#### A. Gradient Descent Parameter Updates
-In supervised machine learning, a loss function `L(W)` measures prediction error over network weights `W`.
-
-To minimize loss, weights are iteratively updated in the direction of steepest descent:
+The robot software continuously computes the virtual force vector:
 
 ```
-   W[k+1] = W[k] - η · ∇_W L(W[k])
+   F_total = -∇U(p) = -∇U_att(p) - ∇U_rep(p)
+           = -k_att · (p - p_goal) + k_rep · ( (1/d) - (1/d₀) ) · (1 / d²) · ∇d
 ```
 
-Where `η` is the learning rate.
+The swerve chassis drives along `-∇U(p)`, automatically bending around defenders without requiring heavy graph search.
 
-#### B. Backpropagation as the Multivariable Chain Rule
-For a deep neural network with layers `z^[l] = W^[l] · a^[l-1] + b^[l]` and `a^[l] = σ(z^[l])`:
+### Machine Learning: Gradient Descent & Backpropagation
 
-To find how the final scalar loss `L` changes with respect to weight matrix `W^[l]`, backpropagation applies the chain rule backward through the computation graph:
+#### Gradient Descent Optimization
+In deep neural networks with millions of parameters `W`, we define an objective loss function `L(W)` measuring prediction error.
 
-```
-   ∂L / ∂W^[l] = (∂L / ∂z^[l]) · (∂z^[l] / ∂W^[l])ᵀ = δ^[l] · (a^[l-1])ᵀ
-```
-
-Where error vector `δ^[l] = ∂L / ∂z^[l]` is propagated backward layer-by-layer:
+To minimize the loss, we iteratively update parameters in the direction of steepest descent:
 
 ```
-   δ^[l-1] = ( (W^[l])ᵀ · δ^[l] ) ⊙ σ'(z^[l-1])
+   W[k+1] = W[k] - η · ∇_W(L)
 ```
 
-Without the multivariable chain rule, training deep neural networks with millions of parameters would be mathematically impossible.
+Where `η` is the **learning rate**.
+
+```
+   Loss L(W)
+   ▲        ● Initial Weights W₀
+   │         \
+   │          \  -η·∇L
+   │           ▼
+   │             ● Local Minimum W*
+   └───────────────────────────────► Weight Parameters W
+```
+
+#### Vector Backpropagation via the Chain Rule
+For a 2-layer neural network with loss `L = (1/2) · ||y_pred - y_true||²` where `y_pred = W₂ · a₁` and `a₁ = σ(W₁ · x)`:
+
+Applying the multivariable chain rule backward:
+
+```
+   ∂L / ∂W₂ = (y_pred - y_true) · (a₁)ᵀ
+   ∂L / ∂a₁ = (W₂)ᵀ · (y_pred - y_true)
+   ∂L / ∂W₁ = [ (∂L / ∂a₁) ⊙ σ'(W₁ · x) ] · (x)ᵀ
+```
+
+Where `⊙` is the element-wise Hadamard product. Every modern deep learning framework (PyTorch, TensorFlow, JAX) is an automated implementation of this vector chain rule.
 
 ---
 
-## Part 4: The Classic Failure Mode & From-Scratch Python Engine
+## 4. Classic Failure Mode & Python Engine
 
-### The Classic Failure Mode: The "Ravine Trap" & Gradient Explosion
-When optimizing ill-conditioned loss surfaces (such as the Rosenbrock function or deep networks with high curvature in one direction and flat slope in another):
+### The Classic Failure Mode: Exploding Gradients & The "Valley Ping-Pong"
+Consider optimizing on an anisotropic loss surface (an elongated, narrow ravine):
+```
+   f(x, y) = 0.5 · (x² + 20.0 · y²)
+```
 
-```
-   Loss Landscape: Long narrow valley (Ravine)
-   
-        ▲ y
-        │    \  Gradient points mostly across steep walls!  /
-        │     \   ◄───●───►                                /
-        │      \     / \                                  /
-        │       \   /   \                                /
-        └──────────┴─────┴────────────────────────────────► x
-                   Valley floor (Slow progress along x)
-```
+The partial derivatives are:
+- `∂f/∂x = x` (Gentle slope along the ravine floor)
+- `∂f/∂y = 20.0 · y` (Steep slope across the ravine walls)
 
 **The Catastrophe:**
-1. The gradient `∇f` has massive magnitude along the steep valley walls (`y`-axis) but tiny magnitude along the shallow floor (`x`-axis).
-2. Standard gradient descent with a fixed learning rate `η` violently bounces back and forth across the canyon walls.
-3. If `η` is even slightly too large, the oscillations grow exponentially, throwing parameters to `±Infinity` (`loss = NaN`).
+1. If the learning rate `η = 0.11` is chosen slightly too large for the steep `y` dimension (where stability requires `η < 2 / 20.0 = 0.10`):
+2. In the `x` dimension, `x[k+1] = (1 - 0.11)·x = 0.89·x` converges slowly.
+3. In the `y` dimension: `y[k+1] = y - 0.11·(20.0·y) = (1 - 2.2)·y = -1.2·y`.
+4. **Result:** The update overshoots the ravine floor, oscillating with exponentially increasing amplitude (`1.2, 1.44, 1.728, ...`) until floating-point overflow (`NaN`). The optimizer ping-pongs wildly off the walls.
 
 ### From-Scratch Python Implementation
-
-The following complete Python engine implements multivariable gradients, numerical gradient verification, and a comparison between standard Gradient Descent vs Gradient Descent with Momentum on a narrow curvature ravine:
 
 ```python
 #!/usr/bin/env python3
 """
-axon - Concept 04: Multivariable Calculus, Gradients & The Chain Rule
-From-scratch multivariable gradient computation & optimization engine.
+axon - Concept 04: Multivariable Calculus, Gradients & Chain Rule
+From-scratch implementation of Potential Fields and Gradient Optimizers.
 """
 import math
-from typing import Tuple, Callable, List
+from typing import Tuple, List
 
 
 class Vector2D:
@@ -287,178 +260,150 @@ class Vector2D:
         self.x = float(x)
         self.y = float(y)
 
-    def __add__(self, other: 'Vector2D') -> 'Vector2D':
-        return Vector2D(self.x + other.x, self.y + other.y)
-
     def __sub__(self, other: 'Vector2D') -> 'Vector2D':
         return Vector2D(self.x - other.x, self.y - other.y)
 
+    def __add__(self, other: 'Vector2D') -> 'Vector2D':
+        return Vector2D(self.x + other.x, self.y + other.y)
+
     def __mul__(self, scalar: float) -> 'Vector2D':
         return Vector2D(self.x * scalar, self.y * scalar)
-
-    def __rmul__(self, scalar: float) -> 'Vector2D':
-        return self.__mul__(scalar)
 
     def magnitude(self) -> float:
         return math.sqrt(self.x**2 + self.y**2)
 
     def __repr__(self) -> str:
-        return f"[{self.x:+.4f}, {self.y:+.4f}]ᵀ"
+        return f"[{self.x:+.4f}, {self.y:+.4f}]"
 
 
-class LossLandscape:
+def ravines_surface(x: float, y: float) -> Tuple[float, Vector2D]:
+    """Anisotropic ravine: f(x, y) = 0.5*(x² + 20*y²)"""
+    loss = 0.5 * (x**2 + 20.0 * (y**2))
+    df_dx = x
+    df_dy = 20.0 * y
+    return loss, Vector2D(df_dx, df_dy)
+
+
+def potential_field(robot: Vector2D, goal: Vector2D, obstacle: Vector2D) -> Tuple[float, Vector2D]:
     """
-    Anisotropic Quadratic Ravine Loss Function:
-    f(x, y) = 0.5 * (x² + 20 * y²)
-    Steep curvature along y (k_y = 20), gentle curvature along x (k_x = 1).
-    Global minimum is at (0, 0) with f(0, 0) = 0.
+    Artificial Potential Field:
+    U_total = U_att(goal) + U_rep(obstacle)
     """
-    @staticmethod
-    def evaluate(p: Vector2D) -> float:
-        return 0.5 * (p.x**2 + 20.0 * (p.y**2))
+    k_att = 1.0
+    k_rep = 2.5
+    d_safe = 1.5
 
-    @staticmethod
-    def analytical_gradient(p: Vector2D) -> Vector2D:
-        """∇f = [∂f/∂x, ∂f/∂y]ᵀ = [x, 20·y]ᵀ"""
-        df_dx = p.x
-        df_dy = 20.0 * p.y
-        return Vector2D(df_dx, df_dy)
+    d_goal = (robot - goal).magnitude()
+    u_att = 0.5 * k_att * (d_goal ** 2)
+    grad_att = (robot - goal) * k_att
 
-    @staticmethod
-    def numerical_gradient(p: Vector2D, h: float = 1e-5) -> Vector2D:
-        """Compute numerical gradient via central finite differences"""
-        f_x_plus = LossLandscape.evaluate(Vector2D(p.x + h, p.y))
-        f_x_minus = LossLandscape.evaluate(Vector2D(p.x - h, p.y))
-        df_dx = (f_x_plus - f_x_minus) / (2.0 * h)
+    d_obs_vec = robot - obstacle
+    d_obs = d_obs_vec.magnitude()
 
-        f_y_plus = LossLandscape.evaluate(Vector2D(p.x, p.y + h))
-        f_y_minus = LossLandscape.evaluate(Vector2D(p.x, p.y - h))
-        df_dy = (f_y_plus - f_y_minus) / (2.0 * h)
+    if d_obs < 0.05:
+        d_obs = 0.05
 
-        return Vector2D(df_dx, df_dy)
+    if d_obs <= d_safe:
+        diff = (1.0 / d_obs) - (1.0 / d_safe)
+        u_rep = 0.5 * k_rep * (diff ** 2)
+        scale = -k_rep * diff * (1.0 / (d_obs**3))
+        grad_rep = d_obs_vec * scale
+    else:
+        u_rep = 0.0
+        grad_rep = Vector2D(0.0, 0.0)
 
-
-def optimize_vanilla_gd(start: Vector2D, lr: float, steps: int = 15) -> List[Tuple[int, Vector2D, float]]:
-    history = []
-    p = Vector2D(start.x, start.y)
-    for k in range(steps):
-        loss = LossLandscape.evaluate(p)
-        grad = LossLandscape.analytical_gradient(p)
-        history.append((k, p, loss))
-        # Vanilla Gradient Descent Update: p = p - lr * grad
-        p = p - lr * grad
-    return history
+    total_potential = u_att + u_rep
+    total_force = (grad_att + grad_rep) * -1.0  # Force is -∇U
+    return total_potential, total_force
 
 
-def optimize_momentum_gd(start: Vector2D, lr: float, beta: float = 0.8, steps: int = 15) -> List[Tuple[int, Vector2D, float]]:
-    history = []
-    p = Vector2D(start.x, start.y)
-    v = Vector2D(0.0, 0.0)  # Velocity buffer
-    for k in range(steps):
-        loss = LossLandscape.evaluate(p)
-        grad = LossLandscape.analytical_gradient(p)
-        history.append((k, p, loss))
-        # Momentum update: v = beta * v + (1 - beta) * grad
-        v = (beta * v) + ((1.0 - beta) * grad)
-        p = p - lr * v
-    return history
-
-
-def benchmark_optimizers():
-    start_pos = Vector2D(5.0, 1.0)
-    print("=" * 70)
-    print("1. NUMERICAL VS ANALYTICAL GRADIENT VERIFICATION")
-    print("=" * 70)
-    grad_ana = LossLandscape.analytical_gradient(start_pos)
-    grad_num = LossLandscape.numerical_gradient(start_pos)
-    print(f"Position            : {start_pos}")
-    print(f"Analytical Gradient : {grad_ana}")
-    print(f"Numerical Gradient  : {grad_num}")
-    diff = (grad_ana - grad_num).magnitude()
-    print(f"Gradient Error Norm : {diff:.8e} (Finite difference verified!)")
-
-    print("\n" + "=" * 70)
-    print("2. OPTIMIZATION ON NARROW RAVINE (LR = 0.08)")
-    print("=" * 70)
-    hist_vanilla = optimize_vanilla_gd(start_pos, lr=0.08, steps=6)
-    hist_momentum = optimize_momentum_gd(start_pos, lr=0.35, beta=0.75, steps=6)
-
-    print("Step | Vanilla GD Position       | Loss     | Momentum GD Position      | Loss")
-    print("-" * 75)
-    for i in range(6):
-        _, p_v, l_v = hist_vanilla[i]
-        _, p_m, l_m = hist_momentum[i]
-        print(f" {i:2d}  | {str(p_v):24s} | {l_v:8.4f} | {str(p_m):24s} | {l_m:8.4f}")
+def simulate_gradient_descent(lr: float, steps: int = 6):
+    print(f"\n--- Gradient Descent on Ravine (Learning Rate η = {lr:.2f}) ---")
+    pos = Vector2D(2.0, 1.0)
+    for step in range(steps):
+        loss, grad = ravines_surface(pos.x, pos.y)
+        print(f"Step {step}: Pos={pos} | Loss={loss:8.4f} | Grad_Norm={grad.magnitude():8.4f}")
+        pos = Vector2D(pos.x - lr * grad.x, pos.y - lr * grad.y)
+        if math.isnan(pos.x) or abs(pos.y) > 1e4:
+            print(f">> DIVERGED TO INFINITY (Ping-pong explosion) at step {step+1}!")
+            break
 
 
 if __name__ == "__main__":
-    benchmark_optimizers()
+    print("=" * 65)
+    print("1. ARTIFICIAL POTENTIAL FIELD NAVIGATION")
+    print("=" * 65)
+    robot = Vector2D(-2.0, 0.2)
+    goal = Vector2D(2.0, 0.0)
+    obs = Vector2D(0.0, 0.0)
+
+    pot, force = potential_field(robot, goal, obs)
+    print(f"Robot Pos: {robot} | Goal: {goal} | Obstacle: {obs}")
+    print(f"Total Potential Energy U : {pot:.4f}")
+    print(f"Steering Force Vector -∇U : {force} (Magnitude: {force.magnitude():.4f} N)")
+
+    print("\n" + "=" * 65)
+    print("2. LEARNING RATE STABILITY BENCHMARK")
+    print("=" * 65)
+    simulate_gradient_descent(lr=0.08)  # Stable
+    simulate_gradient_descent(lr=0.11)  # Unstable explosion
 ```
 
 ---
 
-## Part 5: Review Checkpoints & Deep-Dive Exploration Prompts
+## 5. Review Checkpoints & Deep-Dive Prompts
 
-### Review Checkpoints (Test Your Understanding)
+### Review Checkpoints
 
-#### Checkpoint 1: Computing 2D Gradient and Steepest Ascent
-**Question:** Consider the objective function `f(x, y) = 3·x²·y - 4·y³ + 2·x`.
+#### Checkpoint 1: Gradient and Directional Derivative Calculation
+**Question:** Consider the scalar loss function `f(x, y) = x³ - 3·x·y + 2·y²`.
 1. Compute the analytical gradient vector `∇f(x, y)`.
-2. Evaluate `∇f` at the point `(1, 2)`.
-3. What is the unit vector direction `û_max` of steepest ascent at `(1, 2)`, and what is the maximum slope?
+2. Evaluate the gradient at point `P = (2, 1)`.
+3. Compute the directional derivative at point `P` in the direction of unit vector `û = [1/√2, 1/√2]ᵀ`.
 
 **Solution:**
 1. Compute partial derivatives:
    ```
-   ∂f / ∂x = 6·x·y + 2
-   ∂f / ∂y = 3·x² - 12·y²
-   ∇f(x, y) = [ 6·x·y + 2,  3·x² - 12·y² ]ᵀ
+   ∂f / ∂x = 3·x² - 3·y
+   ∂f / ∂y = -3·x + 4·y
+   ∇f(x, y) = [ 3·x² - 3·y , -3·x + 4·y ]ᵀ
    ```
-2. Evaluate at `x = 1, y = 2`:
+2. Evaluate at `(2, 1)`:
    ```
-   ∂f/∂x = 6(1)(2) + 2 = 12 + 2 = 14
-   ∂f/∂y = 3(1)² - 12(2)² = 3 - 48 = -45
-   ∇f(1, 2) = [ 14, -45 ]ᵀ
+   ∂f / ∂x = 3·(2)² - 3·(1) = 12 - 3 = 9
+   ∂f / ∂y = -3·(2) + 4·(1) = -6 + 4 = -2
+   ∇f(2, 1) = [ 9 , -2 ]ᵀ
    ```
-3. **Direction of Steepest Ascent & Maximum Slope:**
+3. Directional derivative `D_u(f) = ∇f · û`:
    ```
-   ||∇f|| = √(14² + (-45)²) = √(196 + 2025) = √2221 ≈ 47.127
-   û_max = ∇f / ||∇f|| = [ 14 / 47.127, -45 / 47.127 ]ᵀ ≈ [ +0.2971, -0.9549 ]ᵀ
+   D_u(f) = (9) · (1/√2) + (-2) · (1/√2) = 7 / √2 ≈ +4.9497
    ```
-   The maximum slope is **`47.127`** along unit vector `[+0.2971, -0.9549]ᵀ`.
 
-#### Checkpoint 2: Multivariable Chain Rule on a Kinematic Trajectory
-**Question:** A scalar temperature field in an arena is `T(x, y) = 100 - (x² + 2·y²)`. A robot drives along a trajectory given by `x(t) = 3·cos(t)` and `y(t) = 2·sin(t)`.
-Find the time rate of change of temperature experienced by the robot `dT/dt` at `t = π/4`.
+#### Checkpoint 2: The Chain Rule on Composite Neural Losses
+**Question:** Let loss `L = (1/2)·(z - y_true)²` where `z = w₁·x₁ + w₂·x₂ + b`. 
+Use the chain rule to derive the exact partial derivative `∂L / ∂w₁`.
 
 **Solution:**
-1. Compute partial derivatives of `T(x, y)`:
-   - `∂T/∂x = -2·x`
-   - `∂T/∂y = -4·y`
-2. Compute time derivatives of position:
-   - `dx/dt = -3·sin(t)`
-   - `dy/dt = +2·cos(t)`
-3. Apply multivariable chain rule:
+1. Identify intermediate variable: `z = w₁·x₁ + w₂·x₂ + b`.
+2. Differentiate `L` with respect to `z`:
    ```
-   dT / dt = (∂T / ∂x)·(dx / dt) + (∂T / ∂y)·(dy / dt)
-           = (-2·x)·(-3·sin t) + (-4·y)·(2·cos t)
-           = 6·x·sin(t) - 8·y·cos(t)
+   ∂L / ∂z = 2 · (1/2) · (z - y_true) · (1) = (z - y_true)
    ```
-4. Evaluate at `t = π/4` where `cos(π/4) = sin(π/4) = √2 / 2`:
-   - `x = 3·(√2/2) = 1.5·√2`
-   - `y = 2·(√2/2) = √2`
+3. Differentiate `z` with respect to parameter `w₁`:
    ```
-   dT/dt = 6·(1.5·√2)·(√2/2) - 8·(√2)·(√2/2)
-         = 6·(1.5)·(1) - 8·(1) = 9 - 8 = +1.0
+   ∂z / ∂w₁ = x₁
    ```
-   The robot experiences a temperature rise of **`+1.0 degrees/second`**.
+4. Apply the single-variable chain rule:
+   ```
+   ∂L / ∂w₁ = (∂L / ∂z) · (∂z / ∂w₁) = (z - y_true) · x₁
+   ```
 
 ---
 
 ### Deep-Dive Exploration Prompts
 
-1. **Second-Order Curvature & The Hessian Matrix:** While the gradient `∇f` contains first derivatives, the **Hessian matrix** `H_ij = ∂²f / ∂x_i ∂x_j` captures local curvature. How does Newton's optimization method `x[k+1] = x[k] - H⁻¹·∇f` achieve quadratic convergence compared to first-order gradient descent?
-2. **Reverse-Mode vs Forward-Mode Automatic Differentiation:** In automatic differentiation engines (JAX, PyTorch), reverse-mode AD computes `∂y / ∂x` for `f: ℝⁿ ➔ ℝ¹` in a single backward sweep. Why is reverse-mode AD `O(1)` in computational passes for scalar loss functions with 100 billion parameters, while forward-mode AD would require 100 billion passes?
+1. **The Hessian Matrix & Second-Order Curvature:** The Hessian matrix `H` contains all second-order partial derivatives `∂²f / ∂x_i ∂x_j`. How do the eigenvalues of `H` determine whether a critical point (`∇f = 0`) is a local minimum, local maximum, or a saddle point?
+2. **Momentum & Adam Optimizers:** Heavy-ball momentum adds a velocity term `v[k+1] = β·v[k] + (1-β)·∇f`. How does this physical analogy of a rolling ball with mass prevent the optimizer from ping-ponging across steep ravine walls?
 
 ---
 
@@ -466,6 +411,6 @@ Find the time rate of change of temperature experienced by the robot `dT/dt` at 
 
 * **Backward Link:** Concept 01 (Vectors, dot products) and Concept 03 (Derivatives).
 * **Forward Links:**
-  * **Concept 05 (Loss Landscapes & Optimization):** Gradient descent, Adam, and momentum algorithms.
-  * **Concept 07 (Vector Calculus Backpropagation):** Reverse-mode gradient computation across deep computation graphs.
-  * **Concept 18 (Policy Gradients):** Reinforcement learning policy gradient theorem `∇_θ J(θ) = E[ ∇_θ log π_θ(a|s) · Q(s, a) ]`.
+  * **Concept 05 (Loss Landscapes & Optimization):** Momentum, RMSProp, and Adam optimizers.
+  * **Concept 07 (Vector Calculus Backpropagation):** Reverse-mode automatic differentiation in deep networks.
+  * **Concept 18 (Policy Gradients & PPO):** Computing policy gradients `∇_θ J(θ) = E[ ∇_θ log π_θ(a|s) · Q(s,a) ]` for robot reinforcement learning.
