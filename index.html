@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Axon: First-Principles Autonomous Robotics & Applied Math Curriculum</title>
+  <script>
+    (function() {
+      const saved = localStorage.getItem('axon_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
   <style>
     :root {
       --bg-dark: #07090e;
@@ -60,12 +66,10 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      flex-wrap: wrap;
       gap: 16px;
     }
     .brand-wrap {
       flex: 1;
-      min-width: 280px;
     }
     .brand {
       display: flex;
@@ -107,10 +111,14 @@
       color: var(--text-main);
       font-size: 0.8rem;
       font-weight: 600;
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       transition: all 0.15s;
+      white-space: nowrap;
     }
     .btn-theme:hover {
       border-color: var(--accent-blue);
@@ -344,7 +352,7 @@
         <p class="tagline">A first-principles curriculum for mastering 25 foundational concepts across applied mathematics, physical dynamics, control theory, machine learning, and autonomous robotics.</p>
       </div>
       <div class="header-actions">
-        <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
+        <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme (Dark/Light)">Theme: Dark</button>
       </div>
     </header>
 
@@ -661,6 +669,15 @@
         btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
       }
     }
+
+    // Synchronize theme changes across open tabs/windows
+    window.addEventListener('storage', (e) => {
+      if (e.key === THEME_KEY) {
+        const newTheme = e.newValue || 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        updateThemeButton(newTheme);
+      }
+    });
 
     function getStoredProgress() {
       try {

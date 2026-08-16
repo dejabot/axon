@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Concept 02: Trigonometry, atan2 & Continuous Angle Topology</title>
+  <script>
+    (function() {
+      const saved = localStorage.getItem('axon_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
   <style>
     :root {
       --bg-dark: #0a0d14;
@@ -74,20 +80,25 @@
     .header-nav {
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
     }
     .nav-links a, .btn-theme {
       color: var(--text-main);
       text-decoration: none;
       font-size: 0.8rem;
-      padding: 6px 12px;
+      padding: 7px 12px;
       background: var(--btn-bg);
       border: 1px solid var(--card-border);
       border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.2s;
+      transition: all 0.15s;
+      white-space: nowrap;
     }
     .nav-links a:hover, .btn-theme:hover {
       background: var(--btn-hover);
@@ -282,11 +293,11 @@
       <p>Axon Stage 1: The Unified Math Engine</p>
     </div>
     <div class="header-nav">
-      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
       <div class="nav-links">
         <a href="README.md">Concept Guide</a>
         <a href="../../../index.html">Master Dashboard</a>
       </div>
+      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme (Dark/Light)">Theme: Dark</button>
     </div>
   </header>
 
@@ -407,6 +418,15 @@
       const btn = document.getElementById('themeToggleBtn');
       if (btn) btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
     }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === THEME_KEY) {
+        const newTheme = e.newValue || 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        updateThemeButton(newTheme);
+        draw();
+      }
+    });
 
     const canvas = document.getElementById('angleCanvas');
     const ctx = canvas.getContext('2d');

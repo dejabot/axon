@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Concept 01: 2D Matrix Transformation & Basis Space Visualizer</title>
+  <script>
+    (function() {
+      const saved = localStorage.getItem('axon_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
   <style>
     :root {
       --bg-dark: #0a0d14;
@@ -74,20 +80,25 @@
     .header-nav {
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
     }
     .nav-links a, .btn-theme {
       color: var(--text-main);
       text-decoration: none;
       font-size: 0.8rem;
-      padding: 6px 12px;
+      padding: 7px 12px;
       background: var(--btn-bg);
       border: 1px solid var(--card-border);
       border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.2s;
+      transition: all 0.15s;
+      white-space: nowrap;
     }
     .nav-links a:hover, .btn-theme:hover {
       background: var(--btn-hover);
@@ -260,11 +271,11 @@
       <p>Axon Stage 1: The Unified Math Engine</p>
     </div>
     <div class="header-nav">
-      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
       <div class="nav-links">
         <a href="README.md">Concept Guide</a>
         <a href="../../../index.html">Master Dashboard</a>
       </div>
+      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme (Dark/Light)">Theme: Dark</button>
     </div>
   </header>
 
@@ -375,15 +386,21 @@
       if (btn) btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
     }
 
+    window.addEventListener('storage', (e) => {
+      if (e.key === THEME_KEY) {
+        const newTheme = e.newValue || 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        updateThemeButton(newTheme);
+        draw();
+      }
+    });
+
     const canvas = document.getElementById('transformCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Matrix elements
     let A = { a: 1.0, b: 0.0, c: 0.0, d: 1.0 };
-    // Test vector v (in original coordinates)
     let testV = { x: 1.5, y: 1.0 };
 
-    // Coordinate grid settings
     let unitSize = 60;
     let origin = { x: 0, y: 0 };
     let draggingTarget = null;
@@ -441,7 +458,7 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Draw original faint background grid
+      // 1. Grid
       ctx.lineWidth = 1;
       ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.04)';
       const maxGrid = 8;
@@ -455,7 +472,7 @@
         ctx.beginPath(); ctx.moveTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.stroke();
       }
 
-      // 2. Draw transformed warped coordinate grid
+      // 2. Warped grid
       ctx.lineWidth = 1;
       ctx.strokeStyle = isLight ? 'rgba(2, 132, 199, 0.25)' : 'rgba(56, 189, 248, 0.15)';
       for (let i = -maxGrid; i <= maxGrid; i++) {
@@ -476,7 +493,7 @@
         ctx.beginPath(); ctx.moveTo(ps.x, ps.y); ctx.lineTo(pe.x, pe.y); ctx.stroke();
       }
 
-      // 3. Draw Main Axes
+      // 3. Axes
       ctx.lineWidth = 1.5;
       ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.2)';
       ctx.beginPath();
@@ -484,7 +501,7 @@
       ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, height);
       ctx.stroke();
 
-      // 4. Draw Shaded Parallelogram (Determinant area)
+      // 4. Shaded Parallelogram
       const det = (A.a * A.d) - (A.b * A.c);
       const o  = toScreen(0, 0);
       const iL = toScreen(A.a, A.c);
@@ -510,7 +527,7 @@
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // 5. Draw Transformed Basis Vectors
+      // 5. Basis vectors
       drawArrow(o.x, o.y, iL.x, iL.y, isLight ? '#16a34a' : '#4ade80', 3.5, 12);
       drawArrow(o.x, o.y, jL.x, jL.y, isLight ? '#e11d48' : '#f43f5e', 3.5, 12);
 
@@ -521,7 +538,7 @@
       ctx.fillStyle = isLight ? '#e11d48' : '#f43f5e';
       ctx.fillText(`ĵ' [${A.b.toFixed(2)}, ${A.d.toFixed(2)}]`, jL.x + 8, jL.y - 8);
 
-      // 6. Draw Test Vector v and Transformed A·v
+      // 6. Test vector
       const vOrigScreen = toScreen(testV.x, testV.y);
       const mappedVx = A.a * testV.x + A.b * testV.y;
       const mappedVy = A.c * testV.x + A.d * testV.y;

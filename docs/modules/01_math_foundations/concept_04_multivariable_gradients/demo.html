@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Concept 04: Multivariable Calculus, Gradients & Chain Rule</title>
+  <script>
+    (function() {
+      const saved = localStorage.getItem('axon_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
   <style>
     :root {
       --bg-dark: #0a0d14;
@@ -74,20 +80,25 @@
     .header-nav {
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .nav-links {
+      display: flex;
+      gap: 6px;
     }
     .nav-links a, .btn-theme {
       color: var(--text-main);
       text-decoration: none;
       font-size: 0.8rem;
-      padding: 6px 12px;
+      padding: 7px 12px;
       background: var(--btn-bg);
       border: 1px solid var(--card-border);
       border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.2s;
+      transition: all 0.15s;
+      white-space: nowrap;
     }
     .nav-links a:hover, .btn-theme:hover {
       background: var(--btn-hover);
@@ -267,11 +278,11 @@
       <p>Axon Stage 1: The Unified Math Engine</p>
     </div>
     <div class="header-nav">
-      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()">Theme: Dark</button>
       <div class="nav-links">
         <a href="README.md">Concept Guide</a>
         <a href="../../../index.html">Master Dashboard</a>
       </div>
+      <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme (Dark/Light)">Theme: Dark</button>
     </div>
   </header>
 
@@ -373,6 +384,15 @@
       const btn = document.getElementById('themeToggleBtn');
       if (btn) btn.textContent = theme === 'dark' ? 'Theme: Dark' : 'Theme: Light';
     }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === THEME_KEY) {
+        const newTheme = e.newValue || 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        updateThemeButton(newTheme);
+        draw();
+      }
+    });
 
     const canvas = document.getElementById('contourCanvas');
     const ctx = canvas.getContext('2d');
@@ -505,7 +525,7 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Draw Heatmap
+      // 1. Heatmap
       const gridSize = 35;
       const stepX = width / gridSize;
       const stepY = height / gridSize;
@@ -531,7 +551,7 @@
         }
       }
 
-      // 2. Draw Level Contours
+      // 2. Contours
       ctx.lineWidth = 1;
       ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.08)';
       for (let r = 0.5; r <= 4.0; r += 0.5) {
@@ -569,7 +589,7 @@
         ctx.setLineDash([]);
       }
 
-      // 5. Gradient Vectors at Particle
+      // 5. Vectors at particle
       const { val, dfdx, dfdy } = evaluateField(particle.x, particle.y);
       const gradNorm = Math.hypot(dfdx, dfdy);
       const pScr = toScreen(particle.x, particle.y);
