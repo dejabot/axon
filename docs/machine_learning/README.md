@@ -6,27 +6,27 @@ Welcome to the **Machine Learning & Vision Axon**. This track develops deep lear
 
 ## Modules in this Axon
 
-### [1. Loss Functions & Optimization](01_loss_optimization/README.md)
+### 1. Loss Functions & Optimization
 * *The Real-World Problem:* How does an autonomous model measure its own mistakes and adjust its weights to improve?
-* *Concepts:* Mean Squared Error (MSE), Binary & Categorical Cross-Entropy, Gradient Descent, Learning Rates, and Adam Optimizer.
+* *Key Concepts:* Mean Squared Error (MSE), Binary & Categorical Cross-Entropy, Gradient Descent, Learning Rates, and Adam Optimizer.
 
 ---
 
-### [2. Neural Layers & Activation Functions](02_neural_layers/README.md)
+### 2. Neural Layers & Activation Functions
 * *The Real-World Problem:* Why can't linear equations learn curved decision boundaries, and how do neurons fire?
-* *Concepts:* Dense weight matrices, biases, non-linear activation functions (ReLU, GELU, Sigmoid, Tanh), and Universal Approximation.
+* *Key Concepts:* Dense weight matrices, biases, non-linear activation functions (ReLU, GELU, Sigmoid, Tanh), and Universal Approximation.
 
 ---
 
-### [3. Vector Backpropagation Engine](03_backpropagation/README.md)
+### 3. Vector Backpropagation Engine
 * *The Real-World Problem:* How does a network with 10 million parameters calculate the exact slope for every single weight simultaneously?
-* *Concepts:* Computational DAG graphs, the multivariate Chain Rule, vector gradients, and building an autograd engine in pure Python.
+* *Key Concepts:* Computational DAG graphs, the multivariate Chain Rule, vector gradients, and building an autograd engine in pure Python.
 
 ---
 
-### [4. Computer Vision & Object Detection](04_computer_vision/README.md)
+### 4. Computer Vision & Object Detection
 * *The Real-World Problem:* How does a robot detect, classify, and track game pieces or field targets from raw camera pixel streams at 60 FPS?
-* *Concepts:* 2D Spatial Convolutions, Feature Maps, YOLO single-shot architectures, bounding box regression, and Non-Maximum Suppression (NMS).
+* *Key Concepts:* 2D Spatial Convolutions, Feature Maps, YOLO single-shot architectures, bounding box regression, and Non-Maximum Suppression (NMS).
 
 ---
 

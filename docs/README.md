@@ -6,7 +6,7 @@ Axon is an educational curriculum designed from first principles to bridge high-
 
 ## Pedagogical Philosophy
 
-* **FRC & Everyday Intuition First:** We start with real robot scenarios (scoring targets, joystick steering, sensor jitter, elevator chains, shooter trajectories, obstacle avoidance) before presenting formal equations.
+* **FRC & Everyday Intuition First:** We start with real robot scenarios (scoring targets, joystick steering, sensor jitter, elevator chains, shooter ballistics, obstacle avoidance) before presenting formal equations.
 * **Code-First Explanations:** Every concept is solved in 5–15 lines of clean, readable Python with descriptive variable names.
 * **"Math!" Translation Sidebars:** Formal mathematical symbols, equations, and pronunciation guides are introduced as friendly translations of the code.
 * **Bridge to Machine Learning & Modern Robotics:** Every concept explicitly connects to its role in modern deep learning (embeddings, transformer position encoding, dense layers, diffusion models, backpropagation) and physical robotic autonomy.
@@ -56,46 +56,46 @@ Axon is an educational curriculum designed from first principles to bridge high-
 ---
 
 ### [Axon 02: Machine Learning & Vision](machine_learning/README.md)
-* **[Loss Functions & Optimization](machine_learning/01_loss_optimization/README.md)**: MSE, Cross-Entropy, Gradient Descent, Adam.
-* **[Neural Layers & Activation Functions](machine_learning/02_neural_layers/README.md)**: Dense weights, biases, non-linear activations (ReLU, GELU).
-* **[Vector Backpropagation Engine](machine_learning/03_backpropagation/README.md)**: Computational DAG graphs, multivariate Chain Rule, autograd.
-* **[Computer Vision & Object Detection](machine_learning/04_computer_vision/README.md)**: 2D Spatial Convolutions, YOLO single-shot architectures, bounding box IoU.
+* **Loss Functions & Optimization**: MSE, Cross-Entropy, Gradient Descent, Learning Rates, Adam Optimizer.
+* **Neural Layers & Activation Functions**: Dense weights, biases, non-linear activations (ReLU, GELU, Sigmoid).
+* **Vector Backpropagation Engine**: Computational DAG graphs, multivariate Chain Rule, autograd.
+* **Computer Vision & Object Detection**: 2D Spatial Convolutions, YOLO single-shot architectures, bounding box IoU.
 
 ---
 
 ### [Axon 03: Large Language Models & Transformers](large_language_models/README.md)
-* **[Tokenization & Vector Embeddings](large_language_models/01_embeddings/README.md)**: BPE tokenization, vector lookup spaces, semantic similarity.
-* **[Scaled Dot-Product & Self-Attention](large_language_models/02_attention_heads/README.md)**: Query, Key, Value ($Q, K, V$) projections.
-* **[The Transformer Architecture](large_language_models/03_transformers/README.md)**: Multi-Head Attention, residual skip connections, RMSNorm.
-* **[Generation, RoPE & Sampling](large_language_models/04_generation_sampling/README.md)**: Rotary Position Embeddings, Temperature, Top-$p$ sampling.
+* **Tokenization & Vector Embeddings**: BPE tokenization, vector lookup spaces, semantic similarity.
+* **Scaled Dot-Product & Self-Attention**: Query, Key, Value ($Q, K, V$) projections.
+* **The Transformer Architecture**: Multi-Head Attention, residual skip connections, RMSNorm.
+* **Generation, RoPE & Sampling**: Rotary Position Embeddings, Temperature, Top-$p$ sampling.
 
 ---
 
 ### [Axon 04: Physics, Dynamics & Actuation](physics/README.md)
-* **[DC Motor Electromechanics](physics/01_dc_motors/README.md)**: Brushless motor curves, Back-EMF, $K_t$ and $K_v$ constants.
-* **[Gearboxes & Reflected Inertia](physics/02_gearboxes_inertia/README.md)**: Planetary reductions, torque multiplication, reflected load inertia ($J/G^2$).
-* **[Projectile Ballistics & Shooter Trajectories](physics/03_ballistics_trajectories/README.md)**: 2D parabolic arcs, air drag, Magnus spin, shooter flywheel RPM, shooting on the move.
-* **[Physics Feedforward & Closed-Loop PID](physics/04_feedforward_pid/README.md)**: Voltage models ($kS, kV, kA, kG$), velocity feedforward, PID closed-loop control.
+* **DC Motor Electromechanics**: Brushless motor curves, Back-EMF, $K_t$ and $K_v$ constants.
+* **Gearboxes & Reflected Inertia**: Planetary reductions, torque multiplication, reflected load inertia ($J/G^2$).
+* **Projectile Ballistics & Shooter Trajectories**: 2D parabolic arcs, air drag, Magnus spin, shooter flywheel RPM, shooting on the move.
+* **Physics Feedforward & Closed-Loop PID**: Voltage models ($kS, kV, kA, kG$), velocity feedforward, PID closed-loop control.
 
 ---
 
 ### [Axon 05: Kinematics & Motion Planning](kinematics/README.md)
-* **[Chassis Speeds & Kinematics](kinematics/01_chassis_speeds/README.md)**: Forward/Inverse kinematics, wheel velocity desaturation.
-* **[Swerve Kinematics & 2nd-Order Twist](kinematics/02_swerve_kinematics/README.md)**: 4-wheel decomposition, azimuth optimization, Lie group twist discretization.
-* **[Motion Profiling](kinematics/03_motion_profiling/README.md)**: Trapezoidal and 7-segment S-Curve velocity profiles.
-* **[Holonomic Trajectory Tracking](kinematics/04_trajectory_tracking/README.md)**: Hermite splines, HolonomicDriveController, dynamic obstacle potential fields.
+* **Chassis Speeds & Kinematics**: Forward/Inverse kinematics, wheel velocity desaturation.
+* **Swerve Kinematics & 2nd-Order Twist**: 4-wheel decomposition, azimuth optimization, Lie group twist discretization.
+* **Motion Profiling**: Trapezoidal and 7-segment S-Curve velocity profiles.
+* **Holonomic Trajectory Tracking**: Hermite splines, HolonomicDriveController, dynamic obstacle potential fields.
 
 ---
 
 ### [Axon 06: Localization & State Estimation](localization/README.md)
-* **[Wheel Odometry & Gyro Integration](localization/01_wheel_odometry/README.md)**: Twist dead reckoning, encoder tick accumulation, IMU heading integration.
-* **[AprilTag Computer Vision & PnP Pose](localization/02_vision_pose/README.md)**: Pinhole camera matrix $K$, Perspective-n-Point solvers, camera latency compensation.
-* **[Extended Kalman Filter (EKF)](localization/03_kalman_filters/README.md)**: Multi-state sensor fusion combining high-frequency odometry with low-frequency vision.
+* **Wheel Odometry & Gyro Integration**: Twist dead reckoning, encoder tick accumulation, IMU heading integration.
+* **AprilTag Computer Vision & PnP Pose**: Pinhole camera matrix $K$, Perspective-n-Point solvers, camera latency compensation.
+* **Extended Kalman Filter (EKF)**: Multi-state sensor fusion combining high-frequency odometry with low-frequency vision.
 
 ---
 
 ### [Axon 07: Reinforcement Learning & Agentic Decision Systems](reinforcement_learning/README.md)
-* **[Markov Decision Processes](reinforcement_learning/01_mdp_rewards/README.md)**: States, actions, reward shaping, discount factors.
-* **[Value Functions & Deep Q-Learning](reinforcement_learning/02_q_learning/README.md)**: Bellman optimality, Deep Q-Networks (DQN), experience replay.
-* **[Policy Gradients & Actor-Critic](reinforcement_learning/03_policy_gradients/README.md)**: Continuous action spaces, REINFORCE, PPO.
-* **[Monte Carlo Tree Search](reinforcement_learning/04_mcts_game_agents/README.md)**: UCT tree search, AlphaZero search, real-time match strategists.
+* **Markov Decision Processes**: States, actions, reward shaping, discount factors.
+* **Value Functions & Deep Q-Learning**: Bellman optimality, Deep Q-Networks (DQN), experience replay.
+* **Policy Gradients & Actor-Critic**: Continuous action spaces, REINFORCE, PPO.
+* **Monte Carlo Tree Search**: UCT tree search, AlphaZero search, real-time match strategists.

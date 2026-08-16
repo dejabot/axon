@@ -6,21 +6,21 @@ Welcome to the **Localization & State Estimation Axon**. This track covers how a
 
 ## Modules in this Axon
 
-### [1. Wheel Odometry & Gyro Integration](01_wheel_odometry/README.md)
+### 1. Wheel Odometry & Gyro Integration
 * *The Real-World Problem:* How does a robot track where it is on the carpet by accumulating wheel rotations and IMU heading angles?
-* *Concepts:* Forward kinematics integration, twist accumulation, wheel slip modeling, and systematic odometry drift over time.
+* *Key Concepts:* Forward kinematics integration, twist accumulation, wheel slip modeling, and systematic odometry drift over time.
 
 ---
 
-### [2. AprilTag Computer Vision & PnP Pose](02_vision_pose/README.md)
+### 2. AprilTag Computer Vision & PnP Pose
 * *The Real-World Problem:* How does a camera turn a 2D image of a planar AprilTag into a full 3D robot coordinate `(x, y, z, roll, pitch, yaw)` on the field?
-* *Concepts:* Pinhole camera model, intrinsic matrix $K$, Perspective-n-Point (PnP) solvers, camera-to-robot coordinate transforms, and latency timestamp compensation.
+* *Key Concepts:* Pinhole camera model, intrinsic matrix $K$, Perspective-n-Point (PnP) solvers, camera-to-robot coordinate transforms, and latency timestamp compensation.
 
 ---
 
-### [3. Extended Kalman Filter (EKF) State Estimation](03_kalman_filters/README.md)
+### 3. Extended Kalman Filter (EKF) State Estimation
 * *The Real-World Problem:* How do we combine continuous 100 Hz wheel odometry with intermittent, noisy 30 Hz AprilTag vision measurements into a single rock-solid global pose estimate?
-* *Concepts:* State vector $x = [x, y, \theta]^T$, covariance matrix $P$, process noise $Q$, measurement noise $R$, observation model $h(x)$, and standard WPILib SwerveDrivePoseEstimator integration.
+* *Key Concepts:* State vector $x = [x, y, \theta]^T$, covariance matrix $P$, process noise $Q$, measurement noise $R$, observation model $h(x)$, and standard WPILib SwerveDrivePoseEstimator integration.
 
 ---
 
