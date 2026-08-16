@@ -1,24 +1,26 @@
 # Axon Curriculum Documentation
 
-Axon is an educational curriculum designed from first principles to teach applied mathematics, physics, control theory, machine learning, and autonomous robotics for high-performance engineering (such as FIRST Robotics Competition / FRC and modern AI systems).
+Axon is an educational curriculum designed from first principles to bridge high-school mathematics (algebra, geometry, trigonometry, single-variable calculus) into university-level applied mathematics for autonomous robotics (FIRST Robotics Competition / FRC) and machine learning (grounded in [*Mathematics for Machine Learning*](https://mml-book.github.io/book/mml-book.pdf) by Deisenroth, Faisal, and Ong).
 
 ---
 
-## Philosophy & Structure
+## Pedagogical Philosophy
 
-* **First Principles (No Black Boxes):** Every formula is derived step-by-step with zero hand-waving.
-* **Dual Grounding:** Every mathematical concept is directly connected to an FRC robotics mechanism (e.g., swerve kinematics, elevator feedforward, gyro odometry, quaternion 3D poses) and a core Machine Learning component (e.g., dense layers, loss optimization, backpropagation, rotary embeddings).
-* **Interactive Visualizers:** Every concept includes a companion standalone HTML5/Canvas interactive demo with a shared Dark Mode / Light Mode theme toggle.
+* **High-School On-Ramp:** We take zero university-level math for granted. Every concept starts with simple, intuitive analogies (graph paper steps, clock hands, elevator forces, blindfolded hiking).
+* **First Principles (No Black Boxes):** Every formula is derived step-by-step with clean text and zero hand-waving.
+* **Dual Grounding:** Every mathematical concept is directly connected to a real robot mechanism (e.g., swerve kinematics, elevator feedforward, gyro odometry, quaternion 3D poses) and a core Machine Learning component (e.g., dense layers, loss optimization, backpropagation, rotary embeddings).
+* **Interactive Visualizers:** Every concept includes a standalone HTML5/Canvas interactive demo with a shared Dark Mode / Light Mode theme toggle.
 
 ---
 
 ## Curriculum Outline
 
 ### [Module 1: Math Foundations](modules/01_math_foundations/README.md)
-1. [Vectors, Basis Spaces & Matrix Transformations](modules/01_math_foundations/concept_01_vectors_matrices/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_01_vectors_matrices/demo.html)
-2. [Trigonometry, atan2, Continuous Angle Topology & Quaternions](modules/01_math_foundations/concept_02_trig_angle_topology/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_02_trig_angle_topology/demo.html)
-3. [Single-Variable Motion Calculus & Jerk](modules/01_math_foundations/concept_03_motion_calculus/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_03_motion_calculus/demo.html)
-4. [Multivariable Calculus, Gradients & The Chain Rule](modules/01_math_foundations/concept_04_multivariable_gradients/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_04_multivariable_gradients/demo.html)
+Foundational linear algebra, continuous angle topology, single-variable motion calculus, and multivariable gradient calculus bridging high-school math to MML Part I.
+* [Concept 01: Vectors, Basis Spaces & Matrix Transformations](modules/01_math_foundations/concept_01_vectors_matrices/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_01_vectors_matrices/demo.html)
+* [Concept 02: Trigonometry, atan2, Continuous Angle Topology & Quaternions](modules/01_math_foundations/concept_02_trig_angle_topology/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_02_trig_angle_topology/demo.html)
+* [Concept 03: Single-Variable Motion Calculus & Jerk](modules/01_math_foundations/concept_03_motion_calculus/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_03_motion_calculus/demo.html)
+* [Concept 04: Multivariable Calculus, Gradients & The Chain Rule](modules/01_math_foundations/concept_04_multivariable_gradients/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_04_multivariable_gradients/demo.html)
 
 ---
 

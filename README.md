@@ -1,6 +1,6 @@
 # Axon: First-Principles Math, Physics, ML & Autonomous Robotics Curriculum
 
-Axon is a 25-concept curriculum designed from first principles for applied mathematics, physical dynamics, modern control theory, deep machine learning, and autonomous robotics (such as FIRST Robotics Competition / FRC and modern AI systems).
+Axon is a 25-concept curriculum designed from first principles to bridge high-school mathematics (algebra, Cartesian geometry, trigonometry, single-variable calculus) into the foundational pillars of applied mathematics, machine learning (aligned with [*Mathematics for Machine Learning*](https://mml-book.github.io/book/mml-book.pdf) by Deisenroth, Faisal, and Ong), physical dynamics, control theory, and autonomous robotics (FIRST Robotics Competition / FRC).
 
 Every concept is self-contained with step-by-step mathematical derivations, physical grounding, from-scratch Python simulation engines, and companion interactive visualizers with dark and light themes.
 

@@ -36,9 +36,25 @@ The 5 Modules:
 - **Module 4: Swerve & Sensor Fusion** (Concepts 13–16)
 - **Module 5: Reinforcement Learning & Agents** (Concepts 17–25)
 
+## 2. Pedagogical Architecture: From High-School Math to Advanced ML & Robotics
+
+Axon is specifically designed to provide an intuitive, first-principles on-ramp for students with high-school algebra, geometry, and trigonometry, bridging them into the university-level rigor of [*Mathematics for Machine Learning* (MML)](https://mml-book.github.io/book/mml-book.pdf) by Deisenroth, Faisal, and Ong.
+
+### Mapping to the MML Textbook Foundations
+
+| MML Book Chapter | Core Mathematical Topics | Axon Curriculum Alignment |
+|---|---|---|
+| **Ch 2: Linear Algebra** | Vector spaces, basis, linear independence, linear mappings, matrix rank | **Module 1 (Concept 01)** & **Module 4 (Concept 13)** |
+| **Ch 3: Analytic Geometry** | Norms, inner products, orthogonality, projections, 2D/3D rotations | **Module 1 (Concepts 01, 02)** |
+| **Ch 4: Matrix Decompositions** | Determinants, eigenvalues/eigenvectors, SVD, Cholesky | **Module 1 (Concept 01)**, **Module 2 (Concept 08)** & **Module 3 (Concept 12)** |
+| **Ch 5: Vector Calculus** | Univariate differentiation, gradients, Jacobians, Hessians, Chain Rule, Backprop | **Module 1 (Concepts 03, 04)** & **Module 2 (Concepts 06, 07)** |
+| **Ch 6: Probability & Distributions** | Probability space, Bayes' rule, Gaussian distributions, Covariance matrices | **Module 4 (Concepts 15, 16: AprilTags & EKF)** |
+| **Ch 7: Continuous Optimization** | Gradient descent, learning rates, momentum, constrained optimization | **Module 1 (Concept 04)** & **Module 2 (Concept 05)** |
+| **Part II: ML Problems (Ch 8–12)** | Linear regression, dimensionality reduction (PCA), classification | **Module 2 (Concepts 05–08)** & **Module 5 (Concepts 17–25)** |
+
 ---
 
-## 2. Formatting & Visual Guidelines
+## 3. Directory & Colocation Architectures
 
 ### A. The Strict NO-LaTeX Policy
 - **Never use LaTeX delimiters** (`$`, `$$`, `\(`, `\)`, `\[`, `\]`, `\begin{matrix}`, `\frac{...}`, etc.).
