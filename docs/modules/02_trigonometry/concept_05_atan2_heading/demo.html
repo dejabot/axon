@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 05: atan2 vs atan Visualizer</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+    }
+    .canvas-container {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 0.85rem;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="atanCanvas"></canvas>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Target (dx, dy)</span>
+        <span class="stat-val" id="targetPosText" style="color: var(--accent-amber);">[-2.0, -2.0] m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Quadrant</span>
+        <span class="stat-val" id="quadText" style="color: var(--muted);">Quad III (South-West)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Naive atan(y / x)</span>
+        <span class="stat-val" id="naiveAtanText" style="color: var(--accent-red);">+45.0° (Wrong!)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Correct atan2(y, x)</span>
+        <span class="stat-val" id="smartAtanText" style="color: var(--accent-green); font-size: 1.05rem;">-135.0°</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('atanCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let target = { x: -2.0, y: -2.0 };
+    let dragging = false;
+    const maxBound = 4.0;
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      draw();
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+
+    function toScreen(x, y) {
+      const cx = (canvas.width / (window.devicePixelRatio || 1)) / 2;
+      const cy = (canvas.height / (window.devicePixelRatio || 1)) / 2;
+      const scale = Math.min(cx, cy) * 0.8 / maxBound;
+      return { x: cx + x * scale, y: cy - y * scale };
+    }
+
+    function toMath(sx, sy) {
+      const cx = (canvas.width / (window.devicePixelRatio || 1)) / 2;
+      const cy = (canvas.height / (window.devicePixelRatio || 1)) / 2;
+      const scale = Math.min(cx, cy) * 0.8 / maxBound;
+      return {
+        x: Math.max(-maxBound, Math.min(maxBound, (sx - cx) / scale)),
+        y: Math.max(-maxBound, Math.min(maxBound, -(sy - cy) / scale))
+      };
+    }
+
+    function draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const width = canvas.width / (window.devicePixelRatio || 1);
+      const height = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, width, height);
+
+      const cx = width / 2;
+      const cy = height / 2;
+
+      // Axes
+      ctx.strokeStyle = isLight ? '#cbd5e1' : '#232b3b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(30, cy); ctx.lineTo(width - 30, cy);
+      ctx.moveTo(cx, 30); ctx.lineTo(cx, height - 30);
+      ctx.stroke();
+
+      // Quadrant labels
+      ctx.font = '11px sans-serif';
+      ctx.fillStyle = isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.2)';
+      ctx.fillText('Quad II (+, -)', 45, 50);
+      ctx.fillText('Quad I (+, +)', width - 120, 50);
+      ctx.fillText('Quad III (-, -)', 45, height - 40);
+      ctx.fillText('Quad IV (+, -)', width - 120, height - 40);
+
+      const tScr = toScreen(target.x, target.y);
+
+      // Naive atan angle line (dashed red)
+      const naiveAngle = Math.atan(target.y / (target.x === 0 ? 0.0001 : target.x));
+      const naiveP = { x: Math.cos(naiveAngle) * 3.0, y: Math.sin(naiveAngle) * 3.0 };
+      const naiveScr = toScreen(naiveP.x, naiveP.y);
+
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = isLight ? 'rgba(225, 29, 72, 0.6)' : 'rgba(244, 63, 94, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(naiveScr.x, naiveScr.y); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Correct atan2 angle line (solid green)
+      ctx.strokeStyle = isLight ? '#16a34a' : '#4ade80';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tScr.x, tScr.y); ctx.stroke();
+
+      // Target knob
+      ctx.fillStyle = isLight ? '#d97706' : '#fbbf24';
+      ctx.beginPath(); ctx.arc(tScr.x, tScr.y, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+
+      // Origin dot
+      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
+      ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill();
+
+      // Telemetry
+      const atan2Deg = Math.atan2(target.y, target.x) * 180 / Math.PI;
+      const atan1Deg = Math.atan(target.y / (target.x === 0 ? 0.0001 : target.x)) * 180 / Math.PI;
+
+      let quad = "Quad I";
+      if (target.x < 0 && target.y >= 0) quad = "Quad II (North-West)";
+      else if (target.x < 0 && target.y < 0) quad = "Quad III (South-West)";
+      else if (target.x >= 0 && target.y < 0) quad = "Quad IV (South-East)";
+      else quad = "Quad I (North-East)";
+
+      document.getElementById('targetPosText').textContent = `[${target.x.toFixed(1)}, ${target.y.toFixed(1)}] m`;
+      document.getElementById('quadText').textContent = quad;
+      document.getElementById('naiveAtanText').textContent = `${atan1Deg >= 0 ? '+' : ''}${atan1Deg.toFixed(1)}° ${Math.abs(atan1Deg - atan2Deg) > 5 ? '(Wrong!)' : ''}`;
+      document.getElementById('smartAtanText').textContent = `${atan2Deg >= 0 ? '+' : ''}${atan2Deg.toFixed(1)}°`;
+    }
+
+    function updateFromPointer(e) {
+      const rect = canvas.getBoundingClientRect();
+      const sx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const sy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      target = toMath(sx, sy);
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', (e) => { dragging = true; updateFromPointer(e); });
+    window.addEventListener('mousemove', (e) => { if (dragging) updateFromPointer(e); });
+    window.addEventListener('mouseup', () => dragging = false);
+
+    canvas.addEventListener('touchstart', (e) => { dragging = true; updateFromPointer(e); }, { passive: false });
+    window.addEventListener('touchmove', (e) => { if (dragging) { e.preventDefault(); updateFromPointer(e); } }, { passive: false });
+    window.addEventListener('touchend', () => dragging = false);
+
+    resize();
+  </script>
+</body>
+</html>

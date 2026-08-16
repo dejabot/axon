@@ -1,0 +1,110 @@
+# Concept 08: Vectors, Displacements & Scalar Scaling
+
+```
+       Module 3: Linear Algebra  ➔  Concept 08: Vectors & Scaling
+```
+
+> **▶ Interactive Demo: [Vector Addition & Scaling Sandbox](demo.html)**
+>
+> Open the interactive demo below to drag vector arrows **A** and **B**, adjust the scalar multiplier slider, and see head-to-tail vector addition live.
+
+<iframe src="demo.html" width="100%" height="450" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
+
+---
+
+## 1. The Real-World Problem: Combining Robot Moves
+
+Suppose an autonomous robot performs two sequential driving steps:
+1. **Move A:** Drive 2 meters East and 1 meter North (`[2.0, 1.0]`).
+2. **Move B:** Drive 1 meter East and 2 meters North (`[1.0, 2.0]`).
+
+<div style="text-align: center; margin: 20px 0;">
+  <svg width="300" height="170" viewBox="0 0 300 170" style="max-width: 100%; height: auto;">
+    <!-- Vector A -->
+    <line x1="30" y1="140" x2="150" y2="100" stroke="#38bdf8" stroke-width="3" />
+    <circle cx="150" cy="100" r="4" fill="#38bdf8" />
+    <text x="80" y="115" fill="#38bdf8" font-family="sans-serif" font-weight="bold" font-size="11">Move A [2, 1]</text>
+    
+    <!-- Vector B -->
+    <line x1="150" y1="100" x2="210" y2="20" stroke="#4ade80" stroke-width="3" />
+    <circle cx="210" cy="20" r="4" fill="#4ade80" />
+    <text x="185" y="65" fill="#4ade80" font-family="sans-serif" font-weight="bold" font-size="11">Move B [1, 2]</text>
+    
+    <!-- Sum Vector C -->
+    <line x1="30" y1="140" x2="210" y2="20" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="4,4" />
+    <text x="100" y="60" fill="#fbbf24" font-family="sans-serif" font-weight="bold" font-size="12">Total [3, 3]</text>
+  </svg>
+</div>
+
+Where does the robot end up overall? 
+You simply place the tail of Move B at the tip of Move A (**Head-to-Tail addition**). The net result is:
+* Total X = `2.0 + 1.0 = 3.0 meters`
+* Total Y = `1.0 + 2.0 = 3.0 meters`
+
+---
+
+## 2. Solving It in Code
+
+In Python, adding and scaling vectors is straightforward list arithmetic:
+
+```python
+def add_vectors(v1, v2):
+    """Adds two 2D vectors together."""
+    return [v1[0] + v2[0], v1[1] + v2[1]]
+
+def scale_vector(v, scalar):
+    """Multiplies a vector by a scalar number."""
+    return [v[0] * scalar, v[1] * scalar]
+
+move_A = [2.0, 1.0]
+move_B = [1.0, 2.0]
+
+# 1. Total Move (Vector Addition)
+total_move = add_vectors(move_A, move_B)
+print(f"Total move: {total_move}")  # [3.0, 3.0] meters
+
+# 2. Scale by 2.0x (Drive twice as far)
+boosted_move = scale_vector(total_move, 2.0)
+print(f"Twice as far: {boosted_move}")  # [6.0, 6.0] meters
+```
+
+---
+
+> 💡 **Math Sidebar: Vectors, Scalars & Basis Steps**
+>
+> * **Vector:** An ordered list of numbers representing direction and distance (written as a column `[x, y]ᵀ`).
+> * **Scalar:** A single ordinary number (like `2.0` or `0.5`) that **scales** (stretches or shrinks) a vector.
+> * **Elementary Steps (Basis Vectors):** Every 2D vector `[3, 2]` is just a combination of two standard 1-step moves:
+>   * `1 step East` (called `î` or `e₁`): `[1, 0]`
+>   * `1 step North` (called `ĵ` or `e₂`): `[0, 1]`
+>   * `[3, 2] = 3 · [1, 0] + 2 · [0, 1]`
+
+---
+
+## 3. Bridge to Machine Learning: Word Embeddings
+
+In natural language processing AI (like Word2Vec and ChatGPT):
+* Every word is represented as a list of numbers (a vector in 1536-dimensional space).
+* Because concepts are vectors, the AI can perform vector arithmetic on meanings:
+  ```
+  Vector("King") - Vector("Man") + Vector("Woman") ≈ Vector("Queen")
+  ```
+
+---
+
+## 4. Review Checkpoints
+
+### Checkpoint 1
+You have vector `A = [4.0, -2.0]` and vector `B = [-1.0, 5.0]`.
+Compute `A + B`.
+
+**Solution:**
+`[4.0 + (-1.0), -2.0 + 5.0] = [3.0, 3.0]`.
+
+---
+
+### Checkpoint 2
+A robot's velocity vector is `v = [2.0, 4.0]` m/s. The driver hits the "Turbo" button, scaling velocity by `1.5x`. What is the new velocity vector?
+
+**Solution:**
+`v_turbo = [2.0 · 1.5, 4.0 · 1.5] = [3.0, 6.0] m/s`.

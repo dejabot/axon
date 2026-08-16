@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 13: Elevator Motion & Jerk Visualizer</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+    }
+    .canvas-container {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 10px 16px;
+      border-radius: 10px;
+    }
+    button.mode-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    button.mode-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.15);
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 0.85rem;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="jerkCanvas"></canvas>
+    </div>
+
+    <div class="controls-row">
+      <button class="mode-btn active" id="btnScurve" onclick="setMode('scurve')">1. Smooth S-Curve (Bounded Jerk)</button>
+      <button class="mode-btn" id="btnStep" onclick="setMode('step')">2. Instant Step (Infinite Jerk)</button>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Position x(t)</span>
+        <span class="stat-val" id="posText" style="color: var(--accent);">0.00 m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Velocity v(t)</span>
+        <span class="stat-val" id="velText" style="color: var(--accent-green);">0.00 m/s</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Acceleration a(t)</span>
+        <span class="stat-val" id="accText" style="color: var(--accent-amber);">0.00 m/s²</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Jerk Status</span>
+        <span class="stat-val" id="jerkStatusText" style="color: var(--accent-green);">Smooth (No Shock)</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('jerkCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let mode = 'scurve';
+    let t = 0.0;
+    const duration = 2.0;
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', () => draw());
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById('btnScurve').classList.toggle('active', m === 'scurve');
+      document.getElementById('btnStep').classList.toggle('active', m === 'step');
+      t = 0.0;
+    }
+
+    function calcState(curT) {
+      const p = Math.min(1.0, Math.max(0.0, curT / duration));
+      if (mode === 'step') {
+        const isStart = curT < 0.05;
+        return {
+          x: p * 2.0,
+          v: (p < 1.0) ? 1.0 : 0.0,
+          a: isStart ? 40.0 : 0.0,
+          j: isStart ? 400.0 : 0.0
+        };
+      } else {
+        const s = 10*(p**3) - 15*(p**4) + 6*(p**5);
+        const sDot = (30*(p**2) - 60*(p**3) + 30*(p**4)) / duration;
+        const sDDot = (60*p - 180*(p**2) + 120*(p**3)) / (duration**2);
+        return {
+          x: s * 2.0,
+          v: sDot * 2.0,
+          a: sDDot * 2.0,
+          j: (60 - 360*p + 360*(p**2)) / (duration**3) * 2.0
+        };
+      }
+    }
+
+    let lastTime = performance.now();
+    function animate(now) {
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+
+      t += dt;
+      if (t > duration + 0.8) t = 0.0;
+
+      draw();
+      requestAnimationFrame(animate);
+    }
+
+    function draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const width = canvas.width / (window.devicePixelRatio || 1);
+      const height = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, width, height);
+
+      const state = calcState(t);
+
+      // Elevator Mast (Left)
+      const mastW = 90;
+      const mastH = height - 40;
+      ctx.fillStyle = isLight ? '#f1f5f9' : '#0f131c';
+      ctx.fillRect(30, 20, mastW, mastH);
+      ctx.strokeStyle = isLight ? '#cbd5e1' : '#232b3b';
+      ctx.strokeRect(30, 20, mastW, mastH);
+
+      // Elevator Carriage
+      const travelFrac = state.x / 2.0;
+      const carriageY = (height - 70) - travelFrac * (height - 110);
+      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
+      ctx.fillRect(35, carriageY, mastW - 10, 40);
+
+      // Coffee Cup
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(35 + (mastW - 10)/2 - 10, carriageY + 10, 20, 20);
+
+      // Coffee slosh
+      ctx.fillStyle = '#b45309';
+      let slosh = (state.j * 0.02) + (state.a * 0.05);
+      if (mode === 'step' && t < 0.15) slosh = 1.0;
+      slosh = Math.max(-0.6, Math.min(0.6, slosh));
+
+      ctx.beginPath();
+      ctx.moveTo(35 + (mastW - 10)/2 - 8, carriageY + 16);
+      ctx.lineTo(35 + (mastW - 10)/2 + 8, carriageY + 16 + slosh * 14);
+      ctx.lineTo(35 + (mastW - 10)/2 + 8, carriageY + 28);
+      ctx.lineTo(35 + (mastW - 10)/2 - 8, carriageY + 28);
+      ctx.closePath();
+      ctx.fill();
+
+      // Velocity plot (Right)
+      const plotX = 150;
+      const plotW = width - plotX - 30;
+      const plotH = height - 60;
+      ctx.fillStyle = isLight ? '#ffffff' : '#0a0d14';
+      ctx.fillRect(plotX, 30, plotW, plotH);
+      ctx.strokeStyle = isLight ? '#e2e8f0' : '#1e2638';
+      ctx.strokeRect(plotX, 30, plotW, plotH);
+
+      ctx.strokeStyle = isLight ? '#16a34a' : '#4ade80';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      const steps = 60;
+      for (let i = 0; i <= steps; i++) {
+        const sT = (i / steps) * duration;
+        const s = calcState(sT);
+        const px = plotX + (i / steps) * plotW;
+        const py = 30 + plotH - (s.v / 2.2) * (plotH - 20) - 10;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Scrub line
+      const curPx = plotX + (Math.min(t, duration) / duration) * plotW;
+      ctx.strokeStyle = isLight ? '#0f172a' : '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(curPx, 30); ctx.lineTo(curPx, 30 + plotH); ctx.stroke();
+
+      // Telemetry
+      document.getElementById('posText').textContent = `${state.x.toFixed(2)} m`;
+      document.getElementById('velText').textContent = `${state.v.toFixed(2)} m/s`;
+      document.getElementById('accText').textContent = `${state.a >= 0 ? '+' : ''}${state.a.toFixed(2)} m/s²`;
+      
+      const statusEl = document.getElementById('jerkStatusText');
+      if (mode === 'step' && t < 0.15) {
+        statusEl.textContent = 'SHOCK (INFINITE JERK!)';
+        statusEl.style.color = 'var(--accent-red)';
+      } else {
+        statusEl.textContent = 'Smooth (No Shock)';
+        statusEl.style.color = 'var(--accent-green)';
+      }
+    }
+
+    resize();
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

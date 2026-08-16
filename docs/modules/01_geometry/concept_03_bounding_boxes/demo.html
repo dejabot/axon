@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 03: 2D Bounding Box Collision Visualizer</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+    }
+    .canvas-container {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 0.85rem;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+    .badge-safe { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
+    .badge-hit { background: rgba(244, 63, 94, 0.2); color: var(--accent-red); }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="boxCanvas"></canvas>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Robot Bounding Box</span>
+        <span class="stat-val" id="robotBoxText" style="color: var(--accent);">[2.0, 1.0] to [2.9, 1.9]</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Obstacle Bounding Box</span>
+        <span class="stat-val" id="obsBoxText" style="color: var(--muted);">[4.0, 2.0] to [5.5, 3.5]</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Collision Status</span>
+        <span id="statusBadge" class="badge badge-safe">Path Clear (Safe)</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('boxCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const fieldX = 10.0;
+    const fieldY = 6.0;
+
+    let robot = { x: 2.0, y: 2.0, w: 1.0, h: 1.0 };
+    let obstacle = { x: 5.0, y: 2.0, w: 1.6, h: 1.6 };
+    let dragging = null;
+    let dragOffset = { x: 0, y: 0 };
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      draw();
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+
+    function toScreen(mx, my) {
+      const pad = 30;
+      const w = (canvas.width / (window.devicePixelRatio || 1)) - pad * 2;
+      const h = (canvas.height / (window.devicePixelRatio || 1)) - pad * 2;
+      return {
+        x: pad + (mx / fieldX) * w,
+        y: pad + h - (my / fieldY) * h
+      };
+    }
+
+    function toMeters(sx, sy) {
+      const pad = 30;
+      const w = (canvas.width / (window.devicePixelRatio || 1)) - pad * 2;
+      const h = (canvas.height / (window.devicePixelRatio || 1)) - pad * 2;
+      return {
+        x: Math.max(0, Math.min(fieldX, ((sx - pad) / w) * fieldX)),
+        y: Math.max(0, Math.min(fieldY, (1.0 - (sy - pad) / h) * fieldY))
+      };
+    }
+
+    function draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const width = canvas.width / (window.devicePixelRatio || 1);
+      const height = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Grid background
+      ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.03)';
+      ctx.lineWidth = 1;
+      for (let x = 1; x < fieldX; x++) {
+        const p1 = toScreen(x, 0); const p2 = toScreen(x, fieldY);
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+      }
+      for (let y = 1; y < fieldY; y++) {
+        const p1 = toScreen(0, y); const p2 = toScreen(fieldX, y);
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+      }
+
+      // Check collision
+      const r_x_min = robot.x, r_x_max = robot.x + robot.w;
+      const r_y_min = robot.y, r_y_max = robot.y + robot.h;
+      const o_x_min = obstacle.x, o_x_max = obstacle.x + obstacle.w;
+      const o_y_min = obstacle.y, o_y_max = obstacle.y + obstacle.h;
+
+      const no_x = (r_x_max < o_x_min) || (r_x_min > o_x_max);
+      const no_y = (r_y_max < o_y_min) || (r_y_min > o_y_max);
+      const isColliding = !(no_x || no_y);
+
+      // Draw Obstacle Box
+      const oTL = toScreen(o_x_min, o_y_max);
+      const oBR = toScreen(o_x_max, o_y_min);
+      ctx.fillStyle = isLight ? 'rgba(100, 116, 139, 0.25)' : 'rgba(71, 85, 105, 0.35)';
+      ctx.fillRect(oTL.x, oTL.y, oBR.x - oTL.x, oBR.y - oTL.y);
+      ctx.strokeStyle = isLight ? '#64748b' : '#94a3b8';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(oTL.x, oTL.y, oBR.x - oTL.x, oBR.y - oTL.y);
+
+      // Draw Robot Box
+      const rTL = toScreen(r_x_min, r_y_max);
+      const rBR = toScreen(r_x_max, r_y_min);
+      if (isColliding) {
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.35)';
+        ctx.strokeStyle = isLight ? '#e11d48' : '#f43f5e';
+      } else {
+        ctx.fillStyle = isLight ? 'rgba(2, 132, 199, 0.25)' : 'rgba(56, 189, 248, 0.25)';
+        ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
+      }
+      ctx.fillRect(rTL.x, rTL.y, rBR.x - rTL.x, rBR.y - rTL.y);
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(rTL.x, rTL.y, rBR.x - rTL.x, rBR.y - rTL.y);
+
+      // Labels
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = isLight ? '#0f172a' : '#f8fafc';
+      ctx.fillText('Robot', rTL.x + 8, rTL.y + 20);
+      ctx.fillStyle = isLight ? '#475569' : '#94a3b8';
+      ctx.fillText('Obstacle', oTL.x + 8, oTL.y + 20);
+
+      // Update UI
+      document.getElementById('robotBoxText').textContent = `[${r_x_min.toFixed(1)}, ${r_y_min.toFixed(1)}] to [${r_x_max.toFixed(1)}, ${r_y_max.toFixed(1)}]`;
+      document.getElementById('obsBoxText').textContent = `[${o_x_min.toFixed(1)}, ${o_y_min.toFixed(1)}] to [${o_x_max.toFixed(1)}, ${o_y_max.toFixed(1)}]`;
+      
+      const badge = document.getElementById('statusBadge');
+      if (isColliding) {
+        badge.className = 'badge badge-hit';
+        badge.textContent = 'COLLISION DETECTED!';
+      } else {
+        badge.className = 'badge badge-safe';
+        badge.textContent = 'Path Clear (Safe)';
+      }
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - rect.left, y: cy - rect.top };
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const p = getPos(e);
+      const m = toMeters(p.x, p.y);
+      if (m.x >= robot.x && m.x <= robot.x + robot.w && m.y >= robot.y && m.y <= robot.y + robot.h) {
+        dragging = 'robot';
+        dragOffset = { x: m.x - robot.x, y: m.y - robot.y };
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const p = getPos(e);
+      const m = toMeters(p.x, p.y);
+      robot.x = Math.max(0, Math.min(fieldX - robot.w, m.x - dragOffset.x));
+      robot.y = Math.max(0, Math.min(fieldY - robot.h, m.y - dragOffset.y));
+      draw();
+    });
+
+    window.addEventListener('mouseup', () => dragging = null);
+
+    canvas.addEventListener('touchstart', (e) => {
+      const p = getPos(e);
+      const m = toMeters(p.x, p.y);
+      if (m.x >= robot.x && m.x <= robot.x + robot.w && m.y >= robot.y && m.y <= robot.y + robot.h) {
+        dragging = 'robot';
+        dragOffset = { x: m.x - robot.x, y: m.y - robot.y };
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      const p = getPos(e);
+      const m = toMeters(p.x, p.y);
+      robot.x = Math.max(0, Math.min(fieldX - robot.w, m.x - dragOffset.x));
+      robot.y = Math.max(0, Math.min(fieldY - robot.h, m.y - dragOffset.y));
+      draw();
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => dragging = null);
+
+    resize();
+  </script>
+</body>
+</html>

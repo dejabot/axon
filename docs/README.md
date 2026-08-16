@@ -1,60 +1,54 @@
 # Axon Curriculum Documentation
 
-Axon is an educational curriculum designed from first principles to bridge high-school mathematics (algebra, geometry, trigonometry, single-variable calculus) into university-level applied mathematics for autonomous robotics (FIRST Robotics Competition / FRC) and machine learning (grounded in [*Mathematics for Machine Learning*](https://mml-book.github.io/book/mml-book.pdf) by Deisenroth, Faisal, and Ong).
+Axon is an educational curriculum designed from first principles to bridge high-school mathematics (algebra, geometry, trigonometry, single-variable calculus) into university-level applied mathematics, physical dynamics, autonomous robotics (FIRST Robotics Competition / FRC), and machine learning (grounded in [*Mathematics for Machine Learning*](https://mml-book.github.io/book/mml-book.pdf) by Deisenroth, Faisal, and Ong).
 
 ---
 
 ## Pedagogical Philosophy
 
-* **High-School On-Ramp:** We take zero university-level math for granted. Every concept starts with simple, intuitive analogies (graph paper steps, clock hands, elevator forces, blindfolded hiking).
-* **First Principles (No Black Boxes):** Every formula is derived step-by-step with clean text and zero hand-waving.
-* **Dual Grounding:** Every mathematical concept is directly connected to a real robot mechanism (e.g., swerve kinematics, elevator feedforward, gyro odometry, quaternion 3D poses) and a core Machine Learning component (e.g., dense layers, loss optimization, backpropagation, rotary embeddings).
-* **Interactive Visualizers:** Every concept includes a standalone HTML5/Canvas interactive demo with a shared Dark Mode / Light Mode theme toggle.
+* **FRC & Everyday Intuition First:** We start with real robot scenarios (scoring targets, joystick steering, elevator chains, obstacle avoidance) before presenting formal equations.
+* **Code-First Explanations:** Every concept is solved in 5–15 lines of clean, readable Python with descriptive variable names.
+* **"Math!" Translation Sidebars:** Formal mathematical symbols, equations, and pronunciation guides are introduced as friendly translations of the code.
+* **Bridge to Machine Learning:** Every math concept explicitly connects to its role in modern deep learning (embeddings, transformer position encoding, dense layers, backpropagation).
+* **Clean Interactive Visualizers:** Every concept includes a companion interactive HTML5/Canvas demo with dark/light theming.
 
 ---
 
 ## Curriculum Outline
 
-### [Module 1: Math Foundations](modules/01_math_foundations/README.md)
-Foundational linear algebra, continuous angle topology, single-variable motion calculus, and multivariable gradient calculus bridging high-school math to MML Part I.
-* [Concept 01: Vectors, Basis Spaces & Matrix Transformations](modules/01_math_foundations/concept_01_vectors_matrices/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_01_vectors_matrices/demo.html)
-* [Concept 02: Trigonometry, atan2, Continuous Angle Topology & Quaternions](modules/01_math_foundations/concept_02_trig_angle_topology/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_02_trig_angle_topology/demo.html)
-* [Concept 03: Single-Variable Motion Calculus & Jerk](modules/01_math_foundations/concept_03_motion_calculus/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_03_motion_calculus/demo.html)
-* [Concept 04: Multivariable Calculus, Gradients & The Chain Rule](modules/01_math_foundations/concept_04_multivariable_gradients/README.md) — [Interactive Visualizer](modules/01_math_foundations/concept_04_multivariable_gradients/demo.html)
+### [Module 1: Geometry for Robotics](modules/01_geometry/README.md)
+* [Concept 01: Coordinates, Poses & Pythagorean Distance](modules/01_geometry/concept_01_coordinates_distance/README.md) — [Interactive Visualizer](modules/01_geometry/concept_01_coordinates_distance/demo.html)
+* [Concept 02: Coordinate Frames (Field vs. Robot vs. Camera)](modules/01_geometry/concept_02_coordinate_frames/README.md) — [Interactive Visualizer](modules/01_geometry/concept_02_coordinate_frames/demo.html)
+* [Concept 03: 2D Bounding Boxes & Collision Detection](modules/01_geometry/concept_03_bounding_boxes/README.md) — [Interactive Visualizer](modules/01_geometry/concept_03_bounding_boxes/demo.html)
 
 ---
 
-### [Module 2: Machine Learning](modules/02_machine_learning/README.md)
-5. Loss Landscapes & Optimization Algorithms (MSE, Cross-Entropy, Adam)
-6. Dense Layers & Non-Linear Activation Functions (ReLU, Sigmoid, GELU)
-7. Vector Calculus Backpropagation & Computation Graphs
-8. In-Browser 2D Neural Classifier Sandbox
+### [Module 2: Trigonometry & Angles](modules/02_trigonometry/README.md)
+* [Concept 04: The Unit Circle & Trigonometric Ratios](modules/02_trigonometry/concept_04_unit_circle_ratios/README.md) — [Interactive Visualizer](modules/02_trigonometry/concept_04_unit_circle_ratios/demo.html)
+* [Concept 05: 4-Quadrant Heading with atan2](modules/02_trigonometry/concept_05_atan2_heading/README.md) — [Interactive Visualizer](modules/02_trigonometry/concept_05_atan2_heading/demo.html)
+* [Concept 06: Angle Wrapping & Swerve 180° Speed Flip](modules/02_trigonometry/concept_06_angle_wrapping_swerve/README.md) — [Interactive Visualizer](modules/02_trigonometry/concept_06_angle_wrapping_swerve/demo.html)
+* [Concept 07: 3D Rotations & Quaternions](modules/02_trigonometry/concept_07_3d_rotations_quaternions/README.md) — [Interactive Visualizer](modules/02_trigonometry/concept_07_3d_rotations_quaternions/demo.html)
 
 ---
 
-### [Module 3: Control & Physics](modules/03_control_physics/README.md)
-9. DC Motor Electromechanics & Torque-Speed Curves
-10. Modern Feedforward Modeling (kS, kV, kA, kG)
-11. Feedback PID Control & Anti-Windup
-12. State-Space Representation & LQR Optimal Control
+### [Module 3: Linear Algebra & Matrix Transformations](modules/03_linear_algebra/README.md)
+* [Concept 08: Vectors, Displacements & Scalar Scaling](modules/03_linear_algebra/concept_08_vectors_scaling/README.md) — [Interactive Visualizer](modules/03_linear_algebra/concept_08_vectors_scaling/demo.html)
+* [Concept 09: Dot Products, Projections & Alignment](modules/03_linear_algebra/concept_09_dot_products/README.md) — [Interactive Visualizer](modules/03_linear_algebra/concept_09_dot_products/demo.html)
+* [Concept 10: Matrices as Coordinate Transformers](modules/03_linear_algebra/concept_10_matrices_transforms/README.md) — [Interactive Visualizer](modules/03_linear_algebra/concept_10_matrices_transforms/demo.html)
+* [Concept 11: Determinants, Inverses & Singularity](modules/03_linear_algebra/concept_11_determinants_inverses/README.md) — [Interactive Visualizer](modules/03_linear_algebra/concept_11_determinants_inverses/demo.html)
 
 ---
 
-### [Module 4: Swerve & Sensor Fusion](modules/04_swerve_fusion/README.md)
-13. 4-Wheel Swerve Kinematics & Vector Decomposition
-14. Module Optimization & 2nd-Order Skew Correction
-15. Computer Vision & AprilTag Perspective-n-Point (PnP)
-16. Extended Kalman Filter (EKF) Sensor Fusion
+### [Module 4: Calculus, Motion & Optimization](modules/04_calculus/README.md)
+* [Concept 12: Rates of Change & Derivatives](modules/04_calculus/concept_12_rates_of_change/README.md) — [Interactive Visualizer](modules/04_calculus/concept_12_rates_of_change/demo.html)
+* [Concept 13: Acceleration, Jerk & S-Curves](modules/04_calculus/concept_13_acceleration_jerk/README.md) — [Interactive Visualizer](modules/04_calculus/concept_13_acceleration_jerk/demo.html)
+* [Concept 14: Accumulation, Area & Numerical Integration](modules/04_calculus/concept_14_accumulation_integrals/README.md) — [Interactive Visualizer](modules/04_calculus/concept_14_accumulation_integrals/demo.html)
+* [Concept 15: Multivariable Gradients & Hill Climbing](modules/04_calculus/concept_15_gradients_multivariable/README.md) — [Interactive Visualizer](modules/04_calculus/concept_15_gradients_multivariable/demo.html)
 
 ---
 
-### [Module 5: Reinforcement Learning & Agents](modules/05_rl_agents/README.md)
-17. Markov Decision Processes (MDPs) & Q-Learning
-18. Policy Gradients & Deep RL (PPO)
-19. Reward Engineering & Sim-to-Real Domain Randomization
-20. Hierarchical Control Architecture & Behavior Trees
-21. Dynamic Obstacle Avoidance & Path Planning
-22. Agentic LLM Tool-Calling & Autonomous Diagnostics
-23. Full Autonomous Match Simulator Lab
-24. System Identification & Real-World Calibration
-25. Capstone Architecture & Complete Repository Index
+### [Module 5: Machine Learning Foundations](modules/05_machine_learning/README.md)
+* Concept 16: Loss Landscapes & Optimization (MSE, Cross-Entropy)
+* Concept 17: Dense Layers & Non-Linear Activation Functions (ReLU, GELU)
+* Concept 18: Vector Calculus Backpropagation & Computation Graphs
+* Concept 19: 2D Neural Classifier Sandbox

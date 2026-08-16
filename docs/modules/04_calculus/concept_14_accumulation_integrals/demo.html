@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 14: Numerical Integration Visualizer</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+    }
+    .canvas-container {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .controls-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 0.85rem;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="integCanvas"></canvas>
+    </div>
+
+    <div class="controls-row">
+      <label>Integration Step Size (dt): <b id="dtLabel" style="color: var(--accent-amber);">0.20 s</b></label>
+      <input type="range" id="dtSlider" min="0.05" max="0.50" step="0.05" value="0.20">
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">True Distance (Calculus)</span>
+        <span class="stat-val" id="trueDistText" style="color: var(--accent);">1.000 m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Euler Rectangles (Red)</span>
+        <span class="stat-val" id="eulerDistText" style="color: var(--accent-red);">0.800 m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Trapezoid Slices (Green)</span>
+        <span class="stat-val" id="trapDistText" style="color: var(--accent-green); font-size: 1.05rem;">1.000 m (Exact)</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('integCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let dt = 0.20;
+    const totalTime = 1.0;
+    const accel = 2.0;
+
+    function vOfT(t) { return accel * t; }
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      draw();
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+
+    function toScreen(t, v) {
+      const pad = 40;
+      const w = (canvas.width / (window.devicePixelRatio || 1)) - pad * 2;
+      const h = (canvas.height / (window.devicePixelRatio || 1)) - pad * 2;
+      return {
+        x: pad + (t / 1.1) * w,
+        y: pad + h - (v / 2.5) * h
+      };
+    }
+
+    function draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const width = canvas.width / (window.devicePixelRatio || 1);
+      const height = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, width, height);
+
+      const o = toScreen(0, 0);
+
+      // Axes
+      ctx.strokeStyle = isLight ? '#cbd5e1' : '#232b3b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(toScreen(0,0).x, toScreen(0,0).y); ctx.lineTo(toScreen(1.1,0).x, toScreen(1.1,0).y);
+      ctx.moveTo(toScreen(0,0).x, toScreen(0,0).y); ctx.lineTo(toScreen(0,2.5).x, toScreen(0,2.5).y);
+      ctx.stroke();
+
+      const numSteps = Math.floor(totalTime / dt);
+      let eulerArea = 0.0;
+      let trapArea = 0.0;
+
+      // Draw Euler & Trapezoid slices
+      for (let i = 0; i < numSteps; i++) {
+        const tStart = i * dt;
+        const tEnd = (i + 1) * dt;
+        const vStart = vOfT(tStart);
+        const vEnd = vOfT(tEnd);
+
+        eulerArea += vStart * dt;
+        trapArea += 0.5 * (vStart + vEnd) * dt;
+
+        // Euler rectangle (Red fill)
+        const p1 = toScreen(tStart, 0);
+        const p2 = toScreen(tStart, vStart);
+        const p3 = toScreen(tEnd, vStart);
+        const p4 = toScreen(tEnd, 0);
+
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.25)';
+        ctx.fillRect(p2.x, p2.y, p3.x - p2.x, p4.y - p2.y);
+        ctx.strokeStyle = isLight ? 'rgba(225, 29, 72, 0.6)' : 'rgba(244, 63, 94, 0.6)';
+        ctx.strokeRect(p2.x, p2.y, p3.x - p2.x, p4.y - p2.y);
+
+        // Trapezoid top line (Green)
+        const pTop = toScreen(tEnd, vEnd);
+        ctx.strokeStyle = isLight ? '#16a34a' : '#4ade80';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(p2.x, p2.y);
+        ctx.lineTo(pTop.x, pTop.y);
+        ctx.stroke();
+      }
+
+      // Continuous Velocity Line v(t) = a*t
+      ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(toScreen(0, 0).x, toScreen(0, 0).y);
+      ctx.lineTo(toScreen(totalTime, vOfT(totalTime)).x, toScreen(totalTime, vOfT(totalTime)).y);
+      ctx.stroke();
+
+      // Telemetry
+      const trueDist = 0.5 * accel * (totalTime ** 2);
+      document.getElementById('trueDistText').textContent = `${trueDist.toFixed(3)} m`;
+      document.getElementById('eulerDistText').textContent = `${eulerArea.toFixed(3)} m (Error: ${abs(trueDist - eulerArea)*1000:0}mm)`;
+      document.getElementById('trapDistText').textContent = `${trapArea.toFixed(3)} m (Exact)`;
+    }
+
+    function abs(v) { return Math.abs(v); }
+
+    document.getElementById('dtSlider').addEventListener('input', (e) => {
+      dt = parseFloat(e.target.value);
+      document.getElementById('dtLabel').textContent = `${dt.toFixed(2)} s`;
+      draw();
+    });
+
+    resize();
+  </script>
+</body>
+</html>
