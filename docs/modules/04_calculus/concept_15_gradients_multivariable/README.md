@@ -120,3 +120,11 @@ Which direction should a robot or optimizer step to minimize loss as fast as pos
 
 **Solution:**
 In the direction of **`-∇f` (Negative Gradient / Steepest Descent)**. At point `(2, 1)`, step along `[-4, -6]ᵀ`.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../concept_14_accumulation_integrals/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 14: Integration & Accumulation</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 4 Overview</a></div>
+  <div><a href="../../05_probability/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Module 5: Probability →</a></div>
+</div>

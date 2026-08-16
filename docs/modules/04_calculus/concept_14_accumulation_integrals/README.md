@@ -107,3 +107,11 @@ Why does Trapezoidal integration produce zero error under constant acceleration?
 
 **Solution:**
 Because under constant acceleration, velocity is a straight line ($v = a\cdot t$). The area under a straight line is an exact trapezoid, which the trapezoid formula calculates perfectly!
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../concept_13_acceleration_jerk/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 13: Acceleration & Jerk</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 4 Overview</a></div>
+  <div><a href="../concept_15_gradients_multivariable/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 15: Gradients & Optimization →</a></div>
+</div>

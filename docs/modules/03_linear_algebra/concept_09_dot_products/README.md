@@ -100,3 +100,11 @@ A robot applies a force vector `F = [10.0, 0.0]` Newtons while driving along dis
 **Solution:**
 In physics, `Work = Force · displacement = (10.0)(5.0) + (0.0)(2.0) = 50.0 Joules`.
 The vertical displacement `2.0m` did zero work because it was perpendicular to the force.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../concept_08_vectors_scaling/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 08: Vectors & Scaling</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 3 Overview</a></div>
+  <div><a href="../concept_10_matrices_transforms/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 10: Matrix Transformations →</a></div>
+</div>

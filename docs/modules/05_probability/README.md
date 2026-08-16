@@ -26,3 +26,11 @@ This module introduces the mathematical tools required to quantify, model, and m
   * *The Everyday Problem:* In the final 20 seconds of an FRC match, should your alliance attempt a risky high-point climb or take guaranteed safe points?
   * *Code & Math:* Expected Value $E[X] = \sum x_i \cdot P(x_i)$, risk variance, and Monte Carlo simulation.
   * *Visualizer:* [concept_19_expected_value_decision/demo.html](concept_19_expected_value_decision/demo.html)
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../04_calculus/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Module 4: Calculus</a></div>
+  <div><a href="README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 5 Overview</a></div>
+  <div><a href="concept_16_sensor_noise_normal/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 16: Sensor Noise & Normal Dist →</a></div>
+</div>

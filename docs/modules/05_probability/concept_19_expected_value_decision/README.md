@@ -111,3 +111,11 @@ Why do autonomous robots use Monte Carlo simulations rather than just trusting s
 
 **Solution:**
 Because reality is probabilistic. Monte Carlo simulations reveal the entire distribution of possible outcomes (both median payoff and variance), allowing the software to make optimal risk-adjusted decisions.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../concept_18_discrete_softmax/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 18: Discrete Softmax</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 5 Overview</a></div>
+  <div><a href="../../../README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Curriculum Home →</a></div>
+</div>

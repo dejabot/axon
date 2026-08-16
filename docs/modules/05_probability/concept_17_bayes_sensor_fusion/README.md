@@ -108,3 +108,11 @@ Why is the fused uncertainty `σ = 0.179m` smaller than both `0.20m` and `0.40m`
 
 **Solution:**
 Because two independent sensor readings provide more total information than one sensor alone. Combining multiple noisy perspectives always reduces overall uncertainty.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../concept_16_sensor_noise_normal/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 16: Sensor Noise & Normal Dist</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 5 Overview</a></div>
+  <div><a href="../concept_18_discrete_softmax/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 18: Discrete Softmax →</a></div>
+</div>

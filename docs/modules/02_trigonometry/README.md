@@ -24,3 +24,11 @@ Welcome to **Module 2: Trigonometry & Angles**. In this module, we build from ev
   * *The Everyday Problem:* Why do 3-axis Euler angles lock up and crash IMU gyros when pitching straight up (Gimbal Lock)?
   * *Code & Math:* Roll/Pitch/Yaw limitations and unit Quaternions `(w, x, y, z)` on the 4D sphere.
   * *Visualizer:* [concept_07_3d_rotations_quaternions/demo.html](concept_07_3d_rotations_quaternions/demo.html)
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../01_geometry/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Module 1: Geometry</a></div>
+  <div><a href="README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
+  <div><a href="concept_04_unit_circle_ratios/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 04: Unit Circle & Ratios →</a></div>
+</div>

@@ -110,3 +110,11 @@ What matrix leaves every vector completely unchanged?
 **Solution:**
 The **Identity Matrix `I`**:
 `[ [1, 0], [0, 1] ]`. Where `î` lands at `[1, 0]` and `ĵ` lands at `[0, 1]`.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../concept_09_dot_products/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 09: Dot Products & Projections</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 3 Overview</a></div>
+  <div><a href="../concept_11_determinants_inverses/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 11: Determinants & Inverses →</a></div>
+</div>

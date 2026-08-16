@@ -130,3 +130,11 @@ Why is an `(x, y)` position not enough by itself to aim a turret or shoot a note
 
 **Solution:**
 Because the robot could be at the right `(x, y)` position but facing backward! You also need the heading angle `θ` (the full `(x, y, θ)` pose) to calculate how much the robot or turret must rotate to face the goal.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Module 1: Geometry</a></div>
+  <div><a href="../../../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Curriculum Home</a></div>
+  <div><a href="../concept_02_coordinate_frames/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 02: Coordinate Frames →</a></div>
+</div>

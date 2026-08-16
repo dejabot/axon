@@ -86,3 +86,11 @@ Why do modern FRC elevator feedforward controllers include `kA · a`?
 
 **Solution:**
 Because accelerating a heavy mechanism requires extra motor voltage (`F = m·a`). Providing voltage proportionally to target acceleration (`kA · a`) cancels out inertia and eliminates lag.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../concept_12_rates_of_change/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 12: Rates of Change</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 4 Overview</a></div>
+  <div><a href="../concept_14_accumulation_integrals/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 14: Integration & Accumulation →</a></div>
+</div>

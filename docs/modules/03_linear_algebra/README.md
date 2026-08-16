@@ -24,3 +24,11 @@ Welcome to **Module 3: Linear Algebra & Matrix Transformations**. In this module
   * *The Everyday Problem:* Why does a drive kinematics solver crash with `Division by Zero` when a robot loses traction or steering locks?
   * *Code & Math:* Determinant as area scaling, singular matrices (`det = 0`), and matrix inverses.
   * *Visualizer:* [concept_11_determinants_inverses/demo.html](concept_11_determinants_inverses/demo.html)
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../02_trigonometry/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Module 2: Trigonometry</a></div>
+  <div><a href="README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 3 Overview</a></div>
+  <div><a href="concept_08_vectors_scaling/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 08: Vectors & Scaling →</a></div>
+</div>

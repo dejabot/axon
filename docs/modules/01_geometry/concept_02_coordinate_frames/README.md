@@ -119,3 +119,11 @@ Why can't an autonomous path planner send camera-relative coordinates directly t
 
 **Solution:**
 Because as the robot moves, its camera moves too! If the target was at `1.5m ahead` and the robot moves `1.0m forward`, the relative position changes to `0.5m ahead`. The path planner must convert all targets to a fixed **Field Frame** so targets don't appear to jump around when the robot moves.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../concept_01_coordinates_distance/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 01: Coordinates & Distance</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 1 Overview</a></div>
+  <div><a href="../concept_03_bounding_boxes/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 03: Bounding Boxes →</a></div>
+</div>

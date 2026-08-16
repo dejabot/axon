@@ -118,3 +118,11 @@ If a robot drives with `vx = 0.6` m/s and `vy = 0.8` m/s, what is its total stra
 
 **Solution:**
 * `speed = √(vx² + vy²) = √(0.6² + 0.8²) = √(0.36 + 0.64) = √1.0 = 1.0 m/s`.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../../01_geometry/concept_03_bounding_boxes/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 03: Bounding Boxes</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
+  <div><a href="../concept_05_atan2_heading/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 05: 4-Quadrant atan2 →</a></div>
+</div>

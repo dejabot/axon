@@ -99,3 +99,11 @@ A robot's velocity vector is `v = [2.0, 4.0]` m/s. The driver hits the "Turbo" b
 
 **Solution:**
 `v_turbo = [2.0 · 1.5, 4.0 · 1.5] = [3.0, 6.0] m/s`.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../../02_trigonometry/concept_07_3d_rotations_quaternions/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 07: 3D Quaternions</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 3 Overview</a></div>
+  <div><a href="../concept_09_dot_products/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 09: Dot Products & Projections →</a></div>
+</div>

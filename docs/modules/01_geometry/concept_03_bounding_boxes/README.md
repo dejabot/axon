@@ -112,3 +112,11 @@ Why do autonomous path planners add a `10cm` padding (safety margin) around obst
 
 **Solution:**
 Because real robots have momentum and minor odometry sensor drift! If you plan a path that passes within `1mm` of a barrier, slight wheel slip will cause the bumper to clip the obstacle. Adding a safety buffer guarantees physical clearance.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../concept_02_coordinate_frames/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 02: Coordinate Frames</a></div>
+  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 1 Overview</a></div>
+  <div><a href="../../02_trigonometry/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Module 2: Trigonometry →</a></div>
+</div>
