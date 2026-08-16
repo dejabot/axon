@@ -91,7 +91,7 @@ print(f"Strategy B Simulated (1000x): {run_monte_carlo(strat_B):.2f} points")
 
 ## 3. Bridge to Machine Learning: Reinforcement Learning & MCTS
 In modern game-playing and autonomous AI:
-* **Reinforcement Learning (Q-Learning):** The AI selects actions that maximize the **Expected Future Reward** ($Q(s, a) = E[r + \gamma \max Q(s', a')]$).
+* **Reinforcement Learning (Q-Learning):** The AI selects actions that maximize the **Expected Future Reward** (Q(s, a) = E[r + \γ \max Q(s', a')]).
 * **Monte Carlo Tree Search (MCTS in AlphaZero & Game Bots):** The AI simulates thousands of random rollouts from the current board state to estimate the win probability of every legal move!
 
 ---

@@ -9,7 +9,7 @@ This module introduces the mathematical tools required to quantify, model, and m
 ## Concepts in this Module
 * **[Concept 16: Sensor Noise & Normal Distributions](concept_16_sensor_noise_normal/)**
   * *The Everyday Problem:* Why does an AprilTag distance sensor reading jitter between 3.8m and 4.2m, and what is the "true" distance?
-  * *Code & Math:* Sample mean $\mu$, sample variance $\sigma^2$, standard deviation $\sigma$, and the Gaussian Bell Curve.
+  * *Code & Math:* Sample mean μ (mean), sample variance \σ^2, standard deviation σ (standard deviation), and the Gaussian Bell Curve.
   * *Visualizer:* [concept_16_sensor_noise_normal/demo.html](concept_16_sensor_noise_normal/demo.html)
 
 * **[Concept 17: Bayes' Rule & 1D Sensor Fusion](concept_17_bayes_sensor_fusion/)**
@@ -24,7 +24,7 @@ This module introduces the mathematical tools required to quantify, model, and m
 
 * **[Concept 19: Expected Value & Decision Making](concept_19_expected_value_decision/)**
   * *The Everyday Problem:* In the final 20 seconds of an FRC match, should your alliance attempt a risky high-point climb or take guaranteed safe points?
-  * *Code & Math:* Expected Value $E[X] = \sum x_i \cdot P(x_i)$, risk variance, and Monte Carlo simulation.
+  * *Code & Math:* Expected Value E[X] = \sum x_i \cdot P(x_i), risk variance, and Monte Carlo simulation.
   * *Visualizer:* [concept_19_expected_value_decision/demo.html](concept_19_expected_value_decision/demo.html)
 
 ---

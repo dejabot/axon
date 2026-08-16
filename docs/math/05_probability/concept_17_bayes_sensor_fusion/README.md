@@ -59,10 +59,10 @@ def fuse_two_sensors(mu_prior, sigma_prior, mu_meas, sigma_meas):
     return fused_mu, fused_sigma
 
 # Fuse Odometry (4.00m ± 0.20m) with Vision (4.50m ± 0.40m)
-mu, sigma = fuse_two_sensors(4.00, 0.20, 4.50, 0.40)
+μ, σ = fuse_two_sensors(4.00, 0.20, 4.50, 0.40)
 
-print(f"Optimal Estimated Position : {mu:.3f} meters")  # 4.100m
-print(f"Combined Uncertainty (σ)   : ±{sigma:.3f} meters")  # ±0.179m (Tighter than both!)
+print(f"Optimal Estimated Position : {μ:.3f} meters")  # 4.100m
+print(f"Combined Uncertainty (σ)   : ±{σ:.3f} meters")  # ±0.179m (Tighter than both!)
 ```
 
 ---

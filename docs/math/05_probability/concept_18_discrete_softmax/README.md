@@ -119,7 +119,7 @@ Equal logits always yield equal probabilities!
 Why can't we simply divide logits by their sum (i.e. `zᵢ / ∑ z`) instead of using exponentials?
 
 **Solution:**
-Because negative logits (e.g. `-0.8`) would produce invalid negative probabilities, and if the sum of logits happened to equal zero (`∑ z = 0`), the formula would crash from division by zero! Exponentiation guarantees every term is strictly positive ($e^z > 0$).
+Because negative logits (e.g. `-0.8`) would produce invalid negative probabilities, and if the sum of logits happened to equal zero (`∑ z = 0`), the formula would crash from division by zero! Exponentiation guarantees every term is strictly positive (e^z > 0).
 
 ---
 

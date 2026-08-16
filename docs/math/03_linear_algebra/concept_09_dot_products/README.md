@@ -2,7 +2,7 @@
 
 > **▶ Interactive Demo: [Dot Product & Projection Visualizer](demo.html)**
 >
-> Open the interactive demo below to rotate two vector arrows and see their dot product, angle $\theta$, and projected shadow update live.
+> Open the interactive demo below to rotate two vector arrows and see their dot product, angle \θ, and projected shadow update live.
 
 <iframe src="demo.html" width="100%" height="450" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 

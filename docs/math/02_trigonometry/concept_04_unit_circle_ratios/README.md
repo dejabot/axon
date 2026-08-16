@@ -2,7 +2,7 @@
 
 > **▶ Interactive Demo: [Joystick Unit Circle Visualizer](demo.html)**
 >
-> Open the interactive demo below to sweep the joystick angle $\theta$ around the circle and see how `cos(θ)` (horizontal power) and `sin(θ)` (vertical power) respond in real time.
+> Open the interactive demo below to sweep the joystick angle \θ around the circle and see how `cos(θ)` (horizontal power) and `sin(θ)` (vertical power) respond in real time.
 
 <iframe src="demo.html" width="100%" height="450" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 

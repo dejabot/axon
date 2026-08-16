@@ -8,19 +8,19 @@ Welcome to the **Reinforcement Learning & Agentic Decision Systems Axon**. This 
 
 ### 1. Markov Decision Processes & Reward Engineering
 * *The Real-World Problem:* How do we frame a complex physical robotics task as an optimization problem of states, actions, and rewards?
-* *Key Concepts:* States $S$, Actions $A$, Transition probabilities $P(s' \mid s, a)$, Discount factor $\gamma$, Sparse vs. Dense reward shaping, and reward hacking pitfalls.
+* *Key Concepts:* States S, Actions A, Transition probabilities P(s' | s, a), Discount factor γ, Sparse vs. Dense reward shaping, and reward hacking pitfalls.
 
 ---
 
 ### 2. Value Functions & Deep Q-Learning
 * *The Real-World Problem:* How does an agent learn the long-term value of taking an action before seeing the final match outcome?
-* *Key Concepts:* State-Value $V(s)$, Action-Value $Q(s, a)$, Bellman Optimality equations, Deep Q-Networks (DQN), Experience Replay, and Target Networks.
+* *Key Concepts:* State-Value V(s), Action-Value Q(s, a), Bellman Optimality equations, Deep Q-Networks (DQN), Experience Replay, and Target Networks.
 
 ---
 
 ### 3. Policy Gradients & Actor-Critic Methods
 * *The Real-World Problem:* How do we train an agent to output continuous voltage and steering velocities directly without discretizing actions?
-* *Key Concepts:* Policy function $\pi_\theta(a \mid s)$, REINFORCE algorithm, Advantage Actor-Critic (A2C), and Proximal Policy Optimization (PPO).
+* *Key Concepts:* Policy function pi(a | s), REINFORCE algorithm, Advantage Actor-Critic (A2C), and Proximal Policy Optimization (PPO).
 
 ---
 

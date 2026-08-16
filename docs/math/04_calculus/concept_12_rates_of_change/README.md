@@ -2,7 +2,7 @@
 
 > **▶ Interactive Demo: [Rate of Change & Derivative Visualizer](demo.html)**
 >
-> Open the interactive demo below to shrink the time step $\Delta t$ and watch the average speed converge into the exact instantaneous tangent slope.
+> Open the interactive demo below to shrink the time step dt and watch the average speed converge into the exact instantaneous tangent slope.
 
 <iframe src="demo.html" width="100%" height="450" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 

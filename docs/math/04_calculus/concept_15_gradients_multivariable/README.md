@@ -2,7 +2,7 @@
 
 > **▶ Interactive Demo: [Potential Field & Gradient Visualizer](demo.html)**
 >
-> Open the interactive demo below to drag the robot on the 2D contour map and watch the gradient vector $\nabla U$ (uphill) and steering force $-\nabla U$ (downhill toward goal) update live.
+> Open the interactive demo below to drag the robot on the 2D contour map and watch the gradient vector \nabla U (uphill) and steering force -\nabla U (downhill toward goal) update live.
 
 <iframe src="demo.html" width="100%" height="450" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 

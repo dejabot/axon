@@ -54,7 +54,7 @@ def compare_integrators(acceleration=2.0, total_time=1.0, dt=0.05):
     """
     steps = int(total_time / dt)
     
-    # 1. Exact Calculus: x = 0.5 * a * t^2
+    # 1. Exact Calculus: x = 0.5 * a * t²
     true_x = 0.5 * acceleration * (total_time ** 2)
     
     # 2. Forward Euler
@@ -106,7 +106,7 @@ Since speed is constant, the area is a simple rectangle: `Area = width · height
 Why does Trapezoidal integration produce zero error under constant acceleration?
 
 **Solution:**
-Because under constant acceleration, velocity is a straight line ($v = a\cdot t$). The area under a straight line is an exact trapezoid, which the trapezoid formula calculates perfectly!
+Because under constant acceleration, velocity is a straight line (v = a * t). The area under a straight line is an exact trapezoid, which the trapezoid formula calculates perfectly!
 
 ---
 

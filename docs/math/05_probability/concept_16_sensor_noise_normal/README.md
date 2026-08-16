@@ -2,7 +2,7 @@
 
 > **▶ Interactive Demo: [Sensor Noise & Bell Curve Visualizer](demo.html)**
 >
-> Open the interactive demo below to adjust the true distance $\mu$ and sensor noise $\sigma$ sliders, generate 1,000 live sensor readings, and watch the histogram match the theoretical Gaussian bell curve.
+> Open the interactive demo below to adjust the true distance μ (mean) and sensor noise σ (standard deviation) sliders, generate 1,000 live sensor readings, and watch the histogram match the theoretical Gaussian bell curve.
 
 <iframe src="demo.html" width="100%" height="450" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 
@@ -24,7 +24,7 @@ Even if the robot is parked completely still at a true distance of **4.00 meters
     <line x1="150" y1="30" x2="150" y2="130" stroke="#fbbf24" stroke-width="2" stroke-dasharray="3,3" />
     <text x="155" y="55" fill="#fbbf24" font-family="sans-serif" font-weight="bold" font-size="11">Mean μ = 4.00m</text>
     
-    <!-- 1-sigma markers -->
+    <!-- 1-σ markers -->
     <line x1="120" y1="75" x2="180" y2="75" stroke="#4ade80" stroke-width="2" />
     <text x="135" y="92" fill="#4ade80" font-family="sans-serif" font-weight="bold" font-size="10">±1σ (68%)</text>
     <line x1="20" y1="130" x2="280" y2="130" stroke="#334155" stroke-width="1.5" />
@@ -65,11 +65,11 @@ def analyze_sensor_noise(readings):
     return mean, variance, std_dev
 
 samples = [3.98, 4.04, 3.95, 4.01, 4.02, 3.97, 4.05, 3.99, 4.00, 3.99]
-mu, var, sigma = analyze_sensor_noise(samples)
+μ, var, σ = analyze_sensor_noise(samples)
 
-print(f"Mean Distance (μ)        : {mu:.3f} meters")
-print(f"Noise Spread  (σ)        : ±{sigma:.3f} meters")
-print(f"68% Confidence Interval  : [{mu - sigma:.3f}, {mu + sigma:.3f}] meters")
+print(f"Mean Distance (μ)        : {μ:.3f} meters")
+print(f"Noise Spread  (σ)        : ±{σ:.3f} meters")
+print(f"68% Confidence Interval  : [{μ - σ:.3f}, {μ + σ:.3f}] meters")
 ```
 
 ---
@@ -85,8 +85,8 @@ print(f"68% Confidence Interval  : [{mu - sigma:.3f}, {mu + sigma:.3f}] meters")
 > ```
 >
 > **How to read this equation out loud:**
-> * `μ` (*mu*) is the **center / peak** of the bell curve.
-> * `σ` (*sigma*) is the **width / spread** of the curve.
+> * `μ` (*μ*) is the **center / peak** of the bell curve.
+> * `σ` (*σ*) is the **width / spread** of the curve.
 > * `e^(-...)` creates the symmetric bell shape that drops off rapidly away from `μ`.
 >
 > **The 68-95-99.7 Rule:**
@@ -98,8 +98,8 @@ print(f"68% Confidence Interval  : [{mu - sigma:.3f}, {mu + sigma:.3f}] meters")
 
 ## 3. Bridge to Machine Learning: Diffusion Models & Weight Initialization
 In modern generative AI:
-* **Diffusion Models (Stable Diffusion / DALL-E):** Image generation begins by taking a pure image and progressively adding Gaussian noise ($\mathcal{N}(0, \sigma^2)$). The neural network is trained to reverse this process by predicting and subtracting the Gaussian noise at each step!
-* **Neural Network Initialization:** When initializing weights in deep networks (e.g. He or Xavier initialization), weights are drawn from a Gaussian distribution with mean $0$ and a carefully chosen variance to prevent gradients from exploding or vanishing.
+* **Diffusion Models (Stable Diffusion / DALL-E):** Image generation begins by taking a pure image and progressively adding Gaussian noise (\mathcal{N}(0, \σ^2)). The neural network is trained to reverse this process by predicting and subtracting the Gaussian noise at each step!
+* **Neural Network Initialization:** When initializing weights in deep networks (e.g. He or Xavier initialization), weights are drawn from a Gaussian distribution with mean 0 and a carefully chosen variance to prevent gradients from exploding or vanishing.
 
 ---
 

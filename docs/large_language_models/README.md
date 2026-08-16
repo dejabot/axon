@@ -14,7 +14,7 @@ Welcome to the **Large Language Models & Transformers Axon**. This track unpacks
 
 ### 2. Scaled Dot-Product & Self-Attention
 * *The Real-World Problem:* How does an AI know that "it" refers to the robot and not the target in a sentence?
-* *Key Concepts:* Query, Key, and Value ($Q, K, V$) projections, matrix attention scores $\text{Softmax}(QK^T / \sqrt{d_k})$, and context mixing.
+* *Key Concepts:* Query, Key, and Value (Q, K, V) projections, matrix attention scores Softmax(Q @ K.T / √(d_k)), and context mixing.
 
 ---
 
@@ -26,7 +26,7 @@ Welcome to the **Large Language Models & Transformers Axon**. This track unpacks
 
 ### 4. Generation, RoPE & Sampling
 * *The Real-World Problem:* How does the model generate coherent text step-by-step without repeating itself or hallucinating?
-* *Key Concepts:* Rotary Position Embeddings (RoPE), KV-Caching, Temperature, Top-$k$, Top-$p$ (Nucleus) sampling, and speculative decoding.
+* *Key Concepts:* Rotary Position Embeddings (RoPE), KV-Caching, Temperature, Top-k, Top-p (Nucleus) sampling, and speculative decoding.
 
 ---
 

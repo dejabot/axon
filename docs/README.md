@@ -65,17 +65,17 @@ Axon is an educational curriculum designed from first principles to bridge high-
 
 ### [Axon 03: Large Language Models & Transformers](large_language_models/)
 * **Tokenization & Vector Embeddings**: BPE tokenization, vector lookup spaces, semantic similarity.
-* **Scaled Dot-Product & Self-Attention**: Query, Key, Value ($Q, K, V$) projections.
+* **Scaled Dot-Product & Self-Attention**: Query, Key, Value (Q, K, V) projections.
 * **The Transformer Architecture**: Multi-Head Attention, residual skip connections, RMSNorm.
-* **Generation, RoPE & Sampling**: Rotary Position Embeddings, Temperature, Top-$p$ sampling.
+* **Generation, RoPE & Sampling**: Rotary Position Embeddings, Temperature, Top-p sampling.
 
 ---
 
 ### [Axon 04: Physics, Dynamics & Actuation](physics/)
-* **DC Motor Electromechanics**: Brushless motor curves, Back-EMF, $K_t$ and $K_v$ constants.
-* **Gearboxes & Reflected Inertia**: Planetary reductions, torque multiplication, reflected load inertia ($J/G^2$).
+* **DC Motor Electromechanics**: Brushless motor curves, Back-EMF, K_t and K_v constants.
+* **Gearboxes & Reflected Inertia**: Planetary reductions, torque multiplication, reflected load inertia (J / G²).
 * **Projectile Ballistics & Shooter Trajectories**: 2D parabolic arcs, air drag, Magnus spin, shooter flywheel RPM, shooting on the move.
-* **Physics Feedforward & Closed-Loop PID**: Voltage models ($kS, kV, kA, kG$), velocity feedforward, PID closed-loop control.
+* **Physics Feedforward & Closed-Loop PID**: Voltage models (kS, kV, kA, kG), velocity feedforward, PID closed-loop control.
 
 ---
 
@@ -89,7 +89,7 @@ Axon is an educational curriculum designed from first principles to bridge high-
 
 ### [Axon 06: Localization & State Estimation](localization/)
 * **Wheel Odometry & Gyro Integration**: Twist dead reckoning, encoder tick accumulation, IMU heading integration.
-* **AprilTag Computer Vision & PnP Pose**: Pinhole camera matrix $K$, Perspective-n-Point solvers, camera latency compensation.
+* **AprilTag Computer Vision & PnP Pose**: Pinhole camera matrix K, Perspective-n-Point solvers, camera latency compensation.
 * **Extended Kalman Filter (EKF)**: Multi-state sensor fusion combining high-frequency odometry with low-frequency vision.
 
 ---

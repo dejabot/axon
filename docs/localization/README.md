@@ -14,13 +14,13 @@ Welcome to the **Localization & State Estimation Axon**. This track covers how a
 
 ### 2. AprilTag Computer Vision & PnP Pose
 * *The Real-World Problem:* How does a camera turn a 2D image of a planar AprilTag into a full 3D robot coordinate `(x, y, z, roll, pitch, yaw)` on the field?
-* *Key Concepts:* Pinhole camera model, intrinsic matrix $K$, Perspective-n-Point (PnP) solvers, camera-to-robot coordinate transforms, and latency timestamp compensation.
+* *Key Concepts:* Pinhole camera model, intrinsic matrix K, Perspective-n-Point (PnP) solvers, camera-to-robot coordinate transforms, and latency timestamp compensation.
 
 ---
 
 ### 3. Extended Kalman Filter (EKF) State Estimation
 * *The Real-World Problem:* How do we combine continuous 100 Hz wheel odometry with intermittent, noisy 30 Hz AprilTag vision measurements into a single rock-solid global pose estimate?
-* *Key Concepts:* State vector $x = [x, y, \theta]^T$, covariance matrix $P$, process noise $Q$, measurement noise $R$, observation model $h(x)$, and standard WPILib SwerveDrivePoseEstimator integration.
+* *Key Concepts:* State vector x = [x, y, θ]^T, covariance matrix P, process noise Q, measurement noise R, observation model h(x), and standard WPILib SwerveDrivePoseEstimator integration.
 
 ---
 
