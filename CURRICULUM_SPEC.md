@@ -1,21 +1,23 @@
 # Axon Curriculum Specification
 
 ## Educational Mission
-Axon bridges high school mathematics into robotics engineering and modern Machine Learning (grounded in [*Mathematics for Machine Learning*](https://mml-book.github.io/book/mml-book.pdf) by Deisenroth, Faisal, and Ong).
+Axon bridges high school mathematics and physics into modern machine learning, large language models, physical electromechanics, autonomous robotics (FIRST Robotics Competition / FRC), and agentic decision systems.
 
 ## Pedagogical Rules
-1. **Paced & Approachable**: Build each concept step-by-step from everyday intuition. Avoid dense jargon dumps.
-2. **Everyday FRC Scenarios**: Ground every concept in a real robot challenge before introducing formulas.
+1. **Paced & Approachable**: Build each concept step-by-step from everyday physical and software intuition. Avoid dense jargon dumps.
+2. **Everyday FRC & Robotics Scenarios**: Ground every concept in a real robot challenge (e.g. reef distances, joystick steering, sensor jitter, elevator chains, shooter ballistics, swerve twist) before introducing formal equations.
 3. **Code-First (Python)**: 5–15 lines of pure, syntax-highlighted Python with clear variable names.
 4. **"Math!" Sidebars**: Introduce formal notations as translations of the code, with explicit pronunciation and "how to read out loud" guides.
-5. **Bridge to Machine Learning**: Explicitly demonstrate how the concept is used in modern deep learning (LLMs, Diffusion Models, Transformer Attention, Vision Classifiers).
+5. **Bridge to Machine Learning & Modern Autonomy**: Explicitly demonstrate how the concept is used in modern deep learning (LLMs, Diffusion Models, Transformer Attention, Vision Classifiers) and robotic autonomy.
 6. **Interactive Companion Demos**: Clean, focused HTML5/Canvas visualizers with dark/light mode toggle.
+7. **Comprehensive Sourcing**: Utilize high-quality first-principles explanations, established robotics/ML industry standards, and best practices across the domain.
 
-## Curriculum Modules
+## The 7 Axon Tracks
 
-* **Module 1: Geometry for Robotics** (Concepts 01–03)
-* **Module 2: Trigonometry & Angles** (Concepts 04–07)
-* **Module 3: Linear Algebra & Matrix Transformations** (Concepts 08–11)
-* **Module 4: Calculus, Motion & Optimization** (Concepts 12–15)
-* **Module 5: Probability & Uncertainty** (Concepts 16–19)
-* **Module 6: Machine Learning Foundations** (Concepts 20–24)
+1. **`docs/math/`**: Mathematical Foundations (Geometry, Trigonometry, Linear Algebra, Calculus, Probability)
+2. **`docs/machine_learning/`**: Core Deep Learning & Computer Vision
+3. **`docs/large_language_models/`**: Transformers & Generative AI
+4. **`docs/physics/`**: Electromechanics, Dynamics, Projectile Ballistics & Trajectories
+5. **`docs/kinematics/`**: Chassis Speeds, Swerve & 2nd-Order Twist, Motion Profiling
+6. **`docs/localization/`**: Wheel Odometry, AprilTag Vision PnP, Extended Kalman Filter (EKF)
+7. **`docs/reinforcement_learning/`**: MDPs, Q-Learning, Policy Gradients, Monte Carlo Tree Search

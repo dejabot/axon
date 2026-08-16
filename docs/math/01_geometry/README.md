@@ -23,7 +23,7 @@ Welcome to **Module 1: Geometry for Robotics**. In this module, we start with th
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../../README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Curriculum Home</a></div>
+  <div><a href="../README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Math Axon Home</a></div>
   <div><a href="README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 1 Overview</a></div>
   <div><a href="concept_01_coordinates_distance/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 01: Coordinates & Distance →</a></div>
 </div>

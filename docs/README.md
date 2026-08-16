@@ -1,59 +1,101 @@
-# Axon Curriculum Documentation
+# Axon Curriculum
+
+Axon is an educational curriculum designed from first principles to bridge high-school mathematics and physics into university-level applied mathematics, physical dynamics, autonomous robotics (FIRST Robotics Competition / FRC), machine learning, large language models, and agentic decision systems.
+
 ---
 
 ## Pedagogical Philosophy
 
-* **FRC & Everyday Intuition First:** We start with real robot scenarios (scoring targets, joystick steering, sensor jitter, elevator chains, obstacle avoidance) before presenting formal equations.
+* **FRC & Everyday Intuition First:** We start with real robot scenarios (scoring targets, joystick steering, sensor jitter, elevator chains, shooter trajectories, obstacle avoidance) before presenting formal equations.
 * **Code-First Explanations:** Every concept is solved in 5–15 lines of clean, readable Python with descriptive variable names.
 * **"Math!" Translation Sidebars:** Formal mathematical symbols, equations, and pronunciation guides are introduced as friendly translations of the code.
-* **Bridge to Machine Learning:** Every math concept explicitly connects to its role in modern deep learning (embeddings, transformer position encoding, dense layers, diffusion models, softmax sampling, backpropagation).
-* **Clean Interactive Visualizers:** Every concept includes a companion interactive HTML5/Canvas demo with dark/light theming.
+* **Bridge to Machine Learning & Modern Robotics:** Every concept explicitly connects to its role in modern deep learning (embeddings, transformer position encoding, dense layers, diffusion models, backpropagation) and physical robotic autonomy.
+* **Clean Interactive Visualizers:** Concepts include companion interactive HTML5/Canvas demos with dark/light theming.
 
 ---
 
-## Curriculum Outline
+## The 7 Axon Tracks
 
-### [Module 1: Geometry for Robotics](modules/01_geometry/README.md)
-* [Concept 01: Coordinates, Poses & Pythagorean Distance](modules/01_geometry/concept_01_coordinates_distance/README.md) — [Interactive Visualizer](modules/01_geometry/concept_01_coordinates_distance/demo.html)
-* [Concept 02: Coordinate Frames (Field vs. Robot vs. Camera)](modules/01_geometry/concept_02_coordinate_frames/README.md) — [Interactive Visualizer](modules/01_geometry/concept_02_coordinate_frames/demo.html)
-* [Concept 03: 2D Bounding Boxes & Collision Detection](modules/01_geometry/concept_03_bounding_boxes/README.md) — [Interactive Visualizer](modules/01_geometry/concept_03_bounding_boxes/demo.html)
-
----
-
-### [Module 2: Trigonometry & Angles](modules/02_trigonometry/README.md)
-* [Concept 04: The Unit Circle & Trigonometric Ratios](modules/02_trigonometry/concept_04_unit_circle_ratios/README.md) — [Interactive Visualizer](modules/02_trigonometry/concept_04_unit_circle_ratios/demo.html)
-* [Concept 05: 4-Quadrant Heading with atan2](modules/02_trigonometry/concept_05_atan2_heading/README.md) — [Interactive Visualizer](modules/02_trigonometry/concept_05_atan2_heading/demo.html)
-* [Concept 06: Angle Wrapping & Swerve 180° Speed Flip](modules/02_trigonometry/concept_06_angle_wrapping_swerve/README.md) — [Interactive Visualizer](modules/02_trigonometry/concept_06_angle_wrapping_swerve/demo.html)
-* [Concept 07: 3D Rotations & Quaternions](modules/02_trigonometry/concept_07_3d_rotations_quaternions/README.md) — [Interactive Visualizer](modules/02_trigonometry/concept_07_3d_rotations_quaternions/demo.html)
-
----
-
-### [Module 3: Linear Algebra & Matrix Transformations](modules/03_linear_algebra/README.md)
-* [Concept 08: Vectors, Displacements & Scalar Scaling](modules/03_linear_algebra/concept_08_vectors_scaling/README.md) — [Interactive Visualizer](modules/03_linear_algebra/concept_08_vectors_scaling/demo.html)
-* [Concept 09: Dot Products, Projections & Alignment](modules/03_linear_algebra/concept_09_dot_products/README.md) — [Interactive Visualizer](modules/03_linear_algebra/concept_09_dot_products/demo.html)
-* [Concept 10: Matrices as Coordinate Transformers](modules/03_linear_algebra/concept_10_matrices_transforms/README.md) — [Interactive Visualizer](modules/03_linear_algebra/concept_10_matrices_transforms/demo.html)
-* [Concept 11: Determinants, Inverses & Singularity](modules/03_linear_algebra/concept_11_determinants_inverses/README.md) — [Interactive Visualizer](modules/03_linear_algebra/concept_11_determinants_inverses/demo.html)
-
----
-
-### [Module 4: Calculus, Motion & Optimization](modules/04_calculus/README.md)
-* [Concept 12: Rates of Change & Derivatives](modules/04_calculus/concept_12_rates_of_change/README.md) — [Interactive Visualizer](modules/04_calculus/concept_12_rates_of_change/demo.html)
-* [Concept 13: Acceleration, Jerk & S-Curves](modules/04_calculus/concept_13_acceleration_jerk/README.md) — [Interactive Visualizer](modules/04_calculus/concept_13_acceleration_jerk/demo.html)
-* [Concept 14: Accumulation, Area & Numerical Integration](modules/04_calculus/concept_14_accumulation_integrals/README.md) — [Interactive Visualizer](modules/04_calculus/concept_14_accumulation_integrals/demo.html)
-* [Concept 15: Multivariable Gradients & Hill Climbing](modules/04_calculus/concept_15_gradients_multivariable/README.md) — [Interactive Visualizer](modules/04_calculus/concept_15_gradients_multivariable/demo.html)
-
----
-
-### [Module 5: Probability & Uncertainty](modules/05_probability/README.md)
-* [Concept 16: Sensor Noise & Normal Distributions](modules/05_probability/concept_16_sensor_noise_normal/README.md) — [Interactive Visualizer](modules/05_probability/concept_16_sensor_noise_normal/demo.html)
-* [Concept 17: Bayes' Rule & 1D Sensor Fusion](modules/05_probability/concept_17_bayes_sensor_fusion/README.md) — [Interactive Visualizer](modules/05_probability/concept_17_bayes_sensor_fusion/demo.html)
-* [Concept 18: Discrete Distributions & Softmax](modules/05_probability/concept_18_discrete_softmax/README.md) — [Interactive Visualizer](modules/05_probability/concept_18_discrete_softmax/demo.html)
-* [Concept 19: Expected Value & Decision Making](modules/05_probability/concept_19_expected_value_decision/README.md) — [Interactive Visualizer](modules/05_probability/concept_19_expected_value_decision/demo.html)
+```
+                        ┌───────────────────────────────┐
+                        │   1. Mathematical Foundations │
+                        └───────────────┬───────────────┘
+                                        │
+             ┌──────────────────────────┴──────────────────────────┐
+             ▼                                                     ▼
+┌───────────────────────────────┐               ┌─────────────────────────────────────┐
+│ 2. Machine Learning & Vision  │               │   4. Physics, Dynamics & Actuation  │
+└────────────┬──────────────────┘               └──────────────────┬──────────────────┘
+             │                                                     │
+             ▼                                                     ▼
+┌───────────────────────────────┐               ┌─────────────────────────────────────┐
+│ 3. Large Language Models      │               │   5. Kinematics & Motion Planning   │
+└────────────┬──────────────────┘               └──────────────────┬──────────────────┘
+             │                                                     │
+             └──────────────────────────┬──────────────────────────┘
+                                        ▼
+                        ┌───────────────────────────────┐
+                        │ 6. Localization & Estimation  │
+                        └───────────────┬───────────────┘
+                                        │
+                                        ▼
+                        ┌───────────────────────────────┐
+                        │ 7. Reinforcement Learning     │
+                        └───────────────────────────────┘
+```
 
 ---
 
-### [Module 6: Machine Learning Foundations](modules/06_machine_learning/README.md)
-* Concept 20: Loss Landscapes & Optimization (MSE, Cross-Entropy)
-* Concept 21: Dense Layers & Non-Linear Activation Functions (ReLU, GELU)
-* Concept 22: Vector Calculus Backpropagation & Computation Graphs
-* Concept 23: 2D Neural Classifier Sandbox
+### [Axon 01: Mathematical Foundations](math/README.md)
+* **[Geometry for Robotics](math/01_geometry/README.md)**: Coordinates, Poses, Frame Transforms, 2D AABB Bounding Boxes.
+* **[Trigonometry & Angles](math/02_trigonometry/README.md)**: Unit Circle, `atan2`, Angle Wrapping, 180° Swerve Speed Flips, 3D Quaternions.
+* **[Linear Algebra & Matrix Transformations](math/03_linear_algebra/README.md)**: Vectors, Dot Products, Matrices, Determinants, Matrix Inverses.
+* **[Calculus, Motion & Optimization](math/04_calculus/README.md)**: Rates of Change, S-Curves & Jerk, Numerical Integrals, Multivariable Gradients.
+* **[Probability & Uncertainty](math/05_probability/README.md)**: Sensor Noise & Bell Curves, Bayes' Rule 1D Fusion, Softmax, Expected Value & Monte Carlo.
+
+---
+
+### [Axon 02: Machine Learning & Vision](machine_learning/README.md)
+* **[Loss Functions & Optimization](machine_learning/01_loss_optimization/README.md)**: MSE, Cross-Entropy, Gradient Descent, Adam.
+* **[Neural Layers & Activation Functions](machine_learning/02_neural_layers/README.md)**: Dense weights, biases, non-linear activations (ReLU, GELU).
+* **[Vector Backpropagation Engine](machine_learning/03_backpropagation/README.md)**: Computational DAG graphs, multivariate Chain Rule, autograd.
+* **[Computer Vision & Object Detection](machine_learning/04_computer_vision/README.md)**: 2D Spatial Convolutions, YOLO single-shot architectures, bounding box IoU.
+
+---
+
+### [Axon 03: Large Language Models & Transformers](large_language_models/README.md)
+* **[Tokenization & Vector Embeddings](large_language_models/01_embeddings/README.md)**: BPE tokenization, vector lookup spaces, semantic similarity.
+* **[Scaled Dot-Product & Self-Attention](large_language_models/02_attention_heads/README.md)**: Query, Key, Value ($Q, K, V$) projections.
+* **[The Transformer Architecture](large_language_models/03_transformers/README.md)**: Multi-Head Attention, residual skip connections, RMSNorm.
+* **[Generation, RoPE & Sampling](large_language_models/04_generation_sampling/README.md)**: Rotary Position Embeddings, Temperature, Top-$p$ sampling.
+
+---
+
+### [Axon 04: Physics, Dynamics & Actuation](physics/README.md)
+* **[DC Motor Electromechanics](physics/01_dc_motors/README.md)**: Brushless motor curves, Back-EMF, $K_t$ and $K_v$ constants.
+* **[Gearboxes & Reflected Inertia](physics/02_gearboxes_inertia/README.md)**: Planetary reductions, torque multiplication, reflected load inertia ($J/G^2$).
+* **[Projectile Ballistics & Shooter Trajectories](physics/03_ballistics_trajectories/README.md)**: 2D parabolic arcs, air drag, Magnus spin, shooter flywheel RPM, shooting on the move.
+* **[Physics Feedforward & Closed-Loop PID](physics/04_feedforward_pid/README.md)**: Voltage models ($kS, kV, kA, kG$), velocity feedforward, PID closed-loop control.
+
+---
+
+### [Axon 05: Kinematics & Motion Planning](kinematics/README.md)
+* **[Chassis Speeds & Kinematics](kinematics/01_chassis_speeds/README.md)**: Forward/Inverse kinematics, wheel velocity desaturation.
+* **[Swerve Kinematics & 2nd-Order Twist](kinematics/02_swerve_kinematics/README.md)**: 4-wheel decomposition, azimuth optimization, Lie group twist discretization.
+* **[Motion Profiling](kinematics/03_motion_profiling/README.md)**: Trapezoidal and 7-segment S-Curve velocity profiles.
+* **[Holonomic Trajectory Tracking](kinematics/04_trajectory_tracking/README.md)**: Hermite splines, HolonomicDriveController, dynamic obstacle potential fields.
+
+---
+
+### [Axon 06: Localization & State Estimation](localization/README.md)
+* **[Wheel Odometry & Gyro Integration](localization/01_wheel_odometry/README.md)**: Twist dead reckoning, encoder tick accumulation, IMU heading integration.
+* **[AprilTag Computer Vision & PnP Pose](localization/02_vision_pose/README.md)**: Pinhole camera matrix $K$, Perspective-n-Point solvers, camera latency compensation.
+* **[Extended Kalman Filter (EKF)](localization/03_kalman_filters/README.md)**: Multi-state sensor fusion combining high-frequency odometry with low-frequency vision.
+
+---
+
+### [Axon 07: Reinforcement Learning & Agentic Decision Systems](reinforcement_learning/README.md)
+* **[Markov Decision Processes](reinforcement_learning/01_mdp_rewards/README.md)**: States, actions, reward shaping, discount factors.
+* **[Value Functions & Deep Q-Learning](reinforcement_learning/02_q_learning/README.md)**: Bellman optimality, Deep Q-Networks (DQN), experience replay.
+* **[Policy Gradients & Actor-Critic](reinforcement_learning/03_policy_gradients/README.md)**: Continuous action spaces, REINFORCE, PPO.
+* **[Monte Carlo Tree Search](reinforcement_learning/04_mcts_game_agents/README.md)**: UCT tree search, AlphaZero search, real-time match strategists.
