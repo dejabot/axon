@@ -5,22 +5,22 @@ Welcome to **Module 2: Trigonometry & Angles**. In this module, we build from ev
 ---
 
 ## Concepts in this Module
-* **[Concept 04: The Unit Circle & Trigonometric Ratios](concept_04_unit_circle_ratios/README.md)**
+* **[Concept 04: The Unit Circle & Trigonometric Ratios](concept_04_unit_circle_ratios/)**
   * *The Everyday Problem:* How does pushing a gamepad joystick decompose into forward and sideways wheel power?
   * *Code & Math:* SOH-CAH-TOA, unit circle projections, `cos` as horizontal shadow, `sin` as vertical height.
   * *Visualizer:* [concept_04_unit_circle_ratios/demo.html](concept_04_unit_circle_ratios/demo.html)
 
-* **[Concept 05: 4-Quadrant Heading with atan2](concept_05_atan2_heading/README.md)**
+* **[Concept 05: 4-Quadrant Heading with atan2](concept_05_atan2_heading/)**
   * *The Everyday Problem:* Why does standard `tan⁻¹(y/x)` confuse aiming North-East with South-West?
   * *Code & Math:* The 4 quadrants, negative sign cancellations, and the robust `atan2(y, x)` function.
   * *Visualizer:* [concept_05_atan2_heading/demo.html](concept_05_atan2_heading/demo.html)
 
-* **[Concept 06: Angle Wrapping & Swerve 180° Speed Flip](concept_06_angle_wrapping_swerve/README.md)**
+* **[Concept 06: Angle Wrapping & Swerve 180° Speed Flip](concept_06_angle_wrapping_swerve/)**
   * *The Everyday Problem:* Why does a naive angle subtraction make a robot spin 340° instead of turning 20°?
   * *Code & Math:* Modular angle difference on a circle, shortest path wrapping, and swerve drive direction inversion.
   * *Visualizer:* [concept_06_angle_wrapping_swerve/demo.html](concept_06_angle_wrapping_swerve/demo.html)
 
-* **[Concept 07: 3D Rotations & Quaternions](concept_07_3d_rotations_quaternions/README.md)**
+* **[Concept 07: 3D Rotations & Quaternions](concept_07_3d_rotations_quaternions/)**
   * *The Everyday Problem:* Why do 3-axis Euler angles lock up and crash IMU gyros when pitching straight up (Gimbal Lock)?
   * *Code & Math:* Roll/Pitch/Yaw limitations and unit Quaternions `(w, x, y, z)` on the 4D sphere.
   * *Visualizer:* [concept_07_3d_rotations_quaternions/demo.html](concept_07_3d_rotations_quaternions/demo.html)
@@ -28,7 +28,7 @@ Welcome to **Module 2: Trigonometry & Angles**. In this module, we build from ev
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../01_geometry/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Module 1: Geometry</a></div>
-  <div><a href="README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
-  <div><a href="concept_04_unit_circle_ratios/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 04: Unit Circle & Ratios →</a></div>
+  <div><a href="../01_geometry/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Module 1: Geometry</a></div>
+  <div><a href="./" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
+  <div><a href="concept_04_unit_circle_ratios/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 04: Unit Circle & Ratios →</a></div>
 </div>

@@ -31,7 +31,7 @@ Welcome to the **Kinematics & Motion Planning Axon**. This track develops the ma
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../physics/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Previous Axon: Physics & Actuation</a></div>
-  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Curriculum Home</a></div>
-  <div><a href="../localization/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Next Axon: Localization & State Estimation →</a></div>
+  <div><a href="../physics/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Previous Axon: Physics & Actuation</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Curriculum Home</a></div>
+  <div><a href="../localization/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Next Axon: Localization & State Estimation →</a></div>
 </div>

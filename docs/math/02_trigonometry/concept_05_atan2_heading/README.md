@@ -106,7 +106,7 @@ Because the slope is defined as `Rise / Run = Δy / Δx`. In `tan(θ) = y / x`, 
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../concept_04_unit_circle_ratios/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 04: Unit Circle & Ratios</a></div>
-  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
-  <div><a href="../concept_06_angle_wrapping_swerve/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 06: Angle Wrapping & Swerve →</a></div>
+  <div><a href="../concept_04_unit_circle_ratios/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 04: Unit Circle & Ratios</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
+  <div><a href="../concept_06_angle_wrapping_swerve/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 06: Angle Wrapping & Swerve →</a></div>
 </div>

@@ -124,7 +124,7 @@ Because negative logits (e.g. `-0.8`) would produce invalid negative probabiliti
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../concept_17_bayes_sensor_fusion/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 17: Bayes' Rule & Sensor Fusion</a></div>
-  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 5 Overview</a></div>
-  <div><a href="../concept_19_expected_value_decision/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 19: Expected Value & Decisions →</a></div>
+  <div><a href="../concept_17_bayes_sensor_fusion/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 17: Bayes' Rule & Sensor Fusion</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 5 Overview</a></div>
+  <div><a href="../concept_19_expected_value_decision/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 19: Expected Value & Decisions →</a></div>
 </div>

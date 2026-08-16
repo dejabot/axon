@@ -119,7 +119,7 @@ A negative determinant means the grid was **reflected** (flipped inside out, lik
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../concept_10_matrices_transforms/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 10: Matrix Transformations</a></div>
-  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 3 Overview</a></div>
-  <div><a href="../../04_calculus/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Module 4: Calculus →</a></div>
+  <div><a href="../concept_10_matrices_transforms/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 10: Matrix Transformations</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 3 Overview</a></div>
+  <div><a href="../../04_calculus/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Module 4: Calculus →</a></div>
 </div>

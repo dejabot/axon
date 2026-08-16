@@ -134,7 +134,7 @@ Because the robot could be at the right `(x, y)` position but facing backward! Y
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Module 1: Geometry</a></div>
-  <div><a href="../../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Math Axon Home</a></div>
-  <div><a href="../concept_02_coordinate_frames/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 02: Coordinate Frames →</a></div>
+  <div><a href="../" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Module 1: Geometry</a></div>
+  <div><a href="../../" style="color: var(--muted, #94a3b8); text-decoration: none;">Math Axon Home</a></div>
+  <div><a href="../concept_02_coordinate_frames/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 02: Coordinate Frames →</a></div>
 </div>

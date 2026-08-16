@@ -25,7 +25,7 @@ Welcome to the **Localization & State Estimation Axon**. This track covers how a
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../kinematics/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Previous Axon: Kinematics & Motion</a></div>
-  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Curriculum Home</a></div>
-  <div><a href="../reinforcement_learning/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Next Axon: Reinforcement Learning →</a></div>
+  <div><a href="../kinematics/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Previous Axon: Kinematics & Motion</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Curriculum Home</a></div>
+  <div><a href="../reinforcement_learning/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Next Axon: Reinforcement Learning →</a></div>
 </div>

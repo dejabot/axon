@@ -111,7 +111,7 @@ Because under constant acceleration, velocity is a straight line ($v = a\cdot t$
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../concept_13_acceleration_jerk/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 13: Acceleration & Jerk</a></div>
-  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 4 Overview</a></div>
-  <div><a href="../concept_15_gradients_multivariable/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 15: Gradients & Optimization →</a></div>
+  <div><a href="../concept_13_acceleration_jerk/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 13: Acceleration & Jerk</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 4 Overview</a></div>
+  <div><a href="../concept_15_gradients_multivariable/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 15: Gradients & Optimization →</a></div>
 </div>

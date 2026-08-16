@@ -100,7 +100,7 @@ Because position is not changing (`dx = 0`), the slope is zero: `v = dx/dt = 0 m
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../../03_linear_algebra/concept_11_determinants_inverses/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 11: Determinants & Inverses</a></div>
-  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 4 Overview</a></div>
-  <div><a href="../concept_13_acceleration_jerk/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 13: Acceleration & Jerk →</a></div>
+  <div><a href="../../03_linear_algebra/concept_11_determinants_inverses/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 11: Determinants & Inverses</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 4 Overview</a></div>
+  <div><a href="../concept_13_acceleration_jerk/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 13: Acceleration & Jerk →</a></div>
 </div>

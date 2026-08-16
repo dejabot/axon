@@ -31,7 +31,7 @@ Welcome to the **Physics, Dynamics & Actuation Axon**. This track bridges mechan
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../large_language_models/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Previous Axon: Large Language Models</a></div>
-  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Curriculum Home</a></div>
-  <div><a href="../kinematics/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Next Axon: Kinematics & Motion →</a></div>
+  <div><a href="../large_language_models/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Previous Axon: Large Language Models</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Curriculum Home</a></div>
+  <div><a href="../kinematics/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Next Axon: Kinematics & Motion →</a></div>
 </div>

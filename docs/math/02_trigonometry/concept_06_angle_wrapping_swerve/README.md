@@ -113,7 +113,7 @@ Because the steering motor never has to rotate more than `90°` to achieve any d
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../concept_05_atan2_heading/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 05: 4-Quadrant atan2</a></div>
-  <div><a href="../README.md" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
-  <div><a href="../concept_07_3d_rotations_quaternions/README.md" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 07: 3D Quaternions →</a></div>
+  <div><a href="../concept_05_atan2_heading/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 05: 4-Quadrant atan2</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
+  <div><a href="../concept_07_3d_rotations_quaternions/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 07: 3D Quaternions →</a></div>
 </div>
