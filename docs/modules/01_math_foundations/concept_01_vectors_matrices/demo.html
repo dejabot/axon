@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 01: 2D Matrix Transformation & Basis Space Visualizer</title>
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --card-bg: #141923;
+      --card-border: #232b3b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-red: #f43f5e;
+      --accent-amber: #fbbf24;
+      --accent-purple: #c084fc;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 16px 24px;
+      background-color: rgba(20, 25, 35, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      letter-spacing: -0.02em;
+    }
+    .header-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .nav-links a {
+      color: var(--accent-amber);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover {
+      background: rgba(251, 191, 36, 0.2);
+    }
+    .main-container {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 16px;
+      gap: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    @media (min-width: 900px) {
+      .main-container {
+        flex-direction: row;
+      }
+    }
+    .canvas-panel {
+      flex: 1.6;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 480px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .canvas-overlay-hints {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      pointer-events: none;
+      background: rgba(10, 13, 20, 0.75);
+      backdrop-filter: blur(4px);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .controls-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-blue);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .matrix-display {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .matrix-cell {
+      background: #0a0d14;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+    }
+    .matrix-cell label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .matrix-cell input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-blue);
+    }
+    .matrix-cell .val {
+      font-family: monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    button.btn {
+      background: #1e2638;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button.btn:hover {
+      background: #2b364f;
+      border-color: var(--accent-blue);
+    }
+    button.btn.danger:hover {
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .stat-box {
+      background: #0a0d14;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .stat-val {
+      font-family: monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-ok { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
+    .badge-warn { background: rgba(251, 191, 36, 0.2); color: var(--accent-amber); }
+    .badge-danger { background: rgba(244, 63, 94, 0.2); color: var(--accent-red); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-title">
+      <h1>01: Vectors, Basis Spaces & Matrix Transformations</h1>
+      <p>Axon Stage 1: The Unified Math Engine</p>
+    </div>
+    <div class="nav-links">
+      <a href="README.md">📖 Concept Guide</a>
+      <a href="../../../index.html">🏠 Master Dashboard</a>
+    </div>
+  </header>
+
+  <div class="main-container">
+    
+    <div class="canvas-panel">
+      <div class="canvas-overlay-hints">
+        • <b>Drag green arrow</b> (î landing) or <b>red arrow</b> (ĵ landing)<br>
+        • <b>Drag cyan arrow</b> (test vector v)<br>
+        • Shaded area = Determinant scale
+      </div>
+      <canvas id="transformCanvas"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      
+      <div class="card">
+        <div class="card-title">
+          <span>Matrix Transformation [ A ]</span>
+          <span id="singularityBadge" class="badge badge-ok">Invertible</span>
+        </div>
+
+        <div class="matrix-display">
+          <div class="matrix-cell">
+            <label>a (î_x)</label>
+            <input type="range" id="sliderA" min="-3" max="3" step="0.05" value="1.0">
+            <div class="val" id="valA">1.00</div>
+          </div>
+          <div class="matrix-cell">
+            <label>b (ĵ_x)</label>
+            <input type="range" id="sliderB" min="-3" max="3" step="0.05" value="0.0">
+            <div class="val" id="valB">0.00</div>
+          </div>
+          <div class="matrix-cell">
+            <label>c (î_y)</label>
+            <input type="range" id="sliderC" min="-3" max="3" step="0.05" value="0.0">
+            <div class="val" id="valC">0.00</div>
+          </div>
+          <div class="matrix-cell">
+            <label>d (ĵ_y)</label>
+            <input type="range" id="sliderD" min="-3" max="3" step="0.05" value="1.0">
+            <div class="val" id="valD">1.00</div>
+          </div>
+        </div>
+
+        <div class="preset-grid">
+          <button class="btn" onclick="applyPreset('identity')">Identity</button>
+          <button class="btn" onclick="applyPreset('rotate45')">Rotate 45°</button>
+          <button class="btn" onclick="applyPreset('shearX')">Shear X</button>
+          <button class="btn" onclick="applyPreset('scale')">Scale 1.5×</button>
+          <button class="btn" onclick="applyPreset('reflect')">Reflect X</button>
+          <button class="btn danger" onclick="applyPreset('singular')">Singular (Det=0)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Live Geometric Telemetry</div>
+        <div class="telemetry-grid">
+          <div class="stat-box">
+            <div class="stat-label">Determinant (det A)</div>
+            <div class="stat-val" id="detVal" style="color: var(--accent-amber);">1.00</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Trace (a + d)</div>
+            <div class="stat-val" id="traceVal" style="color: var(--accent-blue);">2.00</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Eigenvalue λ₁</div>
+            <div class="stat-val" id="eig1Val" style="color: var(--accent-green);">1.00</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Eigenvalue λ₂</div>
+            <div class="stat-val" id="eig2Val" style="color: var(--accent-purple);">1.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Transformed Vector Mapping</div>
+        <div style="font-family: monospace; font-size: 0.85rem; line-height: 1.6; color: var(--text-muted);">
+          Original v &nbsp;: <span style="color: var(--accent-blue);" id="vOrigText">[1.50, 1.00]ᵀ</span><br>
+          Mapped A·v : <span style="color: var(--accent-amber);" id="vMappedText">[1.50, 1.00]ᵀ</span><br>
+          Length ||v||: <span id="vLengthText">1.80 ➔ 1.80</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const canvas = document.getElementById('transformCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Matrix elements
+    let A = { a: 1.0, b: 0.0, c: 0.0, d: 1.0 };
+    // Test vector v (in original coordinates)
+    let testV = { x: 1.5, y: 1.0 };
+
+    // Coordinate grid settings
+    let unitSize = 60; // pixels per unit
+    let origin = { x: 0, y: 0 };
+
+    // Interaction tracking
+    let draggingTarget = null; // 'i_hat', 'j_hat', 'test_v'
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      origin.x = rect.width / 2;
+      origin.y = rect.height / 2;
+      unitSize = Math.min(rect.width, rect.height) / 7.5;
+      draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function toScreen(gridX, gridY) {
+      return {
+        x: origin.x + gridX * unitSize,
+        y: origin.y - gridY * unitSize
+      };
+    }
+
+    function toGrid(screenX, screenY) {
+      return {
+        x: (screenX - origin.x) / unitSize,
+        y: -(screenY - origin.y) / unitSize
+      };
+    }
+
+    function drawArrow(fromX, fromY, toX, toY, color, width = 3, headSize = 10) {
+      const angle = Math.atan2(toY - fromY, toX - fromX);
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = width;
+      
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(toX, toY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(toX, toY);
+      ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI / 6), toY - headSize * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI / 6), toY - headSize * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function draw() {
+      const width = canvas.width / (window.devicePixelRatio || 1);
+      const height = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Draw original faint background grid
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      const maxGrid = 8;
+      for (let i = -maxGrid; i <= maxGrid; i++) {
+        const p1 = toScreen(i, -maxGrid);
+        const p2 = toScreen(i, maxGrid);
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+
+        const p3 = toScreen(-maxGrid, i);
+        const p4 = toScreen(maxGrid, i);
+        ctx.beginPath(); ctx.moveTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.stroke();
+      }
+
+      // 2. Draw transformed warped coordinate grid
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+      for (let i = -maxGrid; i <= maxGrid; i++) {
+        // Line x = i transformed: t * j_hat + i * i_hat
+        const startX = i * A.a + (-maxGrid) * A.b;
+        const startY = i * A.c + (-maxGrid) * A.d;
+        const endX   = i * A.a + (maxGrid) * A.b;
+        const endY   = i * A.c + (maxGrid) * A.d;
+        const pStart = toScreen(startX, startY);
+        const pEnd   = toScreen(endX, endY);
+        ctx.beginPath(); ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y); ctx.stroke();
+
+        // Line y = i transformed: i * j_hat + t * i_hat
+        const sX = (-maxGrid) * A.a + i * A.b;
+        const sY = (-maxGrid) * A.c + i * A.d;
+        const eX = (maxGrid) * A.a + i * A.b;
+        const eY = (maxGrid) * A.c + i * A.d;
+        const ps = toScreen(sX, sY);
+        const pe = toScreen(eX, eY);
+        ctx.beginPath(); ctx.moveTo(ps.x, ps.y); ctx.lineTo(pe.x, pe.y); ctx.stroke();
+      }
+
+      // 3. Draw Main Axes
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.beginPath();
+      ctx.moveTo(0, origin.y); ctx.lineTo(width, origin.y);
+      ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, height);
+      ctx.stroke();
+
+      // 4. Draw Shaded Parallelogram (Determinant area)
+      const det = (A.a * A.d) - (A.b * A.c);
+      const o  = toScreen(0, 0);
+      const iL = toScreen(A.a, A.c);
+      const jL = toScreen(A.b, A.d);
+      const sumL = toScreen(A.a + A.b, A.c + A.d);
+
+      ctx.beginPath();
+      ctx.moveTo(o.x, o.y);
+      ctx.lineTo(iL.x, iL.y);
+      ctx.lineTo(sumL.x, sumL.y);
+      ctx.lineTo(jL.x, jL.y);
+      ctx.closePath();
+
+      if (Math.abs(det) < 0.05) {
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.35)'; // collapsed singularity warning
+      } else if (det > 0) {
+        ctx.fillStyle = 'rgba(74, 222, 128, 0.18)'; // positive orientation
+      } else {
+        ctx.fillStyle = 'rgba(192, 132, 252, 0.22)'; // flipped orientation
+      }
+      ctx.fill();
+      ctx.strokeStyle = det >= 0 ? 'rgba(74, 222, 128, 0.6)' : 'rgba(192, 132, 252, 0.6)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 5. Draw Transformed Basis Vectors
+      // î (i-hat landing): green
+      drawArrow(o.x, o.y, iL.x, iL.y, '#4ade80', 3.5, 12);
+      // ĵ (j-hat landing): red
+      drawArrow(o.x, o.y, jL.x, jL.y, '#f43f5e', 3.5, 12);
+
+      // Labels on basis vectors
+      ctx.font = 'bold 13px monospace';
+      ctx.fillStyle = '#4ade80';
+      ctx.fillText(`î' [${A.a.toFixed(2)}, ${A.c.toFixed(2)}]`, iL.x + 8, iL.y - 8);
+
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillText(`ĵ' [${A.b.toFixed(2)}, ${A.d.toFixed(2)}]`, jL.x + 8, jL.y - 8);
+
+      // 6. Draw Test Vector v and Transformed A·v
+      const vOrigScreen = toScreen(testV.x, testV.y);
+      const mappedVx = A.a * testV.x + A.b * testV.y;
+      const mappedVy = A.c * testV.x + A.d * testV.y;
+      const vMappedScreen = toScreen(mappedVx, mappedVy);
+
+      // Original test vector (dashed faint cyan)
+      ctx.setLineDash([4, 4]);
+      drawArrow(o.x, o.y, vOrigScreen.x, vOrigScreen.y, 'rgba(56, 189, 248, 0.4)', 2, 8);
+      ctx.setLineDash([]);
+
+      // Transformed test vector (solid amber)
+      drawArrow(o.x, o.y, vMappedScreen.x, vMappedScreen.y, '#fbbf24', 3, 10);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillText(`A·v [${mappedVx.toFixed(2)}, ${mappedVy.toFixed(2)}]`, vMappedScreen.x + 8, vMappedScreen.y - 8);
+
+      // Draw grab handle on original v
+      ctx.beginPath();
+      ctx.arc(vOrigScreen.x, vOrigScreen.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      updateTelemetry(det, mappedVx, mappedVy);
+    }
+
+    function updateTelemetry(det, mappedVx, mappedVy) {
+      document.getElementById('valA').textContent = A.a.toFixed(2);
+      document.getElementById('valB').textContent = A.b.toFixed(2);
+      document.getElementById('valC').textContent = A.c.toFixed(2);
+      document.getElementById('valD').textContent = A.d.toFixed(2);
+
+      document.getElementById('sliderA').value = A.a;
+      document.getElementById('sliderB').value = A.b;
+      document.getElementById('sliderC').value = A.c;
+      document.getElementById('sliderD').value = A.d;
+
+      document.getElementById('detVal').textContent = det.toFixed(2);
+      const trace = A.a + A.d;
+      document.getElementById('traceVal').textContent = trace.toFixed(2);
+
+      const disc = trace * trace - 4 * det;
+      if (disc >= 0) {
+        const l1 = (trace + Math.sqrt(disc)) / 2;
+        const l2 = (trace - Math.sqrt(disc)) / 2;
+        document.getElementById('eig1Val').textContent = l1.toFixed(2);
+        document.getElementById('eig2Val').textContent = l2.toFixed(2);
+      } else {
+        document.getElementById('eig1Val').textContent = "Complex";
+        document.getElementById('eig2Val').textContent = "Complex";
+      }
+
+      const badge = document.getElementById('singularityBadge');
+      if (Math.abs(det) < 0.05) {
+        badge.className = "badge badge-danger";
+        badge.textContent = "Singular (Det ≈ 0)";
+      } else if (det < 0) {
+        badge.className = "badge badge-warn";
+        badge.textContent = "Orientation Flipped";
+      } else {
+        badge.className = "badge badge-ok";
+        badge.textContent = "Invertible";
+      }
+
+      document.getElementById('vOrigText').textContent = `[${testV.x.toFixed(2)}, ${testV.y.toFixed(2)}]ᵀ`;
+      document.getElementById('vMappedText').textContent = `[${mappedVx.toFixed(2)}, ${mappedVy.toFixed(2)}]ᵀ`;
+
+      const origLen = Math.hypot(testV.x, testV.y);
+      const mapLen = Math.hypot(mappedVx, mappedVy);
+      document.getElementById('vLengthText').textContent = `${origLen.toFixed(2)} ➔ ${mapLen.toFixed(2)}`;
+    }
+
+    // Sliders event listeners
+    ['A', 'B', 'C', 'D'].forEach(key => {
+      const slider = document.getElementById('slider' + key);
+      slider.addEventListener('input', (e) => {
+        A[key.toLowerCase()] = parseFloat(e.target.value);
+        draw();
+      });
+    });
+
+    // Preset handler
+    function applyPreset(type) {
+      if (type === 'identity') {
+        A = { a: 1.0, b: 0.0, c: 0.0, d: 1.0 };
+      } else if (type === 'rotate45') {
+        const rad = Math.PI / 4;
+        A = { a: Math.cos(rad), b: -Math.sin(rad), c: Math.sin(rad), d: Math.cos(rad) };
+      } else if (type === 'shearX') {
+        A = { a: 1.0, b: 1.2, c: 0.0, d: 1.0 };
+      } else if (type === 'scale') {
+        A = { a: 1.5, b: 0.0, c: 0.0, d: 1.5 };
+      } else if (type === 'reflect') {
+        A = { a: 1.0, b: 0.0, c: 0.0, d: -1.0 };
+      } else if (type === 'singular') {
+        A = { a: 1.5, b: 1.5, c: 1.0, d: 1.0 };
+      }
+      draw();
+    }
+
+    // Mouse / Touch Dragging Logic
+    function getPointerPos(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+      return {
+        screenX: clientX - rect.left,
+        screenY: clientY - rect.top
+      };
+    }
+
+    function onPointerDown(evt) {
+      const { screenX, screenY } = getPointerPos(evt);
+      const grid = toGrid(screenX, screenY);
+
+      // Check distance to î landing (A.a, A.c)
+      const distI = Math.hypot(grid.x - A.a, grid.y - A.c);
+      // Check distance to ĵ landing (A.b, A.d)
+      const distJ = Math.hypot(grid.x - A.b, grid.y - A.d);
+      // Check distance to test vector v (testV.x, testV.y)
+      const distV = Math.hypot(grid.x - testV.x, grid.y - testV.y);
+
+      const threshold = 0.4;
+      if (distI < threshold) {
+        draggingTarget = 'i_hat';
+      } else if (distJ < threshold) {
+        draggingTarget = 'j_hat';
+      } else if (distV < threshold) {
+        draggingTarget = 'test_v';
+      }
+    }
+
+    function onPointerMove(evt) {
+      if (!draggingTarget) return;
+      evt.preventDefault();
+      const { screenX, screenY } = getPointerPos(evt);
+      const grid = toGrid(screenX, screenY);
+
+      if (draggingTarget === 'i_hat') {
+        A.a = Math.max(-3, Math.min(3, grid.x));
+        A.c = Math.max(-3, Math.min(3, grid.y));
+      } else if (draggingTarget === 'j_hat') {
+        A.b = Math.max(-3, Math.min(3, grid.x));
+        A.d = Math.max(-3, Math.min(3, grid.y));
+      } else if (draggingTarget === 'test_v') {
+        testV.x = Math.max(-4, Math.min(4, grid.x));
+        testV.y = Math.max(-4, Math.min(4, grid.y));
+      }
+      draw();
+    }
+
+    function onPointerUp() {
+      draggingTarget = null;
+    }
+
+    canvas.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp);
+
+    // Initial render
+    resizeCanvas();
+  </script>
+</body>
+</html>
