@@ -3,202 +3,421 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Concept 01: Joystick Unit Circle Visualizer</title>
+  <title>Concept 01: Unit Circle &amp; Right Triangle Explorer</title>
   <script src="../../../assets/theme.js"></script>
   <link rel="stylesheet" href="../../../assets/axon.css">
   <style>
-    .demo-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 12px;
-    }
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* The container owns its height outright. The canvas is taken out of flow and
+       stretched to fill it, so the canvas size can never feed back into the
+       container size — that loop makes the canvas grow without bound on resize. */
     .canvas-container {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 10px;
       position: relative;
       overflow: hidden;
-      min-height: 340px;
+      height: 380px;
     }
     canvas {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
       cursor: crosshair;
+      touch-action: none;
     }
+    .hint {
+      position: absolute; left: 10px; top: 8px;
+      font-size: 0.7rem; color: var(--muted);
+      pointer-events: none; font-family: system-ui, sans-serif;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
+    }
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=range] { accent-color: var(--accent); width: 150px; }
+    .controls input[type=checkbox] { accent-color: var(--accent); }
+    .controls button {
+      font: inherit; cursor: pointer; padding: 4px 12px; border-radius: 7px;
+      border: 1px solid var(--line); background: var(--panel-hover); color: var(--ink);
+    }
+    .mono { font-family: ui-monospace, "SF Mono", monospace; }
     .stats-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-family: ui-monospace, "SF Mono", monospace;
-      font-size: 0.85rem;
+      display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: space-between;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.85rem;
     }
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    .stat-val {
-      font-weight: 700;
-      color: var(--ink);
-    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); }
   </style>
 </head>
 <body>
   <div class="demo-wrap">
     <div class="canvas-container">
-      <canvas id="trigCanvas"></canvas>
+      <canvas id="wheelCanvas"></canvas>
+      <div class="hint">Drag the wheel around the circle</div>
     </div>
-    
+
+    <div class="controls">
+      <label>Wheel angle θ
+        <input type="range" id="angleSlider" min="-360" max="720" value="30" step="1">
+        <span id="angleVal" class="mono" style="color: var(--accent-purple);">30°</span>
+      </label>
+      <label>Wheel speed v
+        <input type="range" id="speedSlider" min="0" max="5" value="4" step="0.1">
+        <span id="speedVal" class="mono" style="color: var(--accent-amber);">4.0 m/s</span>
+      </label>
+      <label><input type="checkbox" id="showArc" checked> Show arc (radians)</label>
+      <label><input type="checkbox" id="showTan"> Show tan as slope</label>
+      <button type="button" id="sweepBtn">Sweep all four quadrants</button>
+    </div>
+
     <div class="stats-row">
       <div class="stat-item">
-        <span class="stat-label">Joystick Angle (θ)</span>
-        <span class="stat-val" id="angleDegText" style="color: var(--accent-amber);">30.0° (0.52 rad)</span>
+        <span class="stat-label">θ degrees</span>
+        <span class="stat-val" id="degText" style="color: var(--accent-purple);">30.0°</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Forward Power (cos θ)</span>
-        <span class="stat-val" id="cosValText" style="color: var(--accent);">+0.866</span>
+        <span class="stat-label">θ radians</span>
+        <span class="stat-val" id="radText" style="color: var(--accent-purple);">0.5236</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Strafe Power (sin θ)</span>
-        <span class="stat-val" id="sinValText" style="color: var(--accent-green);">+0.500</span>
+        <span class="stat-label">quadrant</span>
+        <span class="stat-val" id="quadText">I</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">cos² + sin² Check</span>
-        <span class="stat-val" id="pythagText" style="color: var(--muted);">1.000</span>
+        <span class="stat-label">cos θ (adjacent)</span>
+        <span class="stat-val" id="cosText" style="color: var(--accent);">+0.8660</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">sin θ (opposite)</span>
+        <span class="stat-val" id="sinText" style="color: var(--accent-green);">+0.5000</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">tan θ = sin/cos</span>
+        <span class="stat-val" id="tanText">+0.5774</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">sin²θ + cos²θ</span>
+        <span class="stat-val" id="idText" style="color: var(--accent-amber); font-size: 1.05rem;">1.000000</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">down-field = v·cos θ</span>
+        <span class="stat-val" id="fwdText" style="color: var(--accent);">+3.464 m/s</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">sideways = v·sin θ</span>
+        <span class="stat-val" id="sideText" style="color: var(--accent-green);">+2.000 m/s</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">recovered speed</span>
+        <span class="stat-val" id="magText">4.000 m/s</span>
       </div>
     </div>
   </div>
 
   <script>
-    const canvas = document.getElementById('trigCanvas');
+    const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
 
-    let angleRad = Math.PI / 6; // 30 deg
+    const angleSlider = document.getElementById('angleSlider');
+    const speedSlider = document.getElementById('speedSlider');
+    const showArc = document.getElementById('showArc');
+    const showTan = document.getElementById('showTan');
+    const sweepBtn = document.getElementById('sweepBtn');
+
+    let theta = Math.PI / 6;   // radians, may run past a full turn in either direction
+    let speed = 4.0;           // meters per second
     let dragging = false;
+    let sweeping = false;
+    let rafId = null;
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
 
     function resize() {
       const rect = canvas.parentElement.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       draw();
     }
-    window.addEventListener('resize', resize);
-    window.addEventListener('axon-theme-changed', draw);
+
+    /* ONE scale for both axes. A circle must be drawn as a circle: separate x and
+       y scales would stretch the unit circle into an ellipse and every leg length
+       read off it would be a lie. */
+    function view() {
+      const { w, h } = cssSize();
+      const r = Math.min(w, h) / 2 - 46;
+      return { cx: w / 2, cy: h / 2, r: Math.max(30, r) };
+    }
+
+    function toScreen(x, y) {
+      const v = view();
+      return { x: v.cx + x * v.r, y: v.cy - y * v.r };
+    }
+
+    function palette() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      return {
+        grid:   isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)',
+        axis:   isLight ? '#94a3b8' : '#475569',
+        line:   isLight ? '#cbd5e1' : '#232b3b',
+        muted:  isLight ? '#64748b' : '#94a3b8',
+        ink:    isLight ? '#0f172a' : '#f1f5f9',
+        blue:   isLight ? '#0284c7' : '#38bdf8',
+        green:  isLight ? '#16a34a' : '#4ade80',
+        amber:  isLight ? '#d97706' : '#fbbf24',
+        red:    isLight ? '#e11d48' : '#f43f5e',
+        purple: isLight ? '#9333ea' : '#c084fc',
+        fill:   isLight ? 'rgba(251,191,36,0.16)' : 'rgba(251,191,36,0.13)'
+      };
+    }
 
     function draw() {
-      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      const width = canvas.width / (window.devicePixelRatio || 1);
-      const height = canvas.height / (window.devicePixelRatio || 1);
+      const C = palette();
+      const v = view();
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
 
-      ctx.clearRect(0, 0, width, height);
-
-      const cx = width / 2;
-      const cy = height / 2;
-      const r = Math.min(width, height) * 0.38;
+      const c = Math.cos(theta);
+      const s = Math.sin(theta);
+      const P = toScreen(c, s);
+      const F = toScreen(c, 0);        // foot of the perpendicular
+      const O = toScreen(0, 0);
 
       // Axes
-      ctx.strokeStyle = isLight ? '#cbd5e1' : '#232b3b';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(cx - r - 30, cy); ctx.lineTo(cx + r + 30, cy);
-      ctx.moveTo(cx, cy - r - 30); ctx.lineTo(cx, cy + r + 30);
+      ctx.moveTo(O.x - v.r - 26, O.y); ctx.lineTo(O.x + v.r + 26, O.y);
+      ctx.moveTo(O.x, O.y - v.r - 26); ctx.lineTo(O.x, O.y + v.r + 26);
       ctx.stroke();
 
-      // Unit Circle
-      ctx.strokeStyle = isLight ? '#94a3b8' : '#334155';
-      ctx.lineWidth = 2;
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = C.muted;
+      ctx.fillText('down-field', O.x + v.r - 24, O.y + 18);
+      ctx.fillText('sideways', O.x + 8, O.y - v.r - 10);
+      ctx.fillText('+1', O.x + v.r + 4, O.y + 14);
+      ctx.fillText('-1', O.x - v.r - 18, O.y + 14);
+
+      // Unit circle
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(O.x, O.y, v.r, 0, Math.PI * 2); ctx.stroke();
+
+      // Swept angle, drawn as a widening spiral so extra whole turns are visible
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      const steps = 160;
+      for (let i = 0; i <= steps; i++) {
+        const a = theta * i / steps;
+        const rr = v.r * (0.26 + 0.035 * Math.abs(a) / (Math.PI * 2));
+        const p = { x: O.x + rr * Math.cos(a), y: O.y - rr * Math.sin(a) };
+        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      }
       ctx.stroke();
 
-      // Stick Tip
-      const px = cx + r * Math.cos(angleRad);
-      const py = cy - r * Math.sin(angleRad);
+      // Arc length along the rim: this length, in radii, IS theta in radians
+      if (showArc.checked) {
+        ctx.strokeStyle = C.green; ctx.lineWidth = 5; ctx.globalAlpha = 0.55;
+        ctx.beginPath();
+        ctx.arc(O.x, O.y, v.r, 0, -theta, theta > 0);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
 
-      // Shadow lines
-      ctx.setLineDash([4, 4]);
-      // cos (horizontal)
-      ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.lineWidth = 2.5;
+      // Shaded right triangle: origin, foot, point
+      ctx.fillStyle = C.fill;
       ctx.beginPath();
-      ctx.moveTo(cx, cy); ctx.lineTo(px, cy);
-      ctx.stroke();
+      ctx.moveTo(O.x, O.y); ctx.lineTo(F.x, F.y); ctx.lineTo(P.x, P.y);
+      ctx.closePath(); ctx.fill();
 
-      // sin (vertical)
-      ctx.strokeStyle = isLight ? '#16a34a' : '#4ade80';
-      ctx.beginPath();
-      ctx.moveTo(px, cy); ctx.lineTo(px, py);
-      ctx.stroke();
+      // Adjacent leg (cos) and opposite leg (sin)
+      ctx.setLineDash([6, 4]); ctx.lineWidth = 3;
+      ctx.strokeStyle = C.blue;
+      ctx.beginPath(); ctx.moveTo(O.x, O.y); ctx.lineTo(F.x, F.y); ctx.stroke();
+      ctx.strokeStyle = C.green;
+      ctx.beginPath(); ctx.moveTo(F.x, F.y); ctx.lineTo(P.x, P.y); ctx.stroke();
       ctx.setLineDash([]);
 
-      // Joystick stick
-      ctx.strokeStyle = isLight ? '#d97706' : '#fbbf24';
-      ctx.lineWidth = 3.5;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy); ctx.lineTo(px, py);
-      ctx.stroke();
+      // Right-angle marker at the foot
+      if (Math.abs(c) > 0.02 && Math.abs(s) > 0.02) {
+        const sx = Math.sign(O.x - F.x) || 1;
+        const sy = Math.sign(P.y - F.y) || 1;
+        ctx.strokeStyle = C.muted; ctx.lineWidth = 1.5;
+        ctx.strokeRect(Math.min(F.x, F.x + sx * 11), Math.min(F.y, F.y + sy * 11), 11, 11);
+      }
 
-      // Knob
-      ctx.fillStyle = isLight ? '#d97706' : '#fbbf24';
-      ctx.beginPath();
-      ctx.arc(px, py, 9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      // Tangent line x = 1, and where the extended radius meets it
+      if (showTan.checked) {
+        const T = toScreen(1, 0);
+        ctx.strokeStyle = C.red; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(T.x, O.y - v.r - 20); ctx.lineTo(T.x, O.y + v.r + 20); ctx.stroke();
+        ctx.setLineDash([]);
+        const t = s / c;
+        if (Math.abs(c) > 1e-6 && Math.abs(t) < 6) {
+          const H = toScreen(1, t);
+          ctx.strokeStyle = C.red; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(O.x, O.y); ctx.lineTo(H.x, H.y); ctx.stroke();
+          ctx.fillStyle = C.red;
+          ctx.beginPath(); ctx.arc(H.x, H.y, 5, 0, Math.PI * 2); ctx.fill();
+          ctx.font = 'bold 12px system-ui, sans-serif';
+          ctx.fillText('tan θ = ' + t.toFixed(3), H.x + 9, H.y + 4);
+        } else {
+          ctx.fillStyle = C.red;
+          ctx.font = 'bold 12px system-ui, sans-serif';
+          ctx.fillText('tan θ off scale', T.x + 9, O.y - 10);
+        }
+      }
 
-      // Arc for angle
-      ctx.strokeStyle = isLight ? 'rgba(217, 119, 6, 0.4)' : 'rgba(251, 191, 36, 0.4)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 30, 0, -angleRad, angleRad < 0);
-      ctx.stroke();
+      // The wheel itself, drawn on the rim, pointing along theta
+      ctx.save();
+      ctx.translate(P.x, P.y);
+      ctx.rotate(-theta);
+      ctx.fillStyle = C.amber; ctx.globalAlpha = 0.18;
+      ctx.fillRect(-22, -7, 44, 14);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = C.amber; ctx.lineWidth = 2.5;
+      ctx.strokeRect(-22, -7, 44, 14);
+      ctx.strokeStyle = C.amber; ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.6;
+      for (const tx of [-11, 0, 11]) {
+        ctx.beginPath(); ctx.moveTo(tx, -7); ctx.lineTo(tx, 7); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
 
-      // Update telemetry
-      let deg = (angleRad * 180 / Math.PI) % 360;
-      if (deg < 0) deg += 360;
-      const cosVal = Math.cos(angleRad);
-      const sinVal = Math.sin(angleRad);
+      // Radius: the wheel's velocity direction, hypotenuse of the triangle
+      ctx.strokeStyle = C.amber; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(O.x, O.y); ctx.lineTo(P.x, P.y); ctx.stroke();
 
-      document.getElementById('angleDegText').textContent = `${deg.toFixed(1)}° (${angleRad.toFixed(2)} rad)`;
-      document.getElementById('cosValText').textContent = `${cosVal >= 0 ? '+' : ''}${cosVal.toFixed(3)}`;
-      document.getElementById('sinValText').textContent = `${sinVal >= 0 ? '+' : ''}${sinVal.toFixed(3)}`;
-      document.getElementById('pythagText').textContent = (cosVal*cosVal + sinVal*sinVal).toFixed(3);
+      // Labels
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillStyle = C.blue;
+      ctx.fillText('cos θ = ' + c.toFixed(3), (O.x + F.x) / 2 - 34, O.y + (s > 0 ? 20 : -10));
+      ctx.fillStyle = C.green;
+      ctx.fillText('sin θ = ' + s.toFixed(3), F.x + (c >= 0 ? 10 : -84), (F.y + P.y) / 2);
+      ctx.fillStyle = C.purple;
+      ctx.fillText(fmtDeg(theta) + '  (' + theta.toFixed(3) + ' rad)', O.x + 12, O.y - 12);
+
+      updateStats(c, s);
     }
 
-    function updateFromPointer(e) {
+    function fmtDeg(rad) {
+      return (rad * 180 / Math.PI).toFixed(1) + '°';
+    }
+
+    function quadrant(c, s) {
+      if (Math.abs(c) < 1e-9 || Math.abs(s) < 1e-9) return 'on an axis';
+      if (c > 0 && s > 0) return 'I  (cos +, sin +)';
+      if (c < 0 && s > 0) return 'II  (cos -, sin +)';
+      if (c < 0 && s < 0) return 'III  (cos -, sin -)';
+      return 'IV  (cos +, sin -)';
+    }
+
+    function signed(x, digits) {
+      return (x >= 0 ? '+' : '') + x.toFixed(digits);
+    }
+
+    function updateStats(c, s) {
+      const set = (id, val) => document.getElementById(id).textContent = val;
+      const t = s / c;
+
+      set('degText', fmtDeg(theta));
+      set('radText', theta.toFixed(4));
+      set('quadText', quadrant(c, s));
+      set('cosText', signed(c, 4));
+      set('sinText', signed(s, 4));
+      set('tanText', Math.abs(c) < 1e-9 ? 'undefined' :
+                     (Math.abs(t) > 1e4 ? signed(t, 0) : signed(t, 4)));
+      set('idText', (s * s + c * c).toFixed(6));
+      set('fwdText', signed(speed * c, 3) + ' m/s');
+      set('sideText', signed(speed * s, 3) + ' m/s');
+      set('magText', Math.hypot(speed * c, speed * s).toFixed(3) + ' m/s');
+      set('angleVal', fmtDeg(theta));
+      set('speedVal', speed.toFixed(1) + ' m/s');
+      angleSlider.value = Math.round(theta * 180 / Math.PI);
+    }
+
+    function getPos(e) {
       const rect = canvas.getBoundingClientRect();
-      const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-      const center_x = (canvas.width / (window.devicePixelRatio || 1)) / 2;
-      const center_y = (canvas.height / (window.devicePixelRatio || 1)) / 2;
-      angleRad = Math.atan2(-(cy - center_y), cx - center_x);
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+    }
+
+    /* Set theta from a pointer position, keeping the accumulated turn count so a
+       drag past 360 degrees keeps counting up instead of snapping back. */
+    function setThetaFromPoint(px, py) {
+      const v = view();
+      const principal = Math.atan2(v.cy - py, px - v.cx);
+      const k = Math.round((theta - principal) / (Math.PI * 2));
+      theta = principal + k * Math.PI * 2;
+      if (theta > 4 * Math.PI) theta -= 2 * Math.PI;
+      if (theta < -2 * Math.PI) theta += 2 * Math.PI;
+    }
+
+    function startDrag(e) {
+      dragging = true;
+      stopSweep();
+      const p = getPos(e);
+      setThetaFromPoint(p.x, p.y);
       draw();
     }
 
-    canvas.addEventListener('mousedown', (e) => { dragging = true; updateFromPointer(e); });
-    window.addEventListener('mousemove', (e) => { if (dragging) updateFromPointer(e); });
-    window.addEventListener('mouseup', () => dragging = false);
+    function moveDrag(e) {
+      if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
+      const p = getPos(e);
+      setThetaFromPoint(p.x, p.y);
+      draw();
+    }
 
-    canvas.addEventListener('touchstart', (e) => { dragging = true; updateFromPointer(e); }, { passive: false });
-    window.addEventListener('touchmove', (e) => { if (dragging) { e.preventDefault(); updateFromPointer(e); } }, { passive: false });
+    function stopSweep() {
+      sweeping = false;
+      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+      sweepBtn.textContent = 'Sweep all four quadrants';
+    }
+
+    function sweepStep() {
+      theta += 0.012;
+      if (theta > 2 * Math.PI) theta -= 2 * Math.PI;
+      draw();
+      rafId = requestAnimationFrame(sweepStep);
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', () => dragging = false);
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
     window.addEventListener('touchend', () => dragging = false);
 
+    angleSlider.addEventListener('input', () => {
+      stopSweep();
+      theta = (+angleSlider.value) * Math.PI / 180;
+      draw();
+    });
+    speedSlider.addEventListener('input', () => { speed = +speedSlider.value; draw(); });
+    showArc.addEventListener('change', draw);
+    showTan.addEventListener('change', draw);
+    sweepBtn.addEventListener('click', () => {
+      if (sweeping) { stopSweep(); return; }
+      sweeping = true;
+      sweepBtn.textContent = 'Stop sweep';
+      rafId = requestAnimationFrame(sweepStep);
+    });
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
     resize();
   </script>
 </body>
