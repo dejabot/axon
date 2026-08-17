@@ -55,6 +55,15 @@
             localStorage.setItem('axon_theme', next);
           } catch (e) {}
           paint();
+          // This is the only theme control on the page. Embedded demos hide
+          // their own, so push the change into every iframe explicitly rather
+          // than relying on the storage event reaching them.
+          var frames = document.querySelectorAll('iframe');
+          for (var i = 0; i < frames.length; i++) {
+            try {
+              frames[i].contentWindow.postMessage({ type: 'axon-theme', theme: next }, '*');
+            } catch (e) {}
+          }
         });
       }
     })();

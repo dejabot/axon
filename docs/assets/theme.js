@@ -66,9 +66,36 @@
     }
   });
 
-  if (document.body) {
-    addToggle();
-  } else {
-    document.addEventListener('DOMContentLoaded', addToggle);
+  /* A demo embedded in a concept page must NOT show its own toggle — the site
+     header already has one, and two controls for one setting is confusing. When
+     embedded we only listen; when opened standalone we provide the control. */
+  var embedded = false;
+  try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
+
+  function applyTheme(next) {
+    if (next !== 'light' && next !== 'dark') return;
+    if (cur() === next) return;
+    root.setAttribute('data-theme', next);
+    var btn = document.getElementById('axonThemeToggle');
+    if (btn) {
+      btn.textContent = next === 'dark' ? '☾' : '☀';
+      btn.title = next === 'dark' ? 'Dark theme — click to switch to light'
+                                  : 'Light theme — click to switch to dark';
+    }
+    notifyThemeChange(next);
+  }
+
+  /* The parent page posts the theme directly on toggle. The storage event below
+     also reaches same-origin iframes, but postMessage is the guaranteed path. */
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'axon-theme') applyTheme(e.data.theme);
+  });
+
+  if (!embedded) {
+    if (document.body) {
+      addToggle();
+    } else {
+      document.addEventListener('DOMContentLoaded', addToggle);
+    }
   }
 })();
