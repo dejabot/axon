@@ -7,12 +7,12 @@ Welcome to **Module 2: Trigonometry & Angles**. [Module 1](../01_geometry/) buil
 ## Concepts in this Module
 
 * **[Concept 01: The Unit Circle & Trigonometric Ratios](01_concept_unit_circle_ratios/)**
-  * *The Everyday Problem:* How does pushing a gamepad joystick decompose into forward and sideways wheel power?
-  * *Code & Math:* SOH-CAH-TOA, unit circle projections, `cos` as horizontal shadow, `sin` as vertical height, radians versus degrees.
+  * *The Everyday Problem:* A wheel is pointed 30° off down-field, moving at 4.0 m/s. How much of that carries the robot down-field, and how much sideways?
+  * *Code & Math:* Why the ratios depend on the angle alone, SOH-CAH-TOA, the hypotenuse-1 collapse onto the unit circle, signs across all four quadrants, radians as arc length, and `sin² + cos² = 1` as Pythagoras.
 
-* **[Concept 02: Rotating a Vector & the 2D Rotation Matrix](02_concept_rotating_vectors/)**
+* **[Concept 02: Rotating a Vector](02_concept_rotating_vectors/)**
   * *The Everyday Problem:* The driver pushes "away from me" but the robot is turned 40 degrees. How does that command become wheel speeds?
-  * *Code & Math:* Rotation derived by tracking the basis vectors, the rotation matrix, proof that rotation preserves length, why the inverse is the transpose, and composition as angle addition.
+  * *Code & Math:* Rotation derived by tracking where `î` and `ĵ` land, proof that rotation preserves length, undoing a rotation by flipping one sign, and composition deriving the angle-addition identities.
 
 * **[Concept 03: Coordinate Frames (Field, Robot & Camera)](03_concept_coordinate_frames/)**
   * *The Everyday Problem:* The camera sees a game piece 1.5 metres ahead. Where is it on the field?
