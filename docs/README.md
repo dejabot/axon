@@ -64,10 +64,10 @@ Axon is an educational curriculum designed from first principles to bridge high-
 ---
 
 ### [Axon 03: Large Language Models & Transformers](large_language_models/)
-* **Tokenization & Vector Embeddings**: BPE tokenization, vector lookup spaces, semantic similarity.
-* **Scaled Dot-Product & Self-Attention**: Query, Key, Value (Q, K, V) projections.
-* **The Transformer Architecture**: Multi-Head Attention, residual skip connections, RMSNorm.
-* **Generation, RoPE & Sampling**: Rotary Position Embeddings, Temperature, Top-p sampling.
+* **[Tokenization & Vector Embeddings](large_language_models/01_embeddings/)**: BPE subword tokenization, vocabulary lookup spaces, high-dimensional semantic vectors, cosine similarity.
+* **[Scaled Dot-Product & Self-Attention](large_language_models/02_attention_heads/)**: Query, Key, Value (Q, K, V) projections, attention heatmaps, Multi-Head Attention feature subspaces.
+* **[The Transformer Architecture](large_language_models/03_transformers/)**: Pre-RMSNorm normalization, residual skip connections (gradient highway), SwiGLU Feed-Forward Blocks.
+* **[Generation, RoPE & Sampling](large_language_models/04_generation_sampling/)**: Rotary Position Embeddings (RoPE), 2D coordinate rotations, Temperature scaling, Top-k, Top-p (Nucleus) sampling, KV-Caching.
 
 ---
 

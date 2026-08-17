@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 01: Byte-Pair Encoding (BPE) Tokenizer</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Byte-Pair Encoding (BPE) Subword Tokenizer</div>
+      <div class="demo-badge">Concept 01 Demo</div>
+    </div>
+
+    <div class="controls-panel" style="flex-direction: column; align-items: stretch;">
+      <label style="font-weight: bold; margin-bottom: 6px;">Input Prompt to Tokenize:</label>
+      <input type="text" id="promptInput" value="Autonomous robot aligns to reef and shoots note with swervedrive" 
+             style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-size: 15px; font-family: sans-serif;">
+      
+      <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+        <button class="btn btn-secondary" id="preset1">Robot Navigation</button>
+        <button class="btn btn-secondary" id="preset2">Micro-Autograd ML</button>
+        <button class="btn btn-secondary" id="preset3">Complex Compound Words</button>
+      </div>
+    </div>
+
+    <div style="margin: 20px 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel);">
+      <div style="font-weight: bold; font-size: 13px; color: var(--muted); margin-bottom: 12px;">TOKENIZED SUBWORD CHIPS:</div>
+      <div id="tokenChips" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 48px; align-items: center;"></div>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Character Count</div>
+        <div class="telemetry-value" id="charCountText">67 chars</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Token Count</div>
+        <div class="telemetry-value" id="tokenCountText" style="color: #38bdf8;">12 tokens</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Compression Ratio</div>
+        <div class="telemetry-value" id="ratioText" style="color: #4ade80;">5.58 chars/tok</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel);">
+      <div style="font-weight: bold; font-size: 12px; color: var(--muted); margin-bottom: 6px;">NUMERICAL TOKEN ID SEQUENCE:</div>
+      <div id="tokenIdsText" style="font-family: monospace; color: #fbbf24; font-size: 13px; word-break: break-all;">[1024, 850, ...]</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const vocabMap = {
+        "auto": 1042, "nomous": 3819, "robot": 8421, "align": 5420, "s": 82, "to": 284,
+        "reef": 9104, "and": 290, "shoot": 6812, "note": 4120, "with": 351, "swerve": 7890,
+        "drive": 2105, "path": 3312, "plan": 4501, "ning": 892, "micro": 6214, "grad": 8109,
+        "back": 1823, "prop": 5129, "a": 64, "tion": 401, "the": 262, "is": 318, "in": 287
+      };
+
+      const chipColors = [
+        { bg: "rgba(56, 189, 248, 0.2)", border: "#38bdf8", text: "#38bdf8" },
+        { bg: "rgba(192, 132, 252, 0.2)", border: "#c084fc", text: "#c084fc" },
+        { bg: "rgba(74, 222, 128, 0.2)", border: "#4ade80", text: "#4ade80" },
+        { bg: "rgba(251, 191, 36, 0.2)", border: "#fbbf24", text: "#fbbf24" },
+        { bg: "rgba(244, 63, 94, 0.2)", border: "#f43f5e", text: "#f43f5e" }
+      ];
+
+      function hashString(str) {
+        let hash = 5381;
+        for (let i = 0; i < str.length; i++) {
+          hash = ((hash << 5) + hash) + str.charCodeAt(i);
+        }
+        return Math.abs(hash % 90000) + 1000;
+      }
+
+      function tokenize(text) {
+        const words = text.split(/(\s+|[.,!?;:])/).filter(w => w.length > 0);
+        const tokens = [];
+
+        words.forEach(w => {
+          if (/^\s+$/.test(w)) return; // skip pure spaces for display chips
+          const lower = w.toLowerCase();
+
+          // Subword greedy decomposition
+          let remaining = lower;
+          while (remaining.length > 0) {
+            let matched = false;
+            // Check vocabulary matches longest first
+            for (let len = remaining.length; len >= 1; len--) {
+              const sub = remaining.substring(0, len);
+              if (vocabMap[sub] || len === 1) {
+                const id = vocabMap[sub] || hashString(sub);
+                tokens.push({ text: remaining.substring(0, len), id: id });
+                remaining = remaining.substring(len);
+                matched = true;
+                break;
+              }
+            }
+            if (!matched) break;
+          }
+        });
+
+        return tokens;
+      }
+
+      function render() {
+        const text = document.getElementById('promptInput').value;
+        const tokens = tokenize(text);
+
+        const chipsContainer = document.getElementById('tokenChips');
+        chipsContainer.innerHTML = '';
+
+        const ids = [];
+
+        tokens.forEach((tok, i) => {
+          ids.push(tok.id);
+          const color = chipColors[i % chipColors.length];
+
+          const chip = document.createElement('div');
+          chip.style.display = 'inline-flex';
+          chip.style.flexDirection = 'column';
+          chip.style.alignItems = 'center';
+          chip.style.padding = '4px 10px';
+          chip.style.borderRadius = '6px';
+          chip.style.background = color.bg;
+          chip.style.border = `1px solid ${color.border}`;
+          chip.style.color = color.text;
+          chip.style.fontFamily = 'monospace';
+
+          chip.innerHTML = `
+            <span style="font-weight: bold; font-size: 14px;">${tok.text}</span>
+            <span style="font-size: 10px; opacity: 0.8; margin-top: 2px;">ID: ${tok.id}</span>
+          `;
+          chipsContainer.appendChild(chip);
+        });
+
+        // Telemetry Update
+        document.getElementById('charCountText').textContent = `${text.length} chars`;
+        document.getElementById('tokenCountText').textContent = `${tokens.length} tokens`;
+        const ratio = tokens.length > 0 ? (text.length / tokens.length).toFixed(2) : '0';
+        document.getElementById('ratioText').textContent = `${ratio} chars/tok`;
+        document.getElementById('tokenIdsText').textContent = `[${ids.join(', ')}]`;
+      }
+
+      document.getElementById('promptInput').addEventListener('input', render);
+
+      document.getElementById('preset1').addEventListener('click', () => {
+        document.getElementById('promptInput').value = "Autonomous robot aligns to reef and shoots note with swervedrive";
+        render();
+      });
+
+      document.getElementById('preset2').addEventListener('click', () => {
+        document.getElementById('promptInput').value = "Micro-Autograd computes backpropagation gradients in pure Java";
+        render();
+      });
+
+      document.getElementById('preset3').addEventListener('click', () => {
+        document.getElementById('promptInput').value = "Unbelievable hyperparameter optimization for transformer tokenization";
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

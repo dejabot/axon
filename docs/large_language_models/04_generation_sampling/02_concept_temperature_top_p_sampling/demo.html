@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 02: Autoregressive Next-Token Sampling Sandbox</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Autoregressive Next-Token Sampling: Temperature & Top-p</div>
+      <div class="demo-badge">Concept 02 Demo</div>
+    </div>
+
+    <div style="margin-bottom: 16px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel);">
+      <div style="font-size: 11px; font-weight: bold; color: var(--muted); margin-bottom: 6px;">PROMPT SEQUENCE:</div>
+      <div id="promptDisplay" style="font-family: monospace; font-size: 14px; color: var(--ink); line-height: 1.5;">
+        The autonomous robot turned toward the reef and decided to
+      </div>
+      <div style="margin-top: 10px; display: flex; gap: 8px;">
+        <button class="btn btn-primary" id="sampleBtn">🎲 Generate Next Token</button>
+        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Temperature (T): <span id="tempDisplay" class="value-display">0.70</span></label>
+        <input type="range" id="tempSlider" min="0.10" max="2.00" step="0.05" value="0.70">
+      </div>
+      <div class="control-group">
+        <label>Top-p (Nucleus Cutoff): <span id="topPDisplay" class="value-display">0.90</span></label>
+        <input type="range" id="topPSlider" min="0.20" max="1.00" step="0.05" value="0.90">
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="samplingCanvas" width="800" height="340"></canvas>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Last Sampled Token</div>
+        <div class="telemetry-value" id="lastTokenText" style="color: #38bdf8;">"score"</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Active Nucleus Size (Top-p)</div>
+        <div class="telemetry-value" id="nucleusSizeText" style="color: #4ade80;">3 Candidates</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Sampling Mode</div>
+        <div class="telemetry-value" id="modeText" style="color: #fbbf24;">Balanced Natural Dialogue</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('samplingCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const vocabItems = [
+        { token: "score", rawLogit: 6.2 },
+        { token: "intake", rawLogit: 5.4 },
+        { token: "align", rawLogit: 4.8 },
+        { token: "navigate", rawLogit: 3.5 },
+        { token: "wait", rawLogit: 2.1 },
+        { token: "reverse", rawLogit: 1.0 },
+        { token: "dance", rawLogit: -1.5 }
+      ];
+
+      const initialPrompt = "The autonomous robot turned toward the reef and decided to";
+      let currentPrompt = initialPrompt;
+
+      function getProbabilities(temp, topP) {
+        const scaled = vocabItems.map(item => item.rawLogit / temp);
+        const maxZ = Math.max(...scaled);
+        const exp = scaled.map(z => Math.exp(z - maxZ));
+        const sumExp = exp.reduce((a, b) => a + b, 0);
+
+        const candidates = vocabItems.map((item, i) => ({
+          token: item.token,
+          prob: exp[i] / sumExp
+        }));
+
+        candidates.sort((a, b) => b.prob - a.prob);
+
+        let cumulative = 0.0;
+        let inNucleusCount = 0;
+        candidates.forEach(c => {
+          if (cumulative < topP) {
+            c.inNucleus = true;
+            inNucleusCount++;
+          } else {
+            c.inNucleus = false;
+          }
+          cumulative += c.prob;
+        });
+
+        return { candidates, inNucleusCount };
+      }
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const temp = parseFloat(document.getElementById('tempSlider').value);
+        const topP = parseFloat(document.getElementById('topPSlider').value);
+
+        document.getElementById('tempDisplay').textContent = temp.toFixed(2);
+        document.getElementById('topPDisplay').textContent = topP.toFixed(2);
+
+        const { candidates, inNucleusCount } = getProbabilities(temp, topP);
+
+        const startY = 30;
+        const rowH = 40;
+        const startX = 100;
+        const maxBarW = 480;
+
+        candidates.forEach((item, i) => {
+          const y = startY + i * rowH;
+          const barW = Math.max(2, item.prob * maxBarW);
+
+          // Token Label
+          ctx.fillStyle = item.inNucleus ? textColor : mutedColor;
+          ctx.font = item.inNucleus ? 'bold 13px monospace' : '12px monospace';
+          ctx.textAlign = 'right';
+          ctx.fillText(`"${item.token}"`, startX - 12, y + 16);
+
+          // Bar
+          if (item.inNucleus) {
+            ctx.fillStyle = (i === 0) ? '#38bdf8' : '#4ade80';
+          } else {
+            ctx.fillStyle = isDark ? '#334155' : '#cbd5e1';
+          }
+          ctx.fillRect(startX, y, barW, 24);
+
+          // Percentage Label
+          ctx.fillStyle = item.inNucleus ? textColor : mutedColor;
+          ctx.font = '11px sans-serif';
+          ctx.textAlign = 'left';
+          const pct = (item.prob * 100).toFixed(1);
+          ctx.fillText(`${pct}%`, startX + barW + 8, y + 16);
+
+          if (!item.inNucleus) {
+            ctx.fillStyle = '#f43f5e';
+            ctx.font = '10px sans-serif';
+            ctx.fillText('[Excluded by Top-p]', startX + barW + 55, y + 16);
+          }
+        });
+
+        // Telemetry Update
+        document.getElementById('nucleusSizeText').textContent = `${inNucleusCount} Candidates`;
+
+        const modeEl = document.getElementById('modeText');
+        if (temp <= 0.25) {
+          modeEl.textContent = 'Deterministic / Argmax Search';
+          modeEl.style.color = '#38bdf8';
+        } else if (temp >= 1.3) {
+          modeEl.textContent = 'High Entropy / Creative Risk';
+          modeEl.style.color = '#f43f5e';
+        } else {
+          modeEl.textContent = 'Balanced Natural Dialogue';
+          modeEl.style.color = '#4ade80';
+        }
+      }
+
+      function sampleToken() {
+        const temp = parseFloat(document.getElementById('tempSlider').value);
+        const topP = parseFloat(document.getElementById('topPSlider').value);
+        const { candidates } = getProbabilities(temp, topP);
+
+        const nucleus = candidates.filter(c => c.inNucleus);
+        const totalNucleusProb = nucleus.reduce((sum, c) => sum + c.prob, 0);
+
+        const rand = Math.random() * totalNucleusProb;
+        let cumulative = 0.0;
+        let chosen = nucleus[0].token;
+
+        for (const c of nucleus) {
+          cumulative += c.prob;
+          if (rand <= cumulative) {
+            chosen = c.token;
+            break;
+          }
+        }
+
+        currentPrompt += ` ${chosen}`;
+        document.getElementById('promptDisplay').textContent = currentPrompt;
+        document.getElementById('lastTokenText').textContent = `"${chosen}"`;
+        render();
+      }
+
+      document.getElementById('tempSlider').addEventListener('input', render);
+      document.getElementById('topPSlider').addEventListener('input', render);
+      document.getElementById('sampleBtn').addEventListener('click', sampleToken);
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        currentPrompt = initialPrompt;
+        document.getElementById('promptDisplay').textContent = currentPrompt;
+        document.getElementById('lastTokenText').textContent = '"score"';
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

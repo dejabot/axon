@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 01: Residual Skip Connections & Gradient Flow</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">The Gradient Highway: Residual Skip vs Plain Network</div>
+      <div class="demo-badge">Concept 01 Demo</div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Network Depth: <span id="depthDisplay" class="value-display">12 Layers</span></label>
+        <input type="range" id="depthSlider" min="4" max="20" step="1" value="12">
+      </div>
+      <div class="control-group">
+        <label>Layer Multiplier (dL/dx): <span id="decayDisplay" class="value-display">0.60</span></label>
+        <input type="range" id="decaySlider" min="0.20" max="0.95" step="0.05" value="0.60">
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="gradCanvas" width="800" height="420"></canvas>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Plain Network Layer 1 Gradient</div>
+        <div class="telemetry-value" id="plainGradText" style="color: #f43f5e;">0.0022 (Extinct)</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Residual Network Layer 1 Gradient</div>
+        <div class="telemetry-value" id="resGradText" style="color: #4ade80;">1.0000 (Active)</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Gradient Flow Status</div>
+        <div class="telemetry-value" id="statusText" style="color: #38bdf8;">Highway Fully Preserved</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('gradCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const depth = parseInt(document.getElementById('depthSlider').value);
+        const decay = parseFloat(document.getElementById('decaySlider').value);
+
+        document.getElementById('depthDisplay').textContent = `${depth} Layers`;
+        document.getElementById('decayDisplay').textContent = decay.toFixed(2);
+
+        // Section Headers
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillText('Plain Network (No Skip Connections)', 60, 40);
+
+        ctx.fillStyle = '#4ade80';
+        ctx.fillText('Transformer Residual Stream (x + SubLayer(x))', 440, 40);
+
+        const rowH = Math.min(24, 300 / depth);
+        const startY = 70;
+
+        let plainGrad = 1.0;
+        let resGrad = 1.0;
+
+        for (let l = depth; l >= 1; l--) {
+          const y = startY + (depth - l) * rowH;
+
+          // Plain network gradient: multiplies by decay at every layer
+          if (l < depth) plainGrad *= decay;
+
+          // Residual network gradient: 1.0 (identity path) + sublayer grad
+          // Even if sublayer is tiny, the identity bypass preserves 1.0
+
+          // Left Track: Plain Network
+          ctx.fillStyle = mutedColor;
+          ctx.font = '10px monospace';
+          ctx.fillText(`L${l}`, 30, y + 10);
+
+          const plainBarW = Math.max(1, plainGrad * 300);
+          ctx.fillStyle = plainGrad > 0.1 ? '#fbbf24' : '#f43f5e';
+          ctx.fillRect(60, y, plainBarW, rowH - 4);
+
+          // Right Track: Residual Network
+          ctx.fillStyle = mutedColor;
+          ctx.fillText(`L${l}`, 410, y + 10);
+
+          // Green bar represents the persistent 1.0 identity highway
+          ctx.fillStyle = '#4ade80';
+          ctx.fillRect(440, y, 300, rowH - 4);
+
+          // Additive Sublayer pulse overlay in cyan
+          const subPulse = Math.max(2, plainGrad * 40);
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(440, y, subPulse, rowH - 4);
+        }
+
+        // Draw Skip Highway Line on Right
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(435, startY);
+        ctx.lineTo(435, startY + depth * rowH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Telemetry Update
+        document.getElementById('plainGradText').textContent = plainGrad < 0.0001 ? plainGrad.toExponential(3) : plainGrad.toFixed(4);
+        document.getElementById('resGradText').textContent = resGrad.toFixed(4);
+
+        const statusEl = document.getElementById('statusText');
+        if (plainGrad < 0.01) {
+          statusEl.textContent = 'Vanishing Gradient Extinction';
+          statusEl.style.color = '#f43f5e';
+        } else {
+          statusEl.textContent = 'Highway Fully Preserved';
+          statusEl.style.color = '#4ade80';
+        }
+      }
+
+      document.getElementById('depthSlider').addEventListener('input', render);
+      document.getElementById('decaySlider').addEventListener('input', render);
+
+      render();
+    })();
+  </script>
+</body>
+</html>

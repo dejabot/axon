@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 02: Multi-Head Attention Subspaces</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Multi-Head Attention Subspace Specialization</div>
+      <div class="demo-badge">Concept 02 Demo</div>
+    </div>
+
+    <div class="controls-panel">
+      <button class="btn btn-primary" id="head1Btn">Head 1: Hardware Modifiers</button>
+      <button class="btn btn-secondary" id="head2Btn">Head 2: Verb & Actions</button>
+      <button class="btn btn-secondary" id="head3Btn">Head 3: Spatial Relations</button>
+      <button class="btn btn-secondary" id="head4Btn">Head 4: Object Attributes</button>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="multiHeadCanvas" width="800" height="420"></canvas>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Active Head Specialization</div>
+        <div class="telemetry-value" id="specLabel" style="color: #38bdf8;">Hardware & Component Modifiers</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Subspace Dimension d_k</div>
+        <div class="telemetry-value" id="dimLabel" style="color: #4ade80;">64 dims (4 × 64 = 256)</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Key Attended Token Pair</div>
+        <div class="telemetry-value" id="pairLabel" style="color: #fbbf24;">"robot" ➔ "swerve" (88%)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('multiHeadCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const sentenceTokens = ["Autonomous", "swerve", "robot", "intakes", "orange", "Note", "near", "high", "Reef"];
+      const N = sentenceTokens.length;
+
+      const heads = [
+        {
+          id: 1,
+          name: "Hardware & Component Modifiers",
+          color: "#38bdf8",
+          btnId: "head1Btn",
+          pair: '"robot" ➔ "swerve" (88%)',
+          links: [
+            { from: 2, to: 0, weight: 0.72 }, // robot -> Autonomous
+            { from: 2, to: 1, weight: 0.88 }, // robot -> swerve
+            { from: 1, to: 0, weight: 0.45 }  // swerve -> Autonomous
+          ]
+        },
+        {
+          id: 2,
+          name: "Action & Verb Routing",
+          color: "#c084fc",
+          btnId: "head2Btn",
+          pair: '"intakes" ➔ "Note" (92%)',
+          links: [
+            { from: 3, to: 2, weight: 0.78 }, // intakes -> robot
+            { from: 3, to: 5, weight: 0.92 }  // intakes -> Note
+          ]
+        },
+        {
+          id: 3,
+          name: "Spatial Geometry & Location",
+          color: "#4ade80",
+          btnId: "head3Btn",
+          pair: '"near" ➔ "Reef" (86%)',
+          links: [
+            { from: 6, to: 5, weight: 0.65 }, // near -> Note
+            { from: 6, to: 8, weight: 0.86 }, // near -> Reef
+            { from: 7, to: 8, weight: 0.74 }  // high -> Reef
+          ]
+        },
+        {
+          id: 4,
+          name: "Object Attributes & State",
+          color: "#fb923c",
+          btnId: "head4Btn",
+          pair: '"Note" ➔ "orange" (94%)',
+          links: [
+            { from: 5, to: 4, weight: 0.94 }, // Note -> orange
+            { from: 8, to: 7, weight: 0.89 }  // Reef -> high
+          ]
+        }
+      ];
+
+      let activeHead = heads[0];
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const tokenY = 320;
+        const totalW = canvas.width - 120;
+        const stepX = totalW / (N - 1);
+        const startX = 60;
+
+        const tokenPositions = [];
+
+        // Draw Token Nodes at Bottom
+        for (let i = 0; i < N; i++) {
+          const x = startX + i * stepX;
+          tokenPositions.push({ x, y: tokenY });
+
+          // Node circle
+          ctx.fillStyle = isDark ? '#1e293b' : '#e2e8f0';
+          ctx.beginPath();
+          ctx.arc(x, tokenY, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = activeHead.color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Token text rotated slightly
+          ctx.save();
+          ctx.translate(x, tokenY + 20);
+          ctx.rotate(Math.PI / 6);
+          ctx.fillStyle = textColor;
+          ctx.font = 'bold 12px monospace';
+          ctx.textAlign = 'left';
+          ctx.fillText(sentenceTokens[i], 0, 0);
+          ctx.restore();
+        }
+
+        // Draw Arcs for the Active Attention Head
+        activeHead.links.forEach(link => {
+          const p1 = tokenPositions[link.from];
+          const p2 = tokenPositions[link.to];
+
+          const midX = (p1.x + p2.x) / 2;
+          const dist = Math.abs(p1.x - p2.x);
+          const arcHeight = Math.min(220, dist * 0.65);
+          const ctrlY = tokenY - arcHeight;
+
+          // Bezier Arc
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y - 8);
+          ctx.quadraticCurveTo(midX, ctrlY, p2.x, p2.y - 8);
+
+          ctx.strokeStyle = activeHead.color;
+          ctx.lineWidth = Math.max(1.5, link.weight * 5.0);
+          ctx.globalAlpha = Math.max(0.4, link.weight);
+          ctx.stroke();
+          ctx.globalAlpha = 1.0;
+
+          // Weight label at peak of arc
+          ctx.fillStyle = activeHead.color;
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${(link.weight * 100).toFixed(0)}%`, midX, ctrlY + 14);
+        });
+
+        // Telemetry Update
+        document.getElementById('specLabel').textContent = activeHead.name;
+        document.getElementById('specLabel').style.color = activeHead.color;
+        document.getElementById('pairLabel').textContent = activeHead.pair;
+      }
+
+      heads.forEach(h => {
+        document.getElementById(h.btnId).addEventListener('click', () => {
+          activeHead = h;
+          heads.forEach(other => {
+            const btn = document.getElementById(other.btnId);
+            if (other === h) {
+              btn.className = 'btn btn-primary';
+            } else {
+              btn.className = 'btn btn-secondary';
+            }
+          });
+          render();
+        });
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
