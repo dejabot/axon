@@ -353,10 +353,12 @@ A Transformer's attention mechanism is **permutation-invariant**: shuffle a sent
 
 The original Transformer paper solved this with the unit circle. Each position `pos` gets a vector of length `d`, filled in pairs:
 
-```
-   PE(pos, 2i)     = sin( pos / 10000^(2i/d) )
-   PE(pos, 2i + 1) = cos( pos / 10000^(2i/d) )
-```
+$$
+\begin{aligned}
+PE_{(pos,\ 2i)}   &= \sin\!\left(\frac{pos}{10000^{\,2i/d}}\right) \\[4pt]
+PE_{(pos,\ 2i+1)} &= \cos\!\left(\frac{pos}{10000^{\,2i/d}}\right)
+\end{aligned}
+$$
 
 Pair `i` places the position on its own unit circle at its own rate. Pair 0 turns fastest, a lap every `2π ≈ 6.3` tokens; the last takes about `62,832` tokens per lap, the rates between spaced geometrically.
 
@@ -370,9 +372,9 @@ Give a small network a coordinate `(x, y)` and ask for the colour there, or the 
 
 The fix is to feed *angles* instead — replace `x` with a bank of sine and cosine pairs at geometrically spaced frequencies:
 
-```
-   γ(x) = [ sin(2⁰πx), cos(2⁰πx), sin(2¹πx), cos(2¹πx), … , sin(2^(L−1)πx), cos(2^(L−1)πx) ]
-```
+$$
+\gamma(x) = \left[\ \sin(2^{0}\pi x),\ \cos(2^{0}\pi x),\ \sin(2^{1}\pi x),\ \cos(2^{1}\pi x),\ \ldots,\ \sin(2^{L-1}\pi x),\ \cos(2^{L-1}\pi x)\ \right]
+$$
 
 This is the hypotenuse-1 collapse applied at many scales at once. Each frequency wraps the coordinate onto its own unit circle, and the fast ones lap across a sliver of the scene, so two nearby points land far apart there. NeRF uses `L = 10`, one lap per 1/512 of the scene at the top. Same layers, same optimiser — only the input changes, and mush becomes geometry. The same trick encodes "hour of day" as `(cos(2π·h/24), sin(2π·h/24))`, so midnight sits beside 11 p.m.
 

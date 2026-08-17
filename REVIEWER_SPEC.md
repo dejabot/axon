@@ -63,11 +63,32 @@ Every number in a figure must match the number in the text, and the figure's geo
 
 ## Notation
 
-There is no math renderer. Everything is Unicode or plain text and must survive as literal characters.
+Pages are rendered by KaTeX, loaded in the site layout. Both Unicode and LaTeX are available, and the choice between them is about legibility, not policy.
 
-**Subscripts.** Unicode for a bare index that reads cleanly at body size — `x₁`, `p₂`, `Σᵢ`. Bracket notation the moment the index is computed — `v[i+1]`, `v[n−2]`, `x[i]`. Unicode *can* express `vᵢ₊₁` and `vₙ₋₂`, but they are hard to read small, font support for `ᵢ` is patchy, and brackets match the array indexing in the concept's own code. Never mix conventions within a page.
+### Which to use
 
-**Everything else.** Unicode operators and Greek: `θ`, `Δ`, `Σ`, `√`, `≥`, `≠`, `⟺`, `‖ ‖`, `≈`, `·`, `⁻¹`, `²`. Multi-line formulas go in fenced blocks, using box-drawing characters where alignment helps. Prefer a formula the reader can retype over one that merely looks typeset.
+**Unicode for inline symbols.** `θ`, `Δ`, `Σ`, `√`, `≥`, `≠`, `⟺`, `‖ ‖`, `≈`, `·`, `⁻¹`, `²`, `x₁`. These read cleanly in running prose, survive copy-paste into code, and need no renderer. Most inline mathematics in this curriculum should stay Unicode.
+
+**LaTeX where Unicode genuinely fails.** Nested or expression superscripts (`10000^{2i/d}`, `2^{L-1}`), real fractions, stacked notation, matrices, and any display equation whose structure carries meaning. Unicode cannot express these — attempting it produces the unreadable strings this rule exists to prevent.
+
+The test: if you find yourself approximating structure with parentheses and carets, use LaTeX.
+
+### How to write it
+
+| Purpose | Author as | Notes |
+|---|---|---|
+| Inline math | `$…$` | Passes through kramdown verbatim |
+| Display math | `$$…$$` | kramdown rewrites it to `\[…\]`, which KaTeX renders |
+
+**Never author `\(…\)` or `\[…\]`.** kramdown strips the backslashes before KaTeX ever sees them, and the math renders as bare parentheses. This is verified behaviour, not a guess.
+
+**Never leave an unpaired `$`.** An odd delimiter swallows the rest of the paragraph into a math span.
+
+**Code fences are safe.** KaTeX skips `<pre>` and `<code>`, so a `$` inside a code block is left alone.
+
+### Subscripts
+
+Inside math delimiters, use LaTeX subscripts freely: `$v_{i+1}$`. Outside them, `v_{i+1}` renders as literal characters — use `v[i+1]`, which also matches the array indexing in the concept's own code. Never mix `vᵢ₊₁`-style Unicode with brackets on the same page.
 
 ---
 
@@ -107,7 +128,7 @@ Cross-module restructuring is proposed to a human, never executed by a concept a
 
 | # | Checkpoint | Pass criteria |
 |---|---|---|
-| **1** | **No LaTeX, clean text** | Zero LaTeX: delimiters (`$`, `\(`), commands (`\frac`, `\begin{}`), and brace sub/superscripts (`v_{i+1}`, `x^{2}`) — all render as literal characters. Checked inside fenced blocks too, which is where they hide. No decorative emoji. |
+| **1** | **Math renders, text is clean** | Math uses `$…$` or `$$…$$` only — never authored `\(…\)` or `\[…\]`, whose backslashes kramdown strips before KaTeX sees them. No unpaired `$`. No brace sub/superscripts outside a math delimiter. No decorative emoji. |
 | **2** | **Depth proportionate to the topic** | No hand-waving, no skipped steps, **and no padding**. Judged against the topic, not a word target. Past 45 minutes, ask whether it is two concepts. |
 | **3** | **Six-section structure** | All six sections present and in order, with "Math!" sidebars interleaved rather than appended. |
 | **4** | **No black boxes** | Every result traces to a stated starting assumption. Named prerequisite techniques are taught, not assumed — SOH-CAH-TOA, the separating axis, the chain rule. |

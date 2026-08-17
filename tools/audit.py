@@ -47,26 +47,39 @@ def check_liquid(path, text):
             err(path, f"contains {token} ({name}) at line {line} — breaks the Jekyll build")
 
 
-def check_latex(path, text):
-    """LaTeX renders as literal characters here; there is no math renderer.
+def check_math(path, text):
+    """Math is rendered by KaTeX, but only from the delimiters kramdown preserves.
 
-    Subscript and superscript braces are checked INSIDE fenced blocks too, since
-    that is exactly where they hide — a plain-text math block full of v_{i+1}
-    looks fine in a diff and renders as garbage on the page.
+    Verified against a built page: `$...$` passes through verbatim and `$$...$$`
+    is rewritten to `\\[...\\]`, so both reach KaTeX. Authored `\\(...\\)` and
+    `\\[...\\]` do NOT — kramdown strips the backslash and the math renders as
+    bare parentheses. That is the main trap this checks for.
     """
-    body = re.sub(r'```.*?```', '', text, flags=re.S)
-    for pat, name in ((r'\$', 'dollar delimiter'),
-                      (r'\\frac', r'\\frac'),
-                      (r'\\begin\{', r'\\begin{'),
-                      (r'\\\(', r'\\(')):
-        if re.search(pat, body):
-            err(path, f"contains LaTeX ({name}) — the site has no math renderer")
+    # Language-tagged fences are real code and are left alone entirely.
+    body = re.sub(r'```[a-zA-Z]+.*?```', '', text, flags=re.S)
 
-    for m in re.finditer(r'[A-Za-z0-9)\]]([_^])\{[^}]*\}', text):
-        line = text[:m.start()].count('\n') + 1
+    for pat, shown in ((r'\\\(', r'\('), (r'\\\[', r'\[')):
+        if re.search(pat, body):
+            line = text[:re.search(pat, body) and text.index(re.search(pat, body).group(0)) or 0].count('\n') + 1
+            err(path, f"authored {shown} near line {line} — kramdown eats the "
+                      f"backslash, so KaTeX never sees it. Use $...$ or $$...$$")
+
+    # Remove well-formed math so what remains can be checked as plain text.
+    outside = re.sub(r'\$\$.*?\$\$', '', body, flags=re.S)
+    outside = re.sub(r'\$[^$\n]+\$', '', outside)
+    outside = re.sub(r'```.*?```', '', outside, flags=re.S)
+
+    if '$' in outside:
+        line = text[:text.rindex('$')].count('\n') + 1
+        err(path, f"unpaired $ near line {line} — an odd delimiter will swallow "
+                  f"the rest of the paragraph into a math span")
+
+    # Brace sub/superscripts only render via KaTeX. Outside math they are literal.
+    for m in re.finditer(r'[A-Za-z0-9)\]]([_^])\{[^}]*\}', outside):
+        line = text[:text.find(m.group(0))].count('\n') + 1
         kind = 'subscript' if m.group(1) == '_' else 'superscript'
-        err(path, f"LaTeX {kind} {m.group(0)!r} at line {line} — "
-                  f"renders literally; use v[i+1] or a Unicode subscript")
+        err(path, f"LaTeX {kind} {m.group(0)!r} at line {line} is outside any "
+                  f"math delimiter — wrap it in $...$ or use v[i+1]")
 
 
 def check_emoji(path, text):
@@ -136,7 +149,7 @@ def main():
                 check_links(path, text)
 
                 if fn == 'README.md':
-                    check_latex(path, text)
+                    check_math(path, text)
                     check_emoji(path, text)
                     if '_concept_' in dirpath:
                         check_concept(path, text)
