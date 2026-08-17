@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 03: Interpolation, Lookup Tables & the Angle Trap</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* Container owns its height; canvas is absolutely positioned so its size can
+       never feed back into the container's, which would grow it without bound. */
+    .canvas-container {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 10px; position: relative; overflow: hidden; height: 360px;
+    }
+    canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      display: block; cursor: grab; touch-action: none;
+    }
+    .hint {
+      position: absolute; left: 10px; top: 8px; font-size: 0.7rem;
+      color: var(--muted); pointer-events: none; font-family: system-ui, sans-serif;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
+    }
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=checkbox], .controls input[type=radio] { accent-color: var(--accent); }
+    .controls input[type=range] { accent-color: var(--accent); width: 190px; }
+    .controls button {
+      background: var(--panel-hover); color: var(--ink); border: 1px solid var(--line);
+      border-radius: 7px; padding: 5px 11px; font-size: 0.78rem; cursor: pointer;
+      font-family: system-ui, sans-serif;
+    }
+    .controls button:hover { border-color: var(--accent); }
+    .modes { display: flex; gap: 14px; flex-wrap: wrap; }
+    .tval { font-family: ui-monospace, "SF Mono", monospace; color: var(--ink); font-weight: 700; min-width: 46px; }
+    .stats-row {
+      display: flex; flex-wrap: wrap; gap: 10px 18px;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.82rem;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; min-width: 104px; }
+    .stat-label { font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); word-break: break-all; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-weight: 700; font-size: 0.78rem;
+    }
+    .badge-ok   { background: rgba(74, 222, 128, 0.18); color: var(--accent-green); }
+    .badge-warn { background: rgba(251, 191, 36, 0.18); color: var(--accent-amber); }
+    .badge-bad  { background: rgba(244, 63, 94, 0.18); color: var(--accent-red); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="lerpCanvas"></canvas>
+      <div class="hint" id="hintText">Drag A and B. Sweep t.</div>
+    </div>
+
+    <div class="controls">
+      <div class="modes">
+        <label><input type="radio" name="mode" value="lerp" checked> Lerp between two points</label>
+        <label><input type="radio" name="mode" value="table"> Shooter lookup table</label>
+        <label><input type="radio" name="mode" value="angle"> The angle trap</label>
+      </div>
+    </div>
+
+    <div class="controls" id="tRow">
+      <label>t <input type="range" id="tSlider" min="-0.4" max="1.4" step="0.001" value="0.35">
+        <span class="tval" id="tLabel">0.350</span></label>
+      <label id="clampWrap"><input type="checkbox" id="clampT" checked> Clamp t into [0, 1]</label>
+      <label id="cmpWrap"><input type="checkbox" id="showForms" checked> Compare both lerp forms</label>
+      <button id="resetCase" type="button">Reset to the 1.01 → 3.02 case</button>
+    </div>
+
+    <div class="stats-row" id="statsLerp">
+      <div class="stat-item">
+        <span class="stat-label">A</span><span class="stat-val" id="aVal">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">B</span><span class="stat-val" id="bVal">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">t used</span><span class="stat-val" id="tUsed" style="color: var(--accent-amber);">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">P(t) = A + t(B−A)</span><span class="stat-val" id="pVal">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Form 1 on x: a+t(b−a)</span><span class="stat-val" id="form1">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Form 2 on x: (1−t)a+tb</span><span class="stat-val" id="form2">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Difference (ULPs)</span><span class="stat-val" id="formDiff" style="color: var(--accent-purple);">—</span>
+      </div>
+    </div>
+
+    <div class="stats-row hidden" id="statsTable">
+      <div class="stat-item">
+        <span class="stat-label">Query distance</span><span class="stat-val" id="qDist" style="color: var(--accent-amber);">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Range</span><span id="rangeBadge" class="badge badge-ok">In table</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Bracketing pair</span><span class="stat-val" id="bracket">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">t = invLerp(keys)</span><span class="stat-val" id="tableT">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Clamped output</span><span class="stat-val" id="clampOut" style="color: var(--accent-green);">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Extrapolated output</span><span class="stat-val" id="extrapOut" style="color: var(--accent-red);">—</span>
+      </div>
+    </div>
+
+    <div class="stats-row hidden" id="statsAngle">
+      <div class="stat-item">
+        <span class="stat-label">Angle A</span><span class="stat-val" id="angA" style="color: var(--accent-amber);">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Angle B</span><span class="stat-val" id="angB" style="color: var(--accent-green);">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Naive lerp(A,B,t)</span><span class="stat-val" id="angNaive" style="color: var(--accent-red);">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Short way (Module 2)</span><span class="stat-val" id="angShort" style="color: var(--accent-purple);">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Naive sweep</span><span class="stat-val" id="sweepNaive">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">True separation</span><span class="stat-val" id="sweepShort">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Wasted travel</span><span id="angBadge" class="badge badge-ok">none</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('lerpCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const FIELD_X = 4.0, FIELD_Y = 2.5, PAD = 34;
+
+    let mode = 'lerp';
+    let dragging = null;
+
+    // ---- Mode 1: two draggable points in metres -------------------------------
+    // Defaults are the README's worked case: x = 1.01 and x = 3.02, where the two
+    // lerp forms disagree by one ULP at t = 1. Drag them and the disagreement
+    // usually vanishes, which is exactly the point — it is rare, not impossible.
+    const A_DEFAULT = { x: 1.01, y: 0.55 }, B_DEFAULT = { x: 3.02, y: 2.0 };
+    const pts = {
+      A: { x: A_DEFAULT.x, y: A_DEFAULT.y, color: 'amber', label: 'A' },
+      B: { x: B_DEFAULT.x, y: B_DEFAULT.y, color: 'green', label: 'B' }
+    };
+
+    // ---- Mode 2: a draggable shooter calibration table -------------------------
+    const table = [
+      { d: 2.0, rpm: 2450 },
+      { d: 3.0, rpm: 2980 },
+      { d: 4.5, rpm: 3610 },
+      { d: 6.0, rpm: 4100 },
+      { d: 7.5, rpm: 4390 }
+    ];
+    const D_MIN = 1.0, D_MAX = 10.0, R_MIN = 2000, R_MAX = 5000;
+    let queryDist = 5.0;
+
+    // ---- Mode 3: two draggable headings, in degrees ----------------------------
+    let angA = 350, angB = 10;
+
+    const tSlider = document.getElementById('tSlider');
+    const tLabel = document.getElementById('tLabel');
+    const clampT = document.getElementById('clampT');
+    const showForms = document.getElementById('showForms');
+    const hintText = document.getElementById('hintText');
+
+    const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y });
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
+
+    // One scale for BOTH axes, so geometric figures are drawn truthfully.
+    // (The table mode is a chart of RPM against metres, not a geometric figure,
+    //  so it uses its own per-axis mapping further down.)
+    function view() {
+      const { w, h } = cssSize();
+      const scale = Math.min((w - PAD * 2) / FIELD_X, (h - PAD * 2) / FIELD_Y);
+      return { scale, ox: (w - FIELD_X * scale) / 2, oy: (h + FIELD_Y * scale) / 2 };
+    }
+    const toScreen = (p) => { const v = view(); return { x: v.ox + p.x * v.scale, y: v.oy - p.y * v.scale }; };
+    const toMeters = (sx, sy) => {
+      const v = view();
+      return {
+        x: Math.max(0, Math.min(FIELD_X, (sx - v.ox) / v.scale)),
+        y: Math.max(0, Math.min(FIELD_Y, (v.oy - sy) / v.scale))
+      };
+    };
+
+    // Chart mapping for the lookup-table mode.
+    function chart() {
+      const { w, h } = cssSize();
+      const l = 62, r = w - 24, tp = 26, b = h - 40;
+      return {
+        l, r, tp, b,
+        px: (d) => l + (d - D_MIN) / (D_MAX - D_MIN) * (r - l),
+        py: (v) => b - (v - R_MIN) / (R_MAX - R_MIN) * (b - tp),
+        dx: (sx) => D_MIN + (sx - l) / (r - l) * (D_MAX - D_MIN),
+        dv: (sy) => R_MIN + (b - sy) / (b - tp) * (R_MAX - R_MIN)
+      };
+    }
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.round(rect.width * dpr));
+      canvas.height = Math.max(1, Math.round(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function palette() {
+      const light = document.documentElement.getAttribute('data-theme') === 'light';
+      return {
+        light,
+        grid:   light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.035)',
+        line:   light ? '#cbd5e1' : '#232b3b',
+        muted:  light ? '#64748b' : '#94a3b8',
+        ink:    light ? '#0f172a' : '#f1f5f9',
+        amber:  light ? '#d97706' : '#fbbf24',
+        red:    light ? '#e11d48' : '#f43f5e',
+        purple: light ? '#9333ea' : '#c084fc',
+        green:  light ? '#16a34a' : '#4ade80',
+        blue:   light ? '#0284c7' : '#38bdf8'
+      };
+    }
+
+    const lerp1 = (a, b, t) => a + t * (b - a);          // one op fewer, monotonic
+    const lerp2 = (a, b, t) => (1 - t) * a + t * b;      // exact at both endpoints
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+    /** Count of representable doubles between x and y — a real ULP distance. */
+    function ulpsBetween(x, y) {
+      if (x === y) return 0;
+      let n = 0, lo = Math.min(x, y), hi = Math.max(x, y);
+      while (lo < hi && n < 64) { lo = nextUp(lo); n++; }
+      return n >= 64 ? 64 : n;
+    }
+    const buf = new ArrayBuffer(8);
+    const f64 = new Float64Array(buf), u32 = new Uint32Array(buf);
+    function nextUp(x) {
+      if (Number.isNaN(x) || x === Infinity) return x;
+      if (x === 0) return Number.MIN_VALUE;
+      f64[0] = x;
+      if (x > 0) { if (u32[0]++ === 0xFFFFFFFF) { u32[0] = 0; u32[1]++; } }
+      else       { if (u32[0]-- === 0) { u32[0] = 0xFFFFFFFF; u32[1]--; } }
+      return f64[0];
+    }
+
+    function drawSegment(p, q, color, width, dash) {
+      ctx.save();
+      ctx.setLineDash(dash || []);
+      ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawHandle(sx, sy, color, label, radius) {
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.arc(sx, sy, radius || 8, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+      if (label) {
+        ctx.fillStyle = color; ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText(label, sx + 11, sy - 10);
+      }
+    }
+
+    // ---------------------------------------------------------------- drawing
+    function draw() {
+      const C = palette();
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
+      if (mode === 'lerp') drawLerp(C);
+      else if (mode === 'table') drawTable(C);
+      else drawAngle(C);
+    }
+
+    function drawFieldGrid(C) {
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let x = 1; x < FIELD_X; x++) {
+        const a = toScreen({ x, y: 0 }), b = toScreen({ x, y: FIELD_Y });
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      for (let y = 1; y < FIELD_Y; y++) {
+        const a = toScreen({ x: 0, y }), b = toScreen({ x: FIELD_X, y });
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      const tl = toScreen({ x: 0, y: FIELD_Y }), br = toScreen({ x: FIELD_X, y: 0 });
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+      ctx.strokeRect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+    }
+
+    function drawLerp(C) {
+      drawFieldGrid(C);
+      const rawT = parseFloat(tSlider.value);
+      const t = clampT.checked ? clamp(rawT, 0, 1) : rawT;
+      const { A, B } = pts;
+
+      // The full parametric line, so t outside [0,1] is visibly "off the segment".
+      const d = sub(B, A);
+      drawSegment(toScreen({ x: A.x - d.x * 3, y: A.y - d.y * 3 }),
+                  toScreen({ x: B.x + d.x * 3, y: B.y + d.y * 3 }),
+                  C.muted + '55', 1.5, [6, 5]);
+      drawSegment(toScreen(A), toScreen(B), C.blue, 4);
+
+      // Tick marks at every tenth of the way along.
+      for (let i = 1; i < 10; i++) {
+        const s = toScreen({ x: lerp2(A.x, B.x, i / 10), y: lerp2(A.y, B.y, i / 10) });
+        ctx.fillStyle = C.muted; ctx.beginPath(); ctx.arc(s.x, s.y, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+
+      const P = { x: lerp2(A.x, B.x, t), y: lerp2(A.y, B.y, t) };
+      const sp = toScreen(P);
+      ctx.fillStyle = C.purple + '33';
+      ctx.beginPath(); ctx.arc(sp.x, sp.y, 15, 0, Math.PI * 2); ctx.fill();
+      drawHandle(sp.x, sp.y, C.purple, null, 8);
+      ctx.fillStyle = C.purple; ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillText('P(' + t.toFixed(2) + ')', sp.x + 13, sp.y + 20);
+
+      const { h: viewH } = cssSize();
+      ctx.font = 'bold 12px system-ui, sans-serif'; ctx.fillStyle = C.red;
+      if (rawT !== t) {
+        ctx.fillText('t = ' + rawT.toFixed(2) + ' clamped to ' + t.toFixed(2), 14, viewH - 14);
+      } else if (rawT < 0 || rawT > 1) {
+        ctx.fillText('extrapolating — off the segment', 14, viewH - 14);
+      }
+
+      drawHandle(toScreen(A).x, toScreen(A).y, C.amber, 'A');
+      drawHandle(toScreen(B).x, toScreen(B).y, C.green, 'B');
+
+      // Telemetry: run both formulas on the x coordinate and compare bit for bit.
+      const f1 = lerp1(A.x, B.x, t), f2 = lerp2(A.x, B.x, t);
+      const set = (id, v) => document.getElementById(id).textContent = v;
+      set('aVal', '(' + A.x.toFixed(3) + ', ' + A.y.toFixed(3) + ')');
+      set('bVal', '(' + B.x.toFixed(3) + ', ' + B.y.toFixed(3) + ')');
+      set('tUsed', t.toFixed(3));
+      set('pVal', '(' + P.x.toFixed(4) + ', ' + P.y.toFixed(4) + ')');
+      if (showForms.checked) {
+        set('form1', f1.toPrecision(17));
+        set('form2', f2.toPrecision(17));
+        const u = ulpsBetween(f1, f2);
+        set('formDiff', u === 0 ? 'identical' : (u >= 64 ? '64+' : u + ' ULP') + '  (Δ ' + (f1 - f2).toExponential(2) + ')');
+      } else {
+        set('form1', f1.toFixed(6)); set('form2', f2.toFixed(6)); set('formDiff', 'hidden');
+      }
+    }
+
+    function drawTable(C) {
+      const ch = chart();
+      // Axes and grid.
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let d = 2; d <= 10; d += 1) {
+        ctx.beginPath(); ctx.moveTo(ch.px(d), ch.tp); ctx.lineTo(ch.px(d), ch.b); ctx.stroke();
+      }
+      for (let v = 2500; v <= 5000; v += 500) {
+        ctx.beginPath(); ctx.moveTo(ch.l, ch.py(v)); ctx.lineTo(ch.r, ch.py(v)); ctx.stroke();
+      }
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(ch.l, ch.tp); ctx.lineTo(ch.l, ch.b); ctx.lineTo(ch.r, ch.b); ctx.stroke();
+      ctx.fillStyle = C.muted; ctx.font = '10px system-ui, sans-serif';
+      for (let d = 2; d <= 10; d += 2) ctx.fillText(d.toFixed(0) + ' m', ch.px(d) - 10, ch.b + 16);
+      for (let v = 2500; v <= 5000; v += 500) ctx.fillText(v.toFixed(0), 16, ch.py(v) + 4);
+
+      const sorted = table.slice().sort((p, q) => p.d - q.d);
+
+      // The interpolated curve is exactly the piecewise-linear join of the rows.
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      sorted.forEach((row, i) => {
+        const x = ch.px(row.d), y = ch.py(row.rpm);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Clamped continuation beyond each end, and the extrapolated alternative.
+      const first = sorted[0], last = sorted[sorted.length - 1];
+      drawSegment({ x: ch.px(D_MIN), y: ch.py(first.rpm) }, { x: ch.px(first.d), y: ch.py(first.rpm) }, C.green, 2.5, [6, 4]);
+      drawSegment({ x: ch.px(last.d), y: ch.py(last.rpm) }, { x: ch.px(D_MAX), y: ch.py(last.rpm) }, C.green, 2.5, [6, 4]);
+      if (sorted.length >= 2) {
+        const p = sorted[sorted.length - 2];
+        const slope = (last.rpm - p.rpm) / (last.d - p.d || 1e-9);
+        const endV = last.rpm + slope * (D_MAX - last.d);
+        drawSegment({ x: ch.px(last.d), y: ch.py(last.rpm) },
+                    { x: ch.px(D_MAX), y: ch.py(clamp(endV, R_MIN - 4000, R_MAX + 4000)) }, C.red, 2.5, [6, 4]);
+      }
+
+      // Query line and the bracketing pair.
+      const q = queryDist;
+      const res = lookup(sorted, q);
+      ctx.strokeStyle = C.amber; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(ch.px(q), ch.tp); ctx.lineTo(ch.px(q), ch.b); ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (res.lo !== null) {
+        const a = sorted[res.lo], b = sorted[res.lo + 1];
+        drawSegment({ x: ch.px(a.d), y: ch.py(a.rpm) }, { x: ch.px(b.d), y: ch.py(b.rpm) }, C.amber, 5);
+      }
+
+      sorted.forEach((row) => drawHandle(ch.px(row.d), ch.py(row.rpm), C.blue, null, 6));
+      drawHandle(ch.px(q), ch.py(res.clamped), C.amber, null, 7);
+      if (Math.abs(res.extrapolated - res.clamped) > 1) {
+        drawHandle(ch.px(q), ch.py(clamp(res.extrapolated, R_MIN - 3000, R_MAX + 3000)), C.red, null, 6);
+      }
+
+      const set = (id, v) => document.getElementById(id).textContent = v;
+      set('qDist', q.toFixed(2) + ' m');
+      set('bracket', res.lo === null ? 'outside table'
+        : sorted[res.lo].d.toFixed(2) + ' m / ' + sorted[res.lo + 1].d.toFixed(2) + ' m');
+      set('tableT', res.t === null ? '—' : res.t.toFixed(4));
+      set('clampOut', res.clamped.toFixed(1) + ' RPM');
+      set('extrapOut', res.extrapolated.toFixed(1) + ' RPM');
+      const badge = document.getElementById('rangeBadge');
+      if (res.lo !== null) { badge.textContent = 'In table'; badge.className = 'badge badge-ok'; }
+      else { badge.textContent = 'Outside — untested'; badge.className = 'badge badge-bad'; }
+    }
+
+    /** Bracket, inverse-lerp the keys, lerp the values. Returns both end behaviours. */
+    function lookup(sorted, q) {
+      const n = sorted.length;
+      if (q <= sorted[0].d) {
+        const s = n > 1 ? (sorted[1].rpm - sorted[0].rpm) / (sorted[1].d - sorted[0].d || 1e-9) : 0;
+        return { lo: null, t: null, clamped: sorted[0].rpm, extrapolated: sorted[0].rpm + s * (q - sorted[0].d) };
+      }
+      if (q >= sorted[n - 1].d) {
+        const s = n > 1 ? (sorted[n - 1].rpm - sorted[n - 2].rpm) / (sorted[n - 1].d - sorted[n - 2].d || 1e-9) : 0;
+        return { lo: null, t: null, clamped: sorted[n - 1].rpm, extrapolated: sorted[n - 1].rpm + s * (q - sorted[n - 1].d) };
+      }
+      let lo = 0, hi = n - 1;
+      while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (sorted[mid].d <= q) lo = mid; else hi = mid; }
+      const t = (q - sorted[lo].d) / (sorted[lo + 1].d - sorted[lo].d || 1e-9);
+      const v = lerp2(sorted[lo].rpm, sorted[lo + 1].rpm, t);
+      return { lo, t, clamped: v, extrapolated: v };
+    }
+
+    function drawAngle(C) {
+      const { w, h } = cssSize();
+      const cx = w / 2, cy = h / 2 + 6;
+      const R = Math.max(40, Math.min(w, h) / 2 - 58);   // one radius: a circle stays a circle
+
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let deg = 0; deg < 360; deg += 30) {
+        const p1 = onCircle(cx, cy, R * 0.93, deg), p2 = onCircle(cx, cy, R, deg);
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+      }
+      ctx.fillStyle = C.muted; ctx.font = '10px system-ui, sans-serif';
+      [0, 90, 180, 270].forEach((deg) => {
+        const p = onCircle(cx, cy, R + 16, deg);
+        ctx.fillText(deg + '°', p.x - 9, p.y + 4);
+      });
+
+      const rawT = parseFloat(tSlider.value);
+      const t = clamp(rawT, 0, 1);
+      const naive = lerp2(angA, angB, t);
+      let delta = ((angB - angA) % 360 + 540) % 360 - 180;    // shortest signed difference
+      const shortAng = angA + delta * t;
+
+      // The arc the naive blend actually sweeps.
+      ctx.strokeStyle = C.red; ctx.lineWidth = 3; ctx.setLineDash([7, 5]);
+      ctx.beginPath();
+      arcPath(cx, cy, R * 0.80, angA, naive);
+      ctx.stroke(); ctx.setLineDash([]);
+
+      // The arc it should have swept.
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 3;
+      ctx.beginPath(); arcPath(cx, cy, R * 0.62, angA, shortAng); ctx.stroke();
+
+      spoke(cx, cy, R, angA, C.amber, 3);
+      spoke(cx, cy, R, angB, C.green, 3);
+      spoke(cx, cy, R * 0.80, naive, C.red, 3);
+      spoke(cx, cy, R * 0.62, shortAng, C.purple, 3);
+
+      const pa = onCircle(cx, cy, R, angA), pb = onCircle(cx, cy, R, angB);
+      drawHandle(pa.x, pa.y, C.amber, 'A', 8);
+      drawHandle(pb.x, pb.y, C.green, 'B', 8);
+
+      ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.fillStyle = C.red;    ctx.fillText('naive lerp', 14, h - 30);
+      ctx.fillStyle = C.purple; ctx.fillText('short way (needs Module 2)', 14, h - 14);
+
+      const naiveSweep = Math.abs(angB - angA);
+      const shortSweep = Math.abs(delta);
+      const set = (id, v) => document.getElementById(id).textContent = v;
+      set('angA', angA.toFixed(1) + '°');
+      set('angB', angB.toFixed(1) + '°');
+      set('angNaive', norm360(naive).toFixed(1) + '°');
+      set('angShort', norm360(shortAng).toFixed(1) + '°');
+      set('sweepNaive', naiveSweep.toFixed(1) + '°');
+      set('sweepShort', shortSweep.toFixed(1) + '°');
+      const waste = naiveSweep - shortSweep;
+      const badge = document.getElementById('angBadge');
+      badge.textContent = waste.toFixed(1) + '°';
+      badge.className = 'badge ' + (waste < 1 ? 'badge-ok' : waste < 90 ? 'badge-warn' : 'badge-bad');
+    }
+
+    const norm360 = (d) => ((d % 360) + 360) % 360;
+    // Screen positions on the circle, derived from the slider angle only for drawing.
+    function onCircle(cx, cy, r, deg) {
+      const rad = deg * Math.PI / 180;
+      return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
+    }
+    function arcPath(cx, cy, r, fromDeg, toDeg) {
+      const steps = 96;
+      for (let i = 0; i <= steps; i++) {
+        const p = onCircle(cx, cy, r, fromDeg + (toDeg - fromDeg) * (i / steps));
+        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      }
+    }
+    function spoke(cx, cy, r, deg, color, width) {
+      const p = onCircle(cx, cy, r, deg);
+      drawSegment({ x: cx, y: cy }, p, color, width);
+    }
+    function angleAt(cx, cy, sx, sy) {
+      return norm360(Math.atan2(cy - sy, sx - cx) * 180 / Math.PI);
+    }
+
+    // ---------------------------------------------------------------- input
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+    }
+
+    function startDrag(e) {
+      const pos = getPos(e);
+      dragging = null;
+      if (mode === 'lerp') {
+        let bestDist = 28;
+        for (const key of Object.keys(pts)) {
+          const sc = toScreen(pts[key]);
+          const d = Math.hypot(pos.x - sc.x, pos.y - sc.y);
+          if (d < bestDist) { bestDist = d; dragging = { kind: 'pt', key }; }
+        }
+      } else if (mode === 'table') {
+        const ch = chart();
+        let bestDist = 24;
+        table.forEach((row, i) => {
+          const d = Math.hypot(pos.x - ch.px(row.d), pos.y - ch.py(row.rpm));
+          if (d < bestDist) { bestDist = d; dragging = { kind: 'row', i }; }
+        });
+        if (!dragging && Math.abs(pos.x - ch.px(queryDist)) < 22) dragging = { kind: 'query' };
+      } else {
+        const { w, h } = cssSize();
+        const cx = w / 2, cy = h / 2 + 6;
+        const R = Math.max(40, Math.min(w, h) / 2 - 58);
+        const pa = onCircle(cx, cy, R, angA), pb = onCircle(cx, cy, R, angB);
+        const da = Math.hypot(pos.x - pa.x, pos.y - pa.y), db = Math.hypot(pos.x - pb.x, pos.y - pb.y);
+        if (da < 28 && da <= db) dragging = { kind: 'angA' };
+        else if (db < 28) dragging = { kind: 'angB' };
+      }
+    }
+
+    function moveDrag(e) {
+      if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
+      const pos = getPos(e);
+      if (dragging.kind === 'pt') {
+        const m = toMeters(pos.x, pos.y);
+        pts[dragging.key].x = m.x; pts[dragging.key].y = m.y;
+      } else if (dragging.kind === 'row') {
+        const ch = chart();
+        table[dragging.i].d = clamp(ch.dx(pos.x), D_MIN + 0.05, D_MAX - 0.05);
+        table[dragging.i].rpm = clamp(ch.dv(pos.y), R_MIN, R_MAX);
+      } else if (dragging.kind === 'query') {
+        const ch = chart();
+        queryDist = clamp(ch.dx(pos.x), D_MIN, D_MAX);
+      } else {
+        const { w, h } = cssSize();
+        const a = angleAt(w / 2, h / 2 + 6, pos.x, pos.y);
+        if (dragging.kind === 'angA') angA = a; else angB = a;
+      }
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', () => dragging = null);
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('touchend', () => dragging = null);
+
+    tSlider.addEventListener('input', () => {
+      tLabel.textContent = parseFloat(tSlider.value).toFixed(3);
+      draw();
+    });
+    [clampT, showForms].forEach((el) => el.addEventListener('change', draw));
+
+    document.getElementById('resetCase').addEventListener('click', () => {
+      pts.A.x = A_DEFAULT.x; pts.A.y = A_DEFAULT.y;
+      pts.B.x = B_DEFAULT.x; pts.B.y = B_DEFAULT.y;
+      tSlider.value = '1'; tLabel.textContent = '1.000';
+      draw();
+    });
+
+    document.querySelectorAll('input[name=mode]').forEach((el) => {
+      el.addEventListener('change', () => {
+        mode = el.value;
+        document.getElementById('statsLerp').classList.toggle('hidden', mode !== 'lerp');
+        document.getElementById('statsTable').classList.toggle('hidden', mode !== 'table');
+        document.getElementById('statsAngle').classList.toggle('hidden', mode !== 'angle');
+        document.getElementById('clampWrap').classList.toggle('hidden', mode !== 'lerp');
+        document.getElementById('cmpWrap').classList.toggle('hidden', mode !== 'lerp');
+        document.getElementById('resetCase').classList.toggle('hidden', mode !== 'lerp');
+        document.getElementById('tRow').classList.toggle('hidden', mode === 'table');
+        hintText.textContent =
+          mode === 'lerp'  ? 'Drag A and B. Sweep t past 0 or 1 to leave the segment.'
+        : mode === 'table' ? 'Drag the blue measurements or the amber query line.'
+        :                    'Drag A and B around the circle. Watch the red arc take the long way.';
+        draw();
+      });
+    });
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+    tLabel.textContent = parseFloat(tSlider.value).toFixed(3);
+    resize();
+  </script>
+</body>
+</html>
