@@ -102,8 +102,8 @@ public class SelfAttention {
 
     public static void main(String[] args) {
         double[] query = {1.2, 0.8};
-        double[][] keys = {{1.1, 0.9}, {-0.8, 0.4}, {0.2, -1.0}};
-        double[][] values = {{5.0, 2.0}, {1.0, 8.0}, {3.0, 3.0}};
+        double[][] keys = { {1.1, 0.9}, {-0.8, 0.4}, {0.2, -1.0} };
+        double[][] values = { {5.0, 2.0}, {1.0, 8.0}, {3.0, 3.0} };
 
         double[] context = computeAttention(query, keys, values, 2);
         System.out.printf("Enriched Context Vector: [%.2f, %.2f]%n", context[0], context[1]);
