@@ -36,7 +36,33 @@ The companion `demo.html` is embedded via `<iframe>` immediately under the title
 
 ## Language Policy
 
-Teaching code is **Java with WPILib**, matching CURRICULUM_SPEC rule 3. Each code section shows first-principles Java first, then the production WPILib equivalent that a real robot project would use. Python appears only when the topic is itself a Python ecosystem (for example PyTorch tensor shapes in the machine learning axon).
+Teaching code follows the domain, matching CURRICULUM_SPEC rule 3. Every code section is two tiers: a from-scratch implementation that hides nothing, then the production library call that replaces it.
+
+| Axon | From-scratch tier | Production tier |
+|---|---|---|
+| Math (geometry, trig, linear algebra) | Plain Java | WPILib |
+| Math (calculus, probability) | Whichever consumer the concept serves; both when it genuinely serves both | WPILib or PyTorch to match |
+| Machine Learning & Vision | Plain Python, standard library only | PyTorch |
+| Large Language Models | Plain Python, standard library only | PyTorch |
+| Physics, Kinematics, Localization | Plain Java | WPILib |
+| Reinforcement Learning | Plain Python | PyTorch |
+
+Rules for the from-scratch tier in Python: **no NumPy**. Lists and loops make the arithmetic visible, which is the entire point of that tier — a vectorised one-liner teaches nothing about what is being vectorised. NumPy may appear in the production tier as a stepping stone to PyTorch where it clarifies the leap.
+
+Rules for the PyTorch tier: it must produce the **same numbers** as the from-scratch tier on the same input, and the concept should say so explicitly. A reader who cannot connect the two tiers has learned an API, not an idea.
+
+TensorFlow and Keras are not used in concept pages. They appear only in the frameworks module's comparison appendix, so that a reader who meets Keras elsewhere can map it onto what they already know.
+
+### Maroon Framework
+
+Maroon Framework (`com.team766.framework`) **may** be referenced in robotics concepts as a third code tier, after first-principles Java and WPILib, where a concept genuinely maps onto a framework primitive (`Mechanism`, `Procedure`, `Context`, `AutonomousMode`).
+
+The boundary is between the framework and the robots built with it:
+
+* **Publishable** — framework library classes and the patterns they express. Team 766 publishes its Programming Tutorials to GitHub Pages, so this material is already public.
+* **Not publishable** — Team 766's specific mechanisms, robot configurations, subsystem constants, and season robot code. These live in a private repository and must not be reproduced in Axon, quoted, or reconstructed from memory.
+
+When a framework example needs a mechanism to act on, invent a generic one for the curriculum rather than importing a real subsystem. If it is unclear which side of the line a piece of code falls on, leave it out and ask.
 
 ---
 
