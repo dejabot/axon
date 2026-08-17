@@ -72,10 +72,10 @@ Axon is an educational curriculum designed from first principles to bridge high-
 ---
 
 ### [Axon 04: Physics, Dynamics & Actuation](physics/)
-* **DC Motor Electromechanics**: Brushless motor curves, Back-EMF, K_t and K_v constants.
-* **Gearboxes & Reflected Inertia**: Planetary reductions, torque multiplication, reflected load inertia (J / G²).
-* **Projectile Ballistics & Shooter Trajectories**: 2D parabolic arcs, air drag, Magnus spin, shooter flywheel RPM, shooting on the move.
-* **Physics Feedforward & Closed-Loop PID**: Voltage models (kS, kV, kA, kG), velocity feedforward, PID closed-loop control.
+* **[DC Motors & Electromechanics](physics/01_motors_electromechanics/)**: Brushless motor curves, Back-EMF, `K_t` and `K_v` constants, planetary reductions, reflected load inertia (`J / G²`).
+* **[Projectile Ballistics & Trajectories](physics/02_ballistics_trajectories/)**: 2D parabolic kinematic arcs, air drag deceleration, Magnus backspin lift, shooting on the move vector compensation.
+* **[Dynamics, Friction & Energy](physics/03_dynamics_energy/)**: Coulomb friction circles (`F_max = μ_s · N`), static vs kinetic slip cliffs, kinetic energy (`½ m v²`), elevator constant-force spring counterbalancing.
+* **[Control Physics & Voltage Models](physics/04_control_physics/)**: Physics feedforward (`kS`, `kV`, `kA`, `kG`), `SimpleMotorFeedforward`, `ElevatorFeedforward`, `ArmFeedforward`, closed-loop PID tuning and stability.
 
 ---
 

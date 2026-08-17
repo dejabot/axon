@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 02: Elevator Counterbalance & Energy Sandbox</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Elevator Gravitational Potential & Constant-Force Spring Counterbalancing</div>
+      <div class="demo-badge">Concept 02 Demo</div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Carriage Mass: <span id="massDisplay" class="value-display">12.0 kg</span></label>
+        <input type="range" id="massSlider" min="4.0" max="24.0" step="0.5" value="12.0">
+      </div>
+      <div class="control-group">
+        <label>Spring Assist Force: <span id="springDisplay" class="value-display">110 N</span></label>
+        <input type="range" id="springSlider" min="0" max="200" step="5" value="110">
+      </div>
+      <div class="control-group">
+        <label>Carriage Height: <span id="heightDisplay" class="value-display">1.20 m</span></label>
+        <input type="range" id="heightSlider" min="0.10" max="1.80" step="0.05" value="1.20">
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="elevatorCanvas" width="800" height="380"></canvas>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Downward Gravity Force (m·g)</div>
+        <div class="telemetry-value" id="gravityText" style="color: #f43f5e;">117.7 N</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Upward Spring Counterbalance</div>
+        <div class="telemetry-value" id="springText" style="color: #4ade80;">110.0 N Assist</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Net Holding Load on Motor</div>
+        <div class="telemetry-value" id="netLoadText" style="color: #38bdf8;">7.7 N (93% Counterbalanced!)</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Holding Voltage & Heat</div>
+        <div class="telemetry-value" id="voltText" style="color: #fbbf24;">0.21 V (Cool & Safe)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('elevatorCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const g = 9.81;
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const mass = parseFloat(document.getElementById('massSlider').value);
+        const springN = parseFloat(document.getElementById('springSlider').value);
+        const heightM = parseFloat(document.getElementById('heightSlider').value);
+
+        document.getElementById('massDisplay').textContent = `${mass.toFixed(1)} kg`;
+        document.getElementById('springDisplay').textContent = `${Math.round(springN)} N`;
+        document.getElementById('heightDisplay').textContent = `${heightM.toFixed(2)} m`;
+
+        const gravN = mass * g;
+        const netLoad = Math.max(0, gravN - springN);
+
+        // Ground / Base layout
+        const baseX = 240;
+        const baseY = 330;
+        const mastHeightPx = 280;
+
+        // Draw Base Plate
+        ctx.fillStyle = isDark ? '#334155' : '#94a3b8';
+        ctx.fillRect(baseX - 40, baseY, 80, 16);
+
+        // Draw Vertical Mast Rails
+        ctx.fillStyle = isDark ? '#1e293b' : '#cbd5e1';
+        ctx.fillRect(baseX - 25, baseY - mastHeightPx, 10, mastHeightPx);
+        ctx.fillRect(baseX + 15, baseY - mastHeightPx, 10, mastHeightPx);
+
+        // Top Pulley
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(baseX, baseY - mastHeightPx, 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Calculate Carriage Position in Screen Y
+        // heightM: 0.1 to 1.8 -> screen offset 20 to 240 px
+        const carriageOffsetPx = (heightM / 1.8) * 230;
+        const carriageY = baseY - carriageOffsetPx - 30;
+
+        // Draw Elevator Carriage
+        const cWidth = 90;
+        const cHeight = 36;
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(baseX - cWidth / 2, carriageY, cWidth, cHeight);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(baseX - cWidth / 2, carriageY, cWidth, cHeight);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Carriage (${mass.toFixed(1)}kg)`, baseX, carriageY + 22);
+
+        // Draw Rigging Cable from Top Pulley down to Carriage
+        ctx.strokeStyle = textColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(baseX, baseY - mastHeightPx);
+        ctx.lineTo(baseX, carriageY);
+        ctx.stroke();
+
+        // Right Section: Free-Body Diagram Vectors
+        const fbdX = 540;
+        const fbdY = 190;
+
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillStyle = textColor;
+        ctx.fillText('Carriage Free-Body Force Diagram:', fbdX, 70);
+
+        // Carriage Point
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(fbdX, fbdY, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Downward Gravity Vector (Red)
+        const gravArrowLen = Math.min(120, gravN * 0.5);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(fbdX, fbdY);
+        ctx.lineTo(fbdX, fbdY + gravArrowLen);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f43f5e';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText(`▼ Gravity: ${gravN.toFixed(1)} N`, fbdX + 16, fbdY + gravArrowLen);
+
+        // Upward Spring Assist Vector (Green)
+        if (springN > 0) {
+          const springArrowLen = Math.min(120, springN * 0.5);
+          ctx.strokeStyle = '#4ade80';
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.moveTo(fbdX, fbdY);
+          ctx.lineTo(fbdX, fbdY - springArrowLen);
+          ctx.stroke();
+
+          ctx.fillStyle = '#4ade80';
+          ctx.fillText(`▲ Spring Assist: ${Math.round(springN)} N`, fbdX + 16, fbdY - springArrowLen + 6);
+        }
+
+        // Net Motor Holding Voltage Calculation
+        // Approx 0.027 V per Net Newton on typical 15:1 Kraken elevator
+        const holdingVolts = netLoad * 0.027;
+
+        // Telemetry Update
+        document.getElementById('gravityText').textContent = `${gravN.toFixed(1)} N`;
+        document.getElementById('springText').textContent = `${Math.round(springN)} N Assist`;
+
+        const pctBalanced = Math.min(100, Math.round((springN / gravN) * 100));
+        document.getElementById('netLoadText').textContent = `${netLoad.toFixed(1)} N (${pctBalanced}% Balanced)`;
+
+        const voltEl = document.getElementById('voltText');
+        if (holdingVolts < 0.5) {
+          voltEl.textContent = `${holdingVolts.toFixed(2)} V (Cool & Safe)`;
+          voltEl.style.color = '#4ade80';
+        } else if (holdingVolts < 1.8) {
+          voltEl.textContent = `${holdingVolts.toFixed(2)} V (Moderate Warmth)`;
+          voltEl.style.color = '#fbbf24';
+        } else {
+          voltEl.textContent = `${holdingVolts.toFixed(2)} V (HEAVY STALL HEAT!)`;
+          voltEl.style.color = '#f43f5e';
+        }
+      }
+
+      document.getElementById('massSlider').addEventListener('input', render);
+      document.getElementById('springSlider').addEventListener('input', render);
+      document.getElementById('heightSlider').addEventListener('input', render);
+
+      render();
+    })();
+  </script>
+</body>
+</html>

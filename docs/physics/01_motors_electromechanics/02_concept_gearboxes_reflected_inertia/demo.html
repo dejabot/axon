@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 02: Gearboxes & Reflected Inertia</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Gear Ratios, Torque Multiplication & Reflected Inertia (1/G²)</div>
+      <div class="demo-badge">Concept 02 Demo</div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Gear Ratio (G:1): <span id="ratioDisplay" class="value-display">10.0 : 1</span></label>
+        <input type="range" id="ratioSlider" min="1" max="30" step="1" value="10">
+      </div>
+      <div class="control-group">
+        <label>Mechanism Load Mass: <span id="massDisplay" class="value-display">12.0 kg</span></label>
+        <input type="range" id="massSlider" min="1.0" max="30.0" step="1.0" value="12.0">
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="gearCanvas" width="800" height="380"></canvas>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Output Speed (6000 RPM in)</div>
+        <div class="telemetry-value" id="speedText" style="color: #38bdf8;">600 RPM</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Output Torque (4.0 Nm in)</div>
+        <div class="telemetry-value" id="torqueText" style="color: #f43f5e;">36.0 Nm (90% eff)</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Felt Reflected Inertia (1/G²)</div>
+        <div class="telemetry-value" id="refInertiaText" style="color: #4ade80;">0.120 kg (100× Lighter!)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('gearCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let animAngleIn = 0;
+      let animAngleOut = 0;
+
+      function drawGear(x, y, radius, teeth, angle, color) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius - 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw Teeth
+        ctx.fillStyle = color;
+        for (let i = 0; i < teeth; i++) {
+          const toothAngle = (i * 2 * Math.PI) / teeth;
+          ctx.save();
+          ctx.rotate(toothAngle);
+          ctx.fillRect(-4, -radius - 4, 8, 10);
+          ctx.restore();
+        }
+
+        // Inner Hub
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.35, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      function loop() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const G = parseFloat(document.getElementById('ratioSlider').value);
+        const mass = parseFloat(document.getElementById('massSlider').value);
+
+        document.getElementById('ratioDisplay').textContent = `${G.toFixed(1)} : 1`;
+        document.getElementById('massDisplay').textContent = `${mass.toFixed(1)} kg`;
+
+        animAngleIn += 0.08;
+        animAngleOut -= 0.08 / G;
+
+        // Draw Driving Pinion (Left)
+        const pinionR = 35;
+        const pinionX = 180;
+        const pinionY = 190;
+        drawGear(pinionX, pinionY, pinionR, 12, animAngleIn, '#38bdf8');
+
+        // Draw Driven Gear (Right)
+        const gearR = Math.min(130, 35 + (G - 1) * 3.5);
+        const gearX = pinionX + pinionR + gearR - 4;
+        const gearY = 190;
+        drawGear(gearX, gearY, gearR, Math.round(12 * (gearR / pinionR)), animAngleOut, '#fbbf24');
+
+        // Labels for Gears
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillStyle = '#38bdf8';
+        ctx.textAlign = 'center';
+        ctx.fillText('Motor Pinion', pinionX, pinionY + pinionR + 30);
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText(`Output Gear (${G.toFixed(0)}:1)`, gearX, gearY + gearR + 30);
+
+        // Right side: Reflected Inertia Visualizer
+        const barStartX = 550;
+        const barStartY = 100;
+
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'left';
+        ctx.fillText('Physical Load Mass vs. Felt Reflected Mass:', barStartX, barStartY);
+
+        // Actual Load Block
+        const actualW = Math.min(180, mass * 6);
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillRect(barStartX, barStartY + 30, actualW, 36);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText(`Actual Load: ${mass.toFixed(1)} kg`, barStartX + 10, barStartY + 52);
+
+        // Reflected Load Block (Divided by G^2)
+        const refMass = mass / (G * G);
+        const refW = Math.max(4, refMass * 6);
+        ctx.fillStyle = '#4ade80';
+        ctx.fillRect(barStartX, barStartY + 100, refW, 36);
+        ctx.fillStyle = textColor;
+        ctx.fillText(`Felt by Motor: ${refMass.toFixed(3)} kg (${(G * G).toFixed(0)}× lighter!)`, barStartX + Math.max(refW + 10, 50), barStartY + 122);
+
+        // Arrow connecting the two
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(barStartX + 30, barStartY + 70);
+        ctx.lineTo(barStartX + 30, barStartY + 95);
+        ctx.stroke();
+
+        // Telemetry Update
+        const outRpm = 6000 / G;
+        const outTorque = 4.0 * G * 0.90;
+        document.getElementById('speedText').textContent = `${Math.round(outRpm)} RPM`;
+        document.getElementById('torqueText').textContent = `${outTorque.toFixed(1)} Nm (90% eff)`;
+        document.getElementById('refInertiaText').textContent = `${refMass.toFixed(3)} kg (${(G * G).toFixed(0)}× Lighter!)`;
+
+        requestAnimationFrame(loop);
+      }
+
+      document.getElementById('ratioSlider').addEventListener('input', () => {});
+      document.getElementById('massSlider').addEventListener('input', () => {});
+
+      loop();
+    })();
+  </script>
+</body>
+</html>

@@ -1,37 +1,37 @@
 # Axon 04: Physics, Dynamics & Actuation
 
-Welcome to the **Physics, Dynamics & Actuation Axon**. This track bridges mechanical laws and electrical motor characteristics into software models—from DC motor torque-speed curves and gearbox inertia to projectile ballistics, shooter trajectories, and feedforward control.
+Welcome to the **Physics, Dynamics & Actuation Axon**. This track develops physical modeling and mechanism control from first principles—covering brushless DC motor curves, gearbox reflected inertia, 2D projectile ballistics with drag and spin, traction friction circles, energy counterbalancing, and WPILib voltage feedforward models.
 
 ---
 
 ## Modules in this Axon
 
-### 1. DC Motor Electromechanics
-* *The Real-World Problem:* How much current and voltage does a brushless motor draw under varying loads and speeds?
-* *Key Concepts:* Stall torque, free speed, Back-Electromotive Force (Back-EMF), torque constant K_t, velocity constant K_v, and electrical resistance R.
+### [1. DC Motors & Electromechanics](01_motors_electromechanics/)
+* [Concept 01: Brushless DC Motors, Back-EMF & Torque Curves](01_motors_electromechanics/01_concept_motor_curves_back_emf/) — [Interactive Visualizer](01_motors_electromechanics/01_concept_motor_curves_back_emf/demo.html)
+* [Concept 02: Gear Ratios, Torque Multiplication & Reflected Inertia](01_motors_electromechanics/02_concept_gearboxes_reflected_inertia/) — [Interactive Visualizer](01_motors_electromechanics/02_concept_gearboxes_reflected_inertia/demo.html)
 
 ---
 
-### 2. Gearboxes & Reflected Inertia
-* *The Real-World Problem:* Why does adding a 10:1 planetary gearbox make an arm 100× harder to backdrive?
-* *Key Concepts:* Gear ratios G, torque multiplication, speed reduction, and reflected rotational inertia (J_{\text{reflected}} = J_{\text{load}} / G²).
+### [2. Projectile Ballistics & Trajectories](02_ballistics_trajectories/)
+* [Concept 01: 2D Parabolic Projectile Motion & Launch Angles](02_ballistics_trajectories/01_concept_2d_kinematic_ballistics/) — [Interactive Visualizer](02_ballistics_trajectories/01_concept_2d_kinematic_ballistics/demo.html)
+* [Concept 02: Aerodynamic Drag, Magnus Spin & Shooting on the Move](02_ballistics_trajectories/02_concept_drag_spin_shooting_on_move/) — [Interactive Visualizer](02_ballistics_trajectories/02_concept_drag_spin_shooting_on_move/demo.html)
 
 ---
 
-### 3. Projectile Ballistics & Shooter Trajectories
-* *The Real-World Problem:* How does an autonomous robot calculate shooter flywheel RPM and hood angle to score a game piece into a target from any distance—even while driving across the field?
-* *Key Concepts:* 2D parabolic projectile mechanics (y(t) = v0y*t - 0.5*g*t²), aerodynamic drag forces, Magnus effect spin stability, and Galilean vector addition for shooting on the move (v_{\text{launch}} = v_{\text{robot}} + v_{\text{shooter}}).
+### [3. Dynamics, Friction & Energy](03_dynamics_energy/)
+* [Concept 01: Forces, Acceleration & Wheel Traction Limits](03_dynamics_energy/01_concept_newtons_laws_friction/) — [Interactive Visualizer](03_dynamics_energy/01_concept_newtons_laws_friction/demo.html)
+* [Concept 02: Work, Kinetic Energy & Elevator Counterbalancing](03_dynamics_energy/02_concept_work_energy_momentum/) — [Interactive Visualizer](03_dynamics_energy/02_concept_work_energy_momentum/demo.html)
 
 ---
 
-### 4. Physics Feedforward & Closed-Loop PID
-* *The Real-World Problem:* Why does standard PID control lag behind fast targets, and how do we calculate the exact voltage required to hold an arm against gravity?
-* *Key Concepts:* Voltage models (V = kS*sgn(v) + kV*v + kA*a + kG), velocity feedforward, and Proportional-Integral-Derivative (PID) closed-loop stabilization.
+### [4. Control Physics & Voltage Models](04_control_physics/)
+* [Concept 01: Physics Feedforward: kS, kV, kA, and kG Models](04_control_physics/01_concept_voltage_feedforward_models/) — [Interactive Visualizer](04_control_physics/01_concept_voltage_feedforward_models/demo.html)
+* [Concept 02: Closed-Loop PID Tuning & Step-Response Stability](04_control_physics/02_concept_closed_loop_pid_tuning/) — [Interactive Visualizer](04_control_physics/02_concept_closed_loop_pid_tuning/demo.html)
 
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
   <div><a href="../large_language_models/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Previous Axon: Large Language Models</a></div>
   <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Curriculum Home</a></div>
-  <div><a href="../kinematics/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Next Axon: Kinematics & Motion →</a></div>
+  <div><a href="../kinematics/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Next Axon: Kinematics & Motion Planning →</a></div>
 </div>

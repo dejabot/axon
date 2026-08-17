@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 02: Aerodynamic Drag & Moving Ballistics</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Aerodynamic Drag, Magnus Lift & Shooting on the Move</div>
+      <div class="demo-badge">Concept 02 Demo</div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Robot Drive Speed: <span id="robotSpeedDisplay" class="value-display">+0.0 m/s</span></label>
+        <input type="range" id="robotSpeedSlider" min="-3.0" max="3.0" step="0.2" value="0.0">
+      </div>
+      <div class="control-group">
+        <label>Air Drag Level: <span id="dragDisplay" class="value-display">0.60 (Foam Note)</span></label>
+        <input type="range" id="dragSlider" min="0.0" max="1.0" step="0.05" value="0.60">
+      </div>
+      <div class="control-group">
+        <label>Backspin (Magnus Lift): <span id="spinDisplay" class="value-display">2000 RPM</span></label>
+        <input type="range" id="spinSlider" min="0" max="4000" step="100" value="2000">
+      </div>
+      <div class="control-group">
+        <label>Exit Speed (v₀): <span id="speedDisplay" class="value-display">12.0 m/s</span></label>
+        <input type="range" id="speedSlider" min="6.0" max="18.0" step="0.5" value="12.0">
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="dragCanvas" width="800" height="380"></canvas>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Aerodynamic Drag Effect</div>
+        <div class="telemetry-value" id="dragText" style="color: #f43f5e;">-1.42 m Range Decel</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Magnus Backspin Lift</div>
+        <div class="telemetry-value" id="liftText" style="color: #4ade80;">+0.65 m Loft (Flat Entry)</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Chassis Motion Lead</div>
+        <div class="telemetry-value" id="leadText" style="color: #38bdf8;">+0.00 m Lead Offset</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Real Flight Apex</div>
+        <div class="telemetry-value" id="apexText" style="color: #fbbf24;">3.45 m</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('dragCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const g = 9.81;
+      const targetDist = 5.0;
+      const targetHeight = 2.0;
+
+      function toScreen(x, y) {
+        // x: 0 to 8 meters -> 60 to 740 px
+        // y: 0 to 5 meters -> 340 to 30 px
+        const sx = 60 + (x / 8.0) * 680;
+        const sy = 340 - (y / 5.0) * 310;
+        return { sx, sy };
+      }
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const vRobot = parseFloat(document.getElementById('robotSpeedSlider').value);
+        const dragLevel = parseFloat(document.getElementById('dragSlider').value);
+        const spinRpm = parseFloat(document.getElementById('spinSlider').value);
+        const v0 = parseFloat(document.getElementById('speedSlider').value);
+
+        document.getElementById('robotSpeedDisplay').textContent = `${vRobot >= 0 ? '+' : ''}${vRobot.toFixed(1)} m/s`;
+        document.getElementById('dragDisplay').textContent = dragLevel === 0 ? '0.0 (Vacuum)' : `${dragLevel.toFixed(2)} (Air)`;
+        document.getElementById('spinDisplay').textContent = `${Math.round(spinRpm)} RPM`;
+        document.getElementById('speedDisplay').textContent = `${v0.toFixed(1)} m/s`;
+
+        // Ground Line
+        const gL = toScreen(0, 0);
+        const gR = toScreen(8, 0);
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(gL.sx - 20, gL.sy);
+        ctx.lineTo(gR.sx + 20, gR.sy);
+        ctx.stroke();
+
+        // Target Basket
+        const tgt = toScreen(targetDist, targetHeight);
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(tgt.sx, toScreen(targetDist, 0).sy);
+        ctx.lineTo(tgt.sx, tgt.sy + 10);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.3)';
+        ctx.fillRect(tgt.sx - 15, tgt.sy - 8, 30, 16);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(tgt.sx - 15, tgt.sy - 8, 30, 16);
+
+        // Angle fixed at 55 deg
+        const angleRad = 55.0 * Math.PI / 180.0;
+
+        // 1. Plot Vacuum Parabola (Gray Dashed)
+        ctx.strokeStyle = mutedColor;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        const startPt = toScreen(0, 0.6);
+        ctx.moveTo(startPt.sx, startPt.sy);
+
+        const vx_vac = v0 * Math.cos(angleRad) + vRobot;
+        const vy_vac = v0 * Math.sin(angleRad);
+        let vacX = 0, vacY = 0.6, tVac = 0;
+        while (vacY >= 0 && vacX <= 8.0) {
+          tVac += 0.01;
+          vacX = vx_vac * tVac;
+          vacY = 0.6 + vy_vac * tVac - 0.5 * g * tVac * tVac;
+          const pt = toScreen(vacX, vacY);
+          ctx.lineTo(pt.sx, pt.sy);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 2. Numerical Integration with Drag & Magnus Lift (Cyan Solid Line)
+        let x = 0, y = 0.6;
+        let vx = v0 * Math.cos(angleRad) + vRobot;
+        let vy = v0 * Math.sin(angleRad);
+        let t = 0;
+        const dt = 0.005;
+        const mass = 0.25; // 250 gram game piece
+        const dragCoeff = dragLevel * 0.025;
+        const magnusCoeff = (spinRpm / 3000.0) * 0.012;
+
+        let apexY = 0.6;
+
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(startPt.sx, startPt.sy);
+
+        while (y >= 0 && x <= 8.0) {
+          t += dt;
+          const speed = Math.hypot(vx, vy);
+
+          // Drag opposing velocity
+          const fDragX = -dragCoeff * speed * vx;
+          const fDragY = -dragCoeff * speed * vy;
+
+          // Magnus lift perpendicular to velocity (upwards for backspin)
+          const fMagX = -magnusCoeff * speed * (-vy);
+          const fMagY = magnusCoeff * speed * vx;
+
+          // Acceleration
+          const ax = (fDragX + fMagX) / mass;
+          const ay = -g + (fDragY + fMagY) / mass;
+
+          vx += ax * dt;
+          vy += ay * dt;
+          x += vx * dt;
+          y += vy * dt;
+
+          if (y > apexY) apexY = y;
+
+          const pt = toScreen(x, y);
+          ctx.lineTo(pt.sx, pt.sy);
+        }
+        ctx.stroke();
+
+        // Legend
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = mutedColor;
+        ctx.fillText('┄ Ideal Vacuum Parabola', 80, 50);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText('━ Real Drag + Magnus + Motion Trajectory', 250, 50);
+
+        // Telemetry Update
+        const leadOffset = vRobot * tVac;
+        document.getElementById('dragText').textContent = dragLevel === 0 ? 'Zero Air Drag' : `-${(dragLevel * 1.8).toFixed(2)} m Range Decel`;
+        document.getElementById('liftText').textContent = `+${((spinRpm / 3000) * 0.75).toFixed(2)} m Loft`;
+        document.getElementById('leadText').textContent = `${leadOffset >= 0 ? '+' : ''}${leadOffset.toFixed(2)} m Lead Offset`;
+        document.getElementById('apexText').textContent = `${apexY.toFixed(2)} m`;
+      }
+
+      document.getElementById('robotSpeedSlider').addEventListener('input', render);
+      document.getElementById('dragSlider').addEventListener('input', render);
+      document.getElementById('spinSlider').addEventListener('input', render);
+      document.getElementById('speedSlider').addEventListener('input', render);
+
+      render();
+    })();
+  </script>
+</body>
+</html>

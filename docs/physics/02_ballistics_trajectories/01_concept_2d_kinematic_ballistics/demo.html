@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 01: 2D Shooter Ballistics Sandbox</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">2D Kinematic Projectile Motion & Shooter Ballistics</div>
+      <div class="demo-badge">Concept 01 Demo</div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Launch Angle (θ): <span id="angleDisplay" class="value-display">55.0°</span></label>
+        <input type="range" id="angleSlider" min="30" max="75" step="0.5" value="55">
+      </div>
+      <div class="control-group">
+        <label>Exit Speed (v₀): <span id="speedDisplay" class="value-display">10.4 m/s</span></label>
+        <input type="range" id="speedSlider" min="4.0" max="18.0" step="0.1" value="10.4">
+      </div>
+      <div class="control-group">
+        <label>Target Distance: <span id="distDisplay" class="value-display">4.5 m</span></label>
+        <input type="range" id="distSlider" min="2.0" max="7.5" step="0.1" value="4.5">
+      </div>
+      <div class="control-group">
+        <button class="btn btn-primary" id="autoSolveBtn">🎯 Auto-Solve Speed</button>
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="ballisticsCanvas" width="800" height="380"></canvas>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Flight Time to Target</div>
+        <div class="telemetry-value" id="flightTimeText" style="color: #38bdf8;">0.75 s</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Peak Apex Height</div>
+        <div class="telemetry-value" id="apexText" style="color: #c084fc;">4.22 m</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Required Flywheel RPM</div>
+        <div class="telemetry-value" id="rpmText" style="color: #fbbf24;">1,955 RPM</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Shot Result</div>
+        <div class="telemetry-value" id="hitText" style="color: #4ade80;">PERFECT BASKET HIT!</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('ballisticsCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const g = 9.81;
+      const shooterY0 = 0.6; // shooter release height 0.6m
+      const targetHeight = 2.0; // basket height 2.0m
+
+      function toScreen(x, y) {
+        // x: 0 to 8 meters -> 60 to 740 px
+        // y: 0 to 5 meters -> 340 to 30 px
+        const sx = 60 + (x / 8.0) * 680;
+        const sy = 340 - (y / 5.0) * 310;
+        return { sx, sy };
+      }
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const angleDeg = parseFloat(document.getElementById('angleSlider').value);
+        const v0 = parseFloat(document.getElementById('speedSlider').value);
+        const targetDist = parseFloat(document.getElementById('distSlider').value);
+
+        const angleRad = (angleDeg * Math.PI) / 180.0;
+
+        document.getElementById('angleDisplay').textContent = `${angleDeg.toFixed(1)}°`;
+        document.getElementById('speedDisplay').textContent = `${v0.toFixed(1)} m/s`;
+        document.getElementById('distDisplay').textContent = `${targetDist.toFixed(1)} m`;
+
+        // Draw Ground Line
+        const gL = toScreen(0, 0);
+        const gR = toScreen(8, 0);
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(gL.sx - 20, gL.sy);
+        ctx.lineTo(gR.sx + 20, gR.sy);
+        ctx.stroke();
+
+        // Draw Robot & Shooter Base at x=0
+        const botBase = toScreen(0, 0);
+        const botTop = toScreen(0, shooterY0);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(botBase.sx - 15, botTop.sy, 30, botBase.sy - botTop.sy);
+
+        // Shooter Barrel
+        const barrelLen = 25;
+        const barrelEnd = {
+          sx: botTop.sx + barrelLen * Math.cos(angleRad),
+          sy: botTop.sy - barrelLen * Math.sin(angleRad)
+        };
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(botTop.sx, botTop.sy);
+        ctx.lineTo(barrelEnd.sx, barrelEnd.sy);
+        ctx.stroke();
+
+        // Draw Target Basket at (targetDist, targetHeight)
+        const tgt = toScreen(targetDist, targetHeight);
+        const tgtPost = toScreen(targetDist, 0);
+
+        // Target Pole
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(tgtPost.sx, tgtPost.sy);
+        ctx.lineTo(tgt.sx, tgt.sy + 10);
+        ctx.stroke();
+
+        // Target Basket Opening (Width ~0.4m)
+        const bWidth = 30;
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.3)';
+        ctx.fillRect(tgt.sx - bWidth / 2, tgt.sy - 8, bWidth, 16);
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(tgt.sx - bWidth / 2, tgt.sy - 8, bWidth, 16);
+
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Target (2.0m)', tgt.sx, tgt.sy - 14);
+
+        // Calculate and Draw Parabolic Trajectory Arc
+        const vx = v0 * Math.cos(angleRad);
+        const vy = v0 * Math.sin(angleRad);
+
+        const dt = 0.01;
+        let curX = 0, curY = shooterY0;
+        let t = 0;
+        let hitDetected = false;
+        let yAtTarget = 0;
+
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        const startPt = toScreen(0, shooterY0);
+        ctx.moveTo(startPt.sx, startPt.sy);
+
+        while (curY >= 0 && curX <= 8.0) {
+          t += dt;
+          curX = vx * t;
+          curY = shooterY0 + vy * t - 0.5 * g * t * t;
+
+          const pt = toScreen(curX, curY);
+          ctx.lineTo(pt.sx, pt.sy);
+
+          if (Math.abs(curX - targetDist) < 0.05) {
+            yAtTarget = curY;
+            if (Math.abs(curY - targetHeight) < 0.25) {
+              hitDetected = true;
+            }
+          }
+        }
+        ctx.stroke();
+
+        // Apex Calculations
+        const tApex = vy / g;
+        const yApex = shooterY0 + (vy * vy) / (2 * g);
+        const tTarget = targetDist / vx;
+
+        const wheelRadius = 0.0508; // 2-inch radius
+        const rpm = (v0 / wheelRadius) * (60 / (2 * Math.PI));
+
+        // Telemetry Update
+        document.getElementById('flightTimeText').textContent = `${tTarget.toFixed(2)} s`;
+        document.getElementById('apexText').textContent = `${yApex.toFixed(2)} m`;
+        document.getElementById('rpmText').textContent = `${Math.round(rpm)} RPM`;
+
+        const hitEl = document.getElementById('hitText');
+        if (hitDetected) {
+          hitEl.textContent = 'PERFECT BASKET HIT!';
+          hitEl.style.color = '#4ade80';
+        } else if (yAtTarget > targetHeight + 0.25) {
+          hitEl.textContent = 'OVERSHOOT (Too High)';
+          hitEl.style.color = '#fbbf24';
+        } else {
+          hitEl.textContent = 'UNDERSHOOT (Too Low)';
+          hitEl.style.color = '#f43f5e';
+        }
+      }
+
+      function autoSolve() {
+        const angleDeg = parseFloat(document.getElementById('angleSlider').value);
+        const targetDist = parseFloat(document.getElementById('distSlider').value);
+        const angleRad = (angleDeg * Math.PI) / 180.0;
+
+        const cos = Math.cos(angleRad);
+        const tan = Math.tan(angleRad);
+        const deltaY = targetHeight - shooterY0;
+
+        const num = g * targetDist * targetDist;
+        const den = 2.0 * cos * cos * (targetDist * tan - deltaY);
+
+        if (den > 0) {
+          const reqV0 = Math.sqrt(num / den);
+          document.getElementById('speedSlider').value = reqV0.toFixed(1);
+          render();
+        }
+      }
+
+      document.getElementById('angleSlider').addEventListener('input', render);
+      document.getElementById('speedSlider').addEventListener('input', render);
+      document.getElementById('distSlider').addEventListener('input', render);
+      document.getElementById('autoSolveBtn').addEventListener('click', autoSolve);
+
+      render();
+    })();
+  </script>
+</body>
+</html>

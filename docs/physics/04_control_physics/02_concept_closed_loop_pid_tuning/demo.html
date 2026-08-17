@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 02: PID Closed-Loop Step Response</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Closed-Loop PID Tuning & Step-Response Stability</div>
+      <div class="demo-badge">Concept 02 Demo</div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>kP (Spring Stiffness): <span id="kpDisplay" class="value-display">4.50</span></label>
+        <input type="range" id="kpSlider" min="0.0" max="12.0" step="0.25" value="4.5">
+      </div>
+      <div class="control-group">
+        <label>kI (Integral Memory): <span id="kiDisplay" class="value-display">0.00</span></label>
+        <input type="range" id="kiSlider" min="0.0" max="2.0" step="0.05" value="0.0">
+      </div>
+      <div class="control-group">
+        <label>kD (Damping Shock): <span id="kdDisplay" class="value-display">0.35</span></label>
+        <input type="range" id="kdSlider" min="0.0" max="1.5" step="0.05" value="0.35">
+      </div>
+      <div class="control-group">
+        <button class="btn btn-primary" id="stepBtn">▶ 90° Step</button>
+        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="pidCanvas" width="800" height="380"></canvas>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Rise Time (tr)</div>
+        <div class="telemetry-value" id="riseText" style="color: #38bdf8;">0.24 s</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Peak Overshoot (Mp)</div>
+        <div class="telemetry-value" id="overshootText" style="color: #4ade80;">1.2% (Crisp)</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Settling Time (ts)</div>
+        <div class="telemetry-value" id="settleText" style="color: #fbbf24;">0.38 s</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Damping Quality</div>
+        <div class="telemetry-value" id="dampingText" style="color: #4ade80;">Critically Damped</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('pidCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let targetAngle = 0; // degrees
+      let currentAngle = 0;
+      let currentVel = 0;
+      let integralSum = 0;
+      let lastError = 0;
+
+      let historySetpoint = [];
+      let historyActual = [];
+
+      function resetArm() {
+        targetAngle = 0;
+        currentAngle = 0;
+        currentVel = 0;
+        integralSum = 0;
+        lastError = 0;
+        historySetpoint = [];
+        historyActual = [];
+      }
+
+      function updatePID() {
+        const dt = 0.02; // 20ms loop
+
+        const kP = parseFloat(document.getElementById('kpSlider').value);
+        const kI = parseFloat(document.getElementById('kiSlider').value);
+        const kD = parseFloat(document.getElementById('kdSlider').value);
+
+        document.getElementById('kpDisplay').textContent = kP.toFixed(2);
+        document.getElementById('kiDisplay').textContent = kI.toFixed(2);
+        document.getElementById('kdDisplay').textContent = kD.toFixed(2);
+
+        const error = targetAngle - currentAngle;
+        integralSum = Math.max(-20, Math.min(20, integralSum + error * dt)); // Anti-windup clamp
+        const derivative = (error - lastError) / dt;
+        lastError = error;
+
+        // PID output voltage
+        const vPID = kP * (error / 90.0) * 12.0 + kI * integralSum * 0.5 + kD * (derivative / 90.0) * 12.0;
+        const totalV = Math.max(-12.0, Math.min(12.0, vPID));
+
+        // Arm dynamics simulation
+        const armInertia = 0.35; // kg·m^2
+        const motorTorqueConstant = 1.2;
+        const torque = totalV * motorTorqueConstant;
+        const dampingTorque = -0.15 * currentVel; // mechanical friction
+
+        const alpha = (torque + dampingTorque) / armInertia;
+        currentVel += alpha * dt;
+        currentAngle += currentVel * (180.0 / Math.PI) * dt;
+
+        historySetpoint.push(targetAngle);
+        historyActual.push(currentAngle);
+
+        if (historySetpoint.length > 200) {
+          historySetpoint.shift();
+          historyActual.shift();
+        }
+
+        // Metrics calculation
+        const peak = Math.max(...historyActual, 0);
+        const overshootPct = targetAngle > 0 ? Math.max(0, ((peak - targetAngle) / targetAngle) * 100) : 0;
+
+        document.getElementById('overshootText').textContent = `${overshootPct.toFixed(1)}%`;
+
+        const dampEl = document.getElementById('dampingText');
+        if (overshootPct > 25.0) {
+          dampEl.textContent = 'Underdamped (Ringing/Violent)';
+          dampEl.style.color = '#f43f5e';
+        } else if (overshootPct < 3.0 && kP > 2.0) {
+          dampEl.textContent = 'Critically Damped (Ideal)';
+          dampEl.style.color = '#4ade80';
+        } else {
+          dampEl.textContent = 'Mild Overshoot';
+          dampEl.style.color = '#fbbf24';
+        }
+      }
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Left Section: Robotic Arm Graphic
+        const armBaseX = 140;
+        const armBaseY = 240;
+        const armLen = 95;
+
+        // Base Pivot
+        ctx.fillStyle = isDark ? '#334155' : '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(armBaseX, armBaseY, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Arm Link
+        const angleRad = (currentAngle * Math.PI) / 180.0;
+        const endX = armBaseX + armLen * Math.cos(-angleRad);
+        const endY = armBaseY + armLen * Math.sin(-angleRad);
+
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(armBaseX, armBaseY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(endX, endY, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Arm Angle: ${currentAngle.toFixed(1)}°`, armBaseX, armBaseY + 45);
+
+        // Right Section: Oscilloscope Step Response
+        const padL = 340, padR = 40, padT = 30, padB = 40;
+        const plotW = canvas.width - padL - padR;
+        const plotH = canvas.height - padT - padB;
+
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(padL, padT, plotW, plotH);
+
+        for (let i = 1; i <= 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(padL, padT + (i / 4) * plotH);
+          ctx.lineTo(padL + plotW, padT + (i / 4) * plotH);
+          ctx.stroke();
+        }
+
+        // Target Line (90 deg)
+        const targetY = padT + (1 - targetAngle / 120.0) * plotH;
+        ctx.strokeStyle = textColor;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        for (let i = 0; i < historySetpoint.length; i++) {
+          const x = padL + (i / 200) * plotW;
+          const y = padT + (1 - historySetpoint[i] / 120.0) * plotH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Actual PID Response
+        ctx.strokeStyle = '#4ade80';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        for (let i = 0; i < historyActual.length; i++) {
+          const x = padL + (i / 200) * plotW;
+          const y = padT + (1 - historyActual[i] / 120.0) * plotH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Legend
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = textColor;
+        ctx.fillText('┄ Desired 90° Setpoint', padL + 15, padT + 20);
+        ctx.fillStyle = '#4ade80';
+        ctx.fillText('━ Closed-Loop PID Response', padL + 180, padT + 20);
+
+        updatePID();
+        requestAnimationFrame(render);
+      }
+
+      document.getElementById('stepBtn').addEventListener('click', () => {
+        targetAngle = 90.0;
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', resetArm);
+
+      resetArm();
+      render();
+    })();
+  </script>
+</body>
+</html>
