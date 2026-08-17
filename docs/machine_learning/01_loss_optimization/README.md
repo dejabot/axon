@@ -8,17 +8,14 @@ Welcome to **Module 1: Loss Functions & Optimization**. In this module, we explo
 * **[Concept 01: Measuring Errors with Loss Functions (MSE & MAE)](01_concept_loss_mse_mae/)**
   * *The Everyday Problem:* The robot shoots a game piece toward a target. How do we turn the difference between where it landed and where we aimed into an error score?
   * *Code & Math:* Mean Squared Error (MSE), Mean Absolute Error (MAE), and quadratic penalty curves.
-  * *Visualizer:* [01_concept_loss_mse_mae/demo.html](01_concept_loss_mse_mae/demo.html)
 
 * **[Concept 02: Cross-Entropy & Classification Loss](02_concept_cross_entropy_loss/)**
   * *The Everyday Problem:* The vision camera predicts probabilities for 3 game piece types. How do we heavily penalize a model that is confidently wrong?
   * *Code & Math:* Negative Log-Likelihood, Cross-Entropy Loss `Loss = -ln(P_correct)`, and information surprise.
-  * *Visualizer:* [02_concept_cross_entropy_loss/demo.html](02_concept_cross_entropy_loss/demo.html)
 
 * **[Concept 03: Gradient Descent & Learning Rates](03_concept_gradient_descent/)**
   * *The Everyday Problem:* How does an autonomous optimizer roll down the error bowl to find the best settings without overshooting?
   * *Code & Math:* Weight updates `w_new = w - lr · ∇Loss`, step sizes, learning rate tuning, and local minima.
-  * *Visualizer:* [03_concept_gradient_descent/demo.html](03_concept_gradient_descent/demo.html)
 
 ---
 

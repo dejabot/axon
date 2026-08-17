@@ -1,51 +1,53 @@
 # Axon 01: Mathematical Foundations
 
-Welcome to the **Mathematical Foundations Axon**. This track bridges high-school mathematics into applied robotics and modern machine learning through first-principles intuition, code-first Python examples, and interactive visualizer sandboxes.
+Welcome to the **Mathematical Foundations Axon**. This track bridges high-school mathematics into applied robotics and modern machine learning through first-principles derivations, working code, and interactive sandboxes.
+
+Every result is derived rather than asserted. Code is written in the language of whichever field the concept serves — Java and WPILib for the robotics concepts, Python and PyTorch for the machine learning ones, and both where a concept genuinely feeds each.
 
 ---
 
 ## Modules in this Axon
 
 ### [1. Geometry for Robotics](01_geometry/)
-* [Concept 01: Coordinates, Poses & Pythagorean Distance](01_geometry/01_concept_coordinates_distance/) — [Interactive Visualizer](01_geometry/01_concept_coordinates_distance/demo.html)
-* [Concept 02: Lines, Segments & Intersections](01_geometry/02_concept_lines_intersections/) — [Interactive Visualizer](01_geometry/02_concept_lines_intersections/demo.html)
-* [Concept 03: Linear Interpolation, Lookup Tables & Blending](01_geometry/03_concept_linear_interpolation/) — [Interactive Visualizer](01_geometry/03_concept_linear_interpolation/demo.html)
-* [Concept 04: Bounding Boxes, Overlap & Collision](01_geometry/04_concept_bounding_boxes/) — [Interactive Visualizer](01_geometry/04_concept_bounding_boxes/demo.html)
-* [Concept 05: Polygons, Areas & Field Zones](01_geometry/05_concept_polygons_zones/) — [Interactive Visualizer](01_geometry/05_concept_polygons_zones/demo.html)
+* [Concept 01: Coordinates, Poses & Pythagorean Distance](01_geometry/01_concept_coordinates_distance/)
+* [Concept 02: Lines, Segments & Intersections](01_geometry/02_concept_lines_intersections/)
+* [Concept 03: Linear Interpolation, Lookup Tables & Blending](01_geometry/03_concept_linear_interpolation/)
+* [Concept 04: Bounding Boxes, Overlap & Collision](01_geometry/04_concept_bounding_boxes/)
+* [Concept 05: Polygons, Areas & Field Zones](01_geometry/05_concept_polygons_zones/)
 
 ---
 
 ### [2. Trigonometry & Angles](02_trigonometry/)
-* [Concept 01: The Unit Circle & Trigonometric Ratios](02_trigonometry/01_concept_unit_circle_ratios/) — [Interactive Visualizer](02_trigonometry/01_concept_unit_circle_ratios/demo.html)
-* [Concept 02: Rotating a Vector & the 2D Rotation Matrix](02_trigonometry/02_concept_rotating_vectors/) — [Interactive Visualizer](02_trigonometry/02_concept_rotating_vectors/demo.html)
-* [Concept 03: Coordinate Frames (Field, Robot & Camera)](02_trigonometry/03_concept_coordinate_frames/) — [Interactive Visualizer](02_trigonometry/03_concept_coordinate_frames/demo.html)
-* [Concept 04: 4-Quadrant Heading with atan2](02_trigonometry/04_concept_atan2_heading/) — [Interactive Visualizer](02_trigonometry/04_concept_atan2_heading/demo.html)
-* [Concept 05: Angle Wrapping & Swerve 180° Speed Flip](02_trigonometry/05_concept_angle_wrapping_swerve/) — [Interactive Visualizer](02_trigonometry/05_concept_angle_wrapping_swerve/demo.html)
-* [Concept 06: 3D Rotations & Quaternions](02_trigonometry/06_concept_3d_rotations_quaternions/) — [Interactive Visualizer](02_trigonometry/06_concept_3d_rotations_quaternions/demo.html)
+* [Concept 01: The Unit Circle & Trigonometric Ratios](02_trigonometry/01_concept_unit_circle_ratios/)
+* [Concept 02: Rotating a Vector](02_trigonometry/02_concept_rotating_vectors/)
+* [Concept 03: Coordinate Frames (Field, Robot & Camera)](02_trigonometry/03_concept_coordinate_frames/)
+* [Concept 04: 4-Quadrant Heading with atan2](02_trigonometry/04_concept_atan2_heading/)
+* [Concept 05: Angle Wrapping & Swerve 180° Speed Flip](02_trigonometry/05_concept_angle_wrapping_swerve/)
+* [Concept 06: 3D Rotations & Quaternions](02_trigonometry/06_concept_3d_rotations_quaternions/)
 
 ---
 
 ### [3. Linear Algebra & Matrix Transformations](03_linear_algebra/)
-* [Concept 01: Vectors, Displacements & Scalar Scaling](03_linear_algebra/01_concept_vectors_scaling/) — [Interactive Visualizer](03_linear_algebra/01_concept_vectors_scaling/demo.html)
-* [Concept 02: Dot Products, Projections & Alignment](03_linear_algebra/02_concept_dot_products/) — [Interactive Visualizer](03_linear_algebra/02_concept_dot_products/demo.html)
-* [Concept 03: Matrices as Coordinate Transformers](03_linear_algebra/03_concept_matrices_transforms/) — [Interactive Visualizer](03_linear_algebra/03_concept_matrices_transforms/demo.html)
-* [Concept 04: Determinants, Inverses & Singularity](03_linear_algebra/04_concept_determinants_inverses/) — [Interactive Visualizer](03_linear_algebra/04_concept_determinants_inverses/demo.html)
+* [Concept 01: Vectors, Displacements & Scalar Scaling](03_linear_algebra/01_concept_vectors_scaling/)
+* [Concept 02: Dot Products, Projections & Alignment](03_linear_algebra/02_concept_dot_products/)
+* [Concept 03: Matrices as Coordinate Transformers](03_linear_algebra/03_concept_matrices_transforms/)
+* [Concept 04: Determinants, Inverses & Singularity](03_linear_algebra/04_concept_determinants_inverses/)
 
 ---
 
 ### [4. Calculus, Motion & Optimization](04_calculus/)
-* [Concept 01: Rates of Change & Derivatives](04_calculus/01_concept_rates_of_change/) — [Interactive Visualizer](04_calculus/01_concept_rates_of_change/demo.html)
-* [Concept 02: Acceleration, Jerk & S-Curves](04_calculus/02_concept_acceleration_jerk/) — [Interactive Visualizer](04_calculus/02_concept_acceleration_jerk/demo.html)
-* [Concept 03: Accumulation, Area & Numerical Integration](04_calculus/03_concept_accumulation_integrals/) — [Interactive Visualizer](04_calculus/03_concept_accumulation_integrals/demo.html)
-* [Concept 04: Multivariable Gradients & Hill Climbing](04_calculus/04_concept_gradients_multivariable/) — [Interactive Visualizer](04_calculus/04_concept_gradients_multivariable/demo.html)
+* [Concept 01: Rates of Change & Derivatives](04_calculus/01_concept_rates_of_change/)
+* [Concept 02: Acceleration, Jerk & S-Curves](04_calculus/02_concept_acceleration_jerk/)
+* [Concept 03: Accumulation, Area & Numerical Integration](04_calculus/03_concept_accumulation_integrals/)
+* [Concept 04: Multivariable Gradients & Hill Climbing](04_calculus/04_concept_gradients_multivariable/)
 
 ---
 
 ### [5. Probability & Uncertainty](05_probability/)
-* [Concept 01: Sensor Noise & Normal Distributions](05_probability/01_concept_sensor_noise_normal/) — [Interactive Visualizer](05_probability/01_concept_sensor_noise_normal/demo.html)
-* [Concept 02: Bayes' Rule & 1D Sensor Fusion](05_probability/02_concept_bayes_sensor_fusion/) — [Interactive Visualizer](05_probability/02_concept_bayes_sensor_fusion/demo.html)
-* [Concept 03: Discrete Distributions & Softmax](05_probability/03_concept_discrete_softmax/) — [Interactive Visualizer](05_probability/03_concept_discrete_softmax/demo.html)
-* [Concept 04: Expected Value & Decision Making](05_probability/04_concept_expected_value_decision/) — [Interactive Visualizer](05_probability/04_concept_expected_value_decision/demo.html)
+* [Concept 01: Sensor Noise & Normal Distributions](05_probability/01_concept_sensor_noise_normal/)
+* [Concept 02: Bayes' Rule & 1D Sensor Fusion](05_probability/02_concept_bayes_sensor_fusion/)
+* [Concept 03: Discrete Distributions & Softmax](05_probability/03_concept_discrete_softmax/)
+* [Concept 04: Expected Value & Decision Making](05_probability/04_concept_expected_value_decision/)
 
 ---
 

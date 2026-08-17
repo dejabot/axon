@@ -10,22 +10,18 @@ This module introduces the mathematical tools required to quantify, model, and m
 * **[Concept 01: Sensor Noise & Normal Distributions](01_concept_sensor_noise_normal/)**
   * *The Everyday Problem:* Why does an AprilTag distance sensor reading jitter between 3.8m and 4.2m, and what is the "true" distance?
   * *Code & Math:* Sample mean μ (mean), sample variance \σ^2, standard deviation σ (standard deviation), and the Gaussian Bell Curve.
-  * *Visualizer:* [01_concept_sensor_noise_normal/demo.html](01_concept_sensor_noise_normal/demo.html)
 
 * **[Concept 02: Bayes' Rule & 1D Sensor Fusion](02_concept_bayes_sensor_fusion/)**
   * *The Everyday Problem:* How do we combine a noisy vision estimate with a wheel odometry estimate into a single, highly confident belief?
   * *Code & Math:* Prior, Likelihood, Posterior, and 1D Kalman filter sensor fusion (multiplying two Gaussians).
-  * *Visualizer:* [02_concept_bayes_sensor_fusion/demo.html](02_concept_bayes_sensor_fusion/demo.html)
 
 * **[Concept 03: Discrete Distributions & Softmax](03_concept_discrete_softmax/)**
   * *The Everyday Problem:* How does an autonomous object detector turn raw model scores into percentages that sum to 100%?
   * *Code & Math:* Categorical distributions, the Softmax function, and temperature scaling.
-  * *Visualizer:* [03_concept_discrete_softmax/demo.html](03_concept_discrete_softmax/demo.html)
 
 * **[Concept 04: Expected Value & Decision Making](04_concept_expected_value_decision/)**
   * *The Everyday Problem:* In the final 20 seconds of an FRC match, should your alliance attempt a risky high-point climb or take guaranteed safe points?
   * *Code & Math:* Expected Value E[X] = \sum x_i \cdot P(x_i), risk variance, and Monte Carlo simulation.
-  * *Visualizer:* [04_concept_expected_value_decision/demo.html](04_concept_expected_value_decision/demo.html)
 
 ---
 

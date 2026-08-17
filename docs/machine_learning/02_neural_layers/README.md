@@ -8,12 +8,10 @@ Welcome to **Module 2: Neural Layers & Activations**. In this module, we constru
 * **[Concept 01: Linear Layers (Weights, Biases & Dot Products)](01_concept_dense_layers/)**
   * *The Everyday Problem:* How does a neural network combine multiple robot sensor inputs into a unified prediction?
   * *Code & Math:* Linear equation `y = W @ x + b`, weights as feature importance, biases as decision thresholds.
-  * *Visualizer:* [01_concept_dense_layers/demo.html](01_concept_dense_layers/demo.html)
 
 * **[Concept 02: Non-Linear Activation Functions (ReLU, GELU, Sigmoid)](02_concept_activation_functions/)**
   * *The Everyday Problem:* Why is a deep stack of purely linear layers no more powerful than a single linear layer? How do activations introduce non-linear curvature?
   * *Code & Math:* Rectified Linear Unit (ReLU), Gaussian Error Linear Unit (GELU), Sigmoid, and solving non-linear boundaries (XOR).
-  * *Visualizer:* [02_concept_activation_functions/demo.html](02_concept_activation_functions/demo.html)
 
 ---
 

@@ -8,22 +8,18 @@ Welcome to **Module 3: Linear Algebra & Matrix Transformations**. In this module
 * **[Concept 01: Vectors, Displacements & Scalar Scaling](01_concept_vectors_scaling/)**
   * *The Everyday Problem:* How does an autonomous robot combine driving forward 2 meters with strafing right 3 meters?
   * *Code & Math:* Vectors as lists/arrows, vector addition (head-to-tail), scalar multiplication, and basis steps.
-  * *Visualizer:* [01_concept_vectors_scaling/demo.html](01_concept_vectors_scaling/demo.html)
 
 * **[Concept 02: Dot Products, Projections & Alignment](02_concept_dot_products/)**
   * *The Everyday Problem:* How much of our robot's velocity is pushing directly along the desired path vs. drifting off-track?
   * *Code & Math:* Dot product `u · v`, vector projection, perpendicular orthogonality check (`dot = 0`).
-  * *Visualizer:* [02_concept_dot_products/demo.html](02_concept_dot_products/demo.html)
 
 * **[Concept 03: Matrices as Coordinate Transformers](03_concept_matrices_transforms/)**
   * *The Everyday Problem:* How do we convert driver joystick commands into wheel velocities when the robot is spun at an angle?
   * *Code & Math:* 2D rotation matrices, matrix-vector multiplication as tracking where unit steps land.
-  * *Visualizer:* [03_concept_matrices_transforms/demo.html](03_concept_matrices_transforms/demo.html)
 
 * **[Concept 04: Determinants, Inverses & Singularity](04_concept_determinants_inverses/)**
   * *The Everyday Problem:* Why does a drive kinematics solver crash with `Division by Zero` when a robot loses traction or steering locks?
   * *Code & Math:* Determinant as area scaling, singular matrices (`det = 0`), and matrix inverses.
-  * *Visualizer:* [04_concept_determinants_inverses/demo.html](04_concept_determinants_inverses/demo.html)
 
 ---
 

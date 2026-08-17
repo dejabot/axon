@@ -8,12 +8,10 @@ Welcome to **Module 3: The Transformer Architecture**. In this module, we assemb
 * **[Concept 01: Residual Skip Connections & RMSNorm](01_concept_residual_layernorm/)**
   * *The Everyday Problem:* When stacking 96 transformer layers on top of each other, how do gradients and information flow cleanly through the network without exploding or vanishing to zero?
   * *Code & Math:* The residual additive shortcut `x_next = x + SubLayer(x)` and Root Mean Square Normalization (RMSNorm) `x / √(mean(x²) + ε)`.
-  * *Visualizer:* [01_concept_residual_layernorm/demo.html](01_concept_residual_layernorm/demo.html)
 
 * **[Concept 02: The Transformer Decoder Block (SwiGLU & Feed-Forward)](02_concept_feedforward_blocks/)**
   * *The Everyday Problem:* Attention routes information between tokens, but where does the model actually "think", recall facts, and perform non-linear transformations?
   * *Code & Math:* Assembling the full Transformer Block: `Pre-RMSNorm → Multi-Head Attention → Residual Add → Pre-RMSNorm → SwiGLU Feed-Forward → Residual Add`.
-  * *Visualizer:* [02_concept_feedforward_blocks/demo.html](02_concept_feedforward_blocks/demo.html)
 
 ---
 

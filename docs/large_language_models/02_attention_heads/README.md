@@ -8,12 +8,10 @@ Welcome to **Module 2: Scaled Dot-Product & Self-Attention**. In this module, we
 * **[Concept 01: Scaled Dot-Product & Self-Attention (Q, K, V)](01_concept_scaled_dot_product/)**
   * *The Everyday Problem:* When reading *"The robot picked up the Note because it was close"*, how does the network know that *"it"* refers to the Note and not the robot?
   * *Code & Math:* Linear Query, Key, and Value projections (`Q`, `K`, `V`), the scaling factor `1 / √(d_k)`, and `Attention(Q, K, V) = Softmax(Q · Kᵀ / √(d_k)) · V`.
-  * *Visualizer:* [01_concept_scaled_dot_product/demo.html](01_concept_scaled_dot_product/demo.html)
 
 * **[Concept 02: Multi-Head Attention & Feature Subspaces](02_concept_multi_head_attention/)**
   * *The Everyday Problem:* Why is a single attention head not enough to track grammar, physical robot geometry, and game targets simultaneously?
   * *Code & Math:* Projecting into multiple parallel subspace heads, computing independent attention distributions, concatenating, and applying the final output projection matrix `W_O`.
-  * *Visualizer:* [02_concept_multi_head_attention/demo.html](02_concept_multi_head_attention/demo.html)
 
 ---
 

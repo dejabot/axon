@@ -8,22 +8,18 @@ Welcome to **Module 4: Calculus, Motion & Optimization**. In this module, we exp
 * **[Concept 01: Rates of Change & Derivatives](01_concept_rates_of_change/)**
   * *The Everyday Problem:* How does an optical encoder turn wheel tick counts into instantaneous robot velocity?
   * *Code & Math:* Secant slope vs. tangent slope, numerical differentiation `dx / dt`, velocity from position.
-  * *Visualizer:* [01_concept_rates_of_change/demo.html](01_concept_rates_of_change/demo.html)
 
 * **[Concept 02: Acceleration, Jerk & S-Curves](02_concept_acceleration_jerk/)**
   * *The Everyday Problem:* Why does slamming an elevator motor to full power snap roller chains and spill boiling coffee?
   * *Code & Math:* Higher derivatives (`da/dt`), Newton's law `F = m·a`, S-curve motion profiling with bounded jerk.
-  * *Visualizer:* [02_concept_acceleration_jerk/demo.html](02_concept_acceleration_jerk/demo.html)
 
 * **[Concept 03: Accumulation, Area & Numerical Integration](03_concept_accumulation_integrals/)**
   * *The Everyday Problem:* How does a robot track where it is on the field by adding up speed measurements over time?
   * *Code & Math:* Area under a velocity curve, Forward Euler vs. Trapezoidal integration accuracy.
-  * *Visualizer:* [03_concept_accumulation_integrals/demo.html](03_concept_accumulation_integrals/demo.html)
 
 * **[Concept 04: Multivariable Gradients & Hill Climbing](04_concept_gradients_multivariable/)**
   * *The Everyday Problem:* How does an autonomous robot steer around obstacles using artificial potential fields?
   * *Code & Math:* Partial derivatives (`∂f/∂x`, `∂f/∂y`), gradient vector `∇f` (steepest uphill), and Gradient Descent `-∇f`.
-  * *Visualizer:* [04_concept_gradients_multivariable/demo.html](04_concept_gradients_multivariable/demo.html)
 
 ---
 

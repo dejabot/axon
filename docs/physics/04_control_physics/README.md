@@ -8,12 +8,10 @@ Welcome to **Module 4: Control Physics & Voltage Models**. In this module, we br
 * **[Concept 01: Physics Feedforward: kS, kV, kA, and kG Models](01_concept_voltage_feedforward_models/)**
   * *The Everyday Problem:* Why does a pure feedback PID controller lag behind fast motion profiles or droop under gravity? The physics of predicting required motor voltage from desired velocity and acceleration.
   * *Code & WPILib:* `SimpleMotorFeedforward`, `ElevatorFeedforward`, `ArmFeedforward`, and `V = kS · sgn(v) + kV · v + kA · a + kG`.
-  * *Visualizer:* [01_concept_voltage_feedforward_models/demo.html](01_concept_voltage_feedforward_models/demo.html)
 
 * **[Concept 02: Closed-Loop PID Tuning & Step-Response Stability](02_concept_closed_loop_pid_tuning/)**
   * *The Everyday Problem:* How do you tune a flywheel RPM velocity loop or an arm position servo without sluggish settling, violent overshoot, or dangerous oscillations?
   * *Code & WPILib:* Proportional stiffness (`kP`), Integral error accumulation (`kI`), Derivative damping (`kD`), and `edu.wpi.first.math.controller.PIDController`.
-  * *Visualizer:* [02_concept_closed_loop_pid_tuning/demo.html](02_concept_closed_loop_pid_tuning/demo.html)
 
 ---
 

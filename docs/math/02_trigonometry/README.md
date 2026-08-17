@@ -9,32 +9,26 @@ Welcome to **Module 2: Trigonometry & Angles**. [Module 1](../01_geometry/) buil
 * **[Concept 01: The Unit Circle & Trigonometric Ratios](01_concept_unit_circle_ratios/)**
   * *The Everyday Problem:* How does pushing a gamepad joystick decompose into forward and sideways wheel power?
   * *Code & Math:* SOH-CAH-TOA, unit circle projections, `cos` as horizontal shadow, `sin` as vertical height, radians versus degrees.
-  * *Visualizer:* [Joystick unit circle](01_concept_unit_circle_ratios/demo.html)
 
 * **[Concept 02: Rotating a Vector & the 2D Rotation Matrix](02_concept_rotating_vectors/)**
   * *The Everyday Problem:* The driver pushes "away from me" but the robot is turned 40 degrees. How does that command become wheel speeds?
   * *Code & Math:* Rotation derived by tracking the basis vectors, the rotation matrix, proof that rotation preserves length, why the inverse is the transpose, and composition as angle addition.
-  * *Visualizer:* [Rotation & field-oriented drive](02_concept_rotating_vectors/demo.html)
 
 * **[Concept 03: Coordinate Frames (Field, Robot & Camera)](03_concept_coordinate_frames/)**
   * *The Everyday Problem:* The camera sees a game piece 1.5 metres ahead. Where is it on the field?
   * *Code & Math:* Rigid transforms combining rotation and translation, chaining field to robot to camera, and inverting a transform.
-  * *Visualizer:* [Frame transformation](03_concept_coordinate_frames/demo.html)
 
 * **[Concept 04: 4-Quadrant Heading with atan2](04_concept_atan2_heading/)**
   * *The Everyday Problem:* Why does standard `tan⁻¹(y/x)` confuse aiming North-East with South-West?
   * *Code & Math:* The 4 quadrants, negative sign cancellations, and the robust `atan2(y, x)` function.
-  * *Visualizer:* [atan2 heading](04_concept_atan2_heading/demo.html)
 
 * **[Concept 05: Angle Wrapping & Swerve 180° Speed Flip](05_concept_angle_wrapping_swerve/)**
   * *The Everyday Problem:* Why does a naive angle subtraction make a robot spin 340° instead of turning 20°?
   * *Code & Math:* Modular angle difference on a circle, shortest path wrapping, and swerve drive direction inversion.
-  * *Visualizer:* [Angle wrapping](05_concept_angle_wrapping_swerve/demo.html)
 
 * **[Concept 06: 3D Rotations & Quaternions](06_concept_3d_rotations_quaternions/)**
   * *The Everyday Problem:* Why do 3-axis Euler angles lock up and crash IMU gyros when pitching straight up (Gimbal Lock)?
   * *Code & Math:* Roll/Pitch/Yaw limitations and unit Quaternions `(w, x, y, z)` on the 4D sphere.
-  * *Visualizer:* [Quaternions](06_concept_3d_rotations_quaternions/demo.html)
 
 ---
 

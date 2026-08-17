@@ -8,12 +8,10 @@ Welcome to **Module 2: Projectile Ballistics & Trajectories**. In this module, w
 * **[Concept 01: 2D Parabolic Projectile Motion & Launch Angles](01_concept_2d_kinematic_ballistics/)**
   * *The Everyday Problem:* How does a robot calculate the exact flywheel RPM and hood angle needed to score into a high target basket from any arbitrary distance on the field?
   * *Code & WPILib:* 2D kinematic trajectory equations: `x(t) = v₀ · cos(θ) · t`, `y(t) = y₀ + v₀ · sin(θ) · t - ½ · g · t²`, and solving for launch velocity `v₀`.
-  * *Visualizer:* [01_concept_2d_kinematic_ballistics/demo.html](01_concept_2d_kinematic_ballistics/demo.html)
 
 * **[Concept 02: Aerodynamic Drag, Magnus Spin & Shooting on the Move](02_concept_drag_spin_shooting_on_move/)**
   * *The Everyday Problem:* Foam game pieces slow down from air resistance and lift from backspin. How do you model drag and compensate when the robot is driving at 3.5 m/s while shooting?
   * *Code & WPILib:* Numerical drag integration `F_drag = -½ · ρ · C_d · A · v²`, Magnus lift, and vector velocity addition (`v_target = v_launch + v_robot`).
-  * *Visualizer:* [02_concept_drag_spin_shooting_on_move/demo.html](02_concept_drag_spin_shooting_on_move/demo.html)
 
 ---
 

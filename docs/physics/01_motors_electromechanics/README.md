@@ -8,12 +8,10 @@ Welcome to **Module 1: DC Motors & Electromechanics**. In this module, we explor
 * **[Concept 01: Brushless DC Motors, Back-EMF & Torque Curves](01_concept_motor_curves_back_emf/)**
   * *The Everyday Problem:* Why does a brushless motor draw 300+ Amps of current at a dead stop (stall), and why does output torque drop to zero when spinning freely at maximum RPM?
   * *Code & WPILib:* Modeling the fundamental electromechanical circuit: `V = I · R + ω / K_v`, torque `τ = K_t · I`, and `edu.wpi.first.math.system.plant.DCMotor`.
-  * *Visualizer:* [01_concept_motor_curves_back_emf/demo.html](01_concept_motor_curves_back_emf/demo.html)
 
 * **[Concept 02: Gear Ratios, Torque Multiplication & Reflected Inertia](02_concept_gearboxes_reflected_inertia/)**
   * *The Everyday Problem:* Why does a heavy 15 kg elevator feel like a lightweight feather to a motor when geared down 25:1? The physics of reflected load inertia scaling by `1 / G²`.
   * *Code & WPILib:* Torque multiplication `τ_out = G · τ_in · η` and reflected rotational inertia `J_reflected = J_load / G²`.
-  * *Visualizer:* [02_concept_gearboxes_reflected_inertia/demo.html](02_concept_gearboxes_reflected_inertia/demo.html)
 
 ---
 

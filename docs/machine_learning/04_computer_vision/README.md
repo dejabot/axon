@@ -8,12 +8,10 @@ Welcome to **Module 4: Computer Vision & Object Detection**. In this module, we 
 * **[Concept 01: 2D Spatial Convolutions & Feature Maps](01_concept_spatial_convolutions/)**
   * *The Everyday Problem:* How does a robot camera extract vertical tape lines, circular targets, and game piece edges from raw RGB pixel grids?
   * *Code & Math:* 3×3 convolution kernels, element-wise sliding window products, Sobel edge filters, and feature maps.
-  * *Visualizer:* [01_concept_spatial_convolutions/demo.html](01_concept_spatial_convolutions/demo.html)
 
 * **[Concept 02: Object Detection, Anchor Boxes & IoU](02_concept_object_detection_iou/)**
   * *The Everyday Problem:* How does an autonomous vision model (like YOLO) draw bounding boxes around game pieces and filter out duplicate overlapping boxes?
   * *Code & Math:* Bounding box coordinates `[x, y, w, h]`, Intersection over Union (`IoU = Area_intersection / Area_union`), and Non-Maximum Suppression (NMS).
-  * *Visualizer:* [02_concept_object_detection_iou/demo.html](02_concept_object_detection_iou/demo.html)
 
 ---
 

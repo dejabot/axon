@@ -8,12 +8,10 @@ Welcome to **Module 3: Vector Backpropagation Engine**. In this module, we demys
 * **[Concept 01: Computational Graphs & Vector Chain Rule](01_concept_computational_graphs/)**
   * *The Everyday Problem:* How does a change in an early motor parameter or weight ripple through multiple calculations to affect the final loss?
   * *Code & Math:* Directed Acyclic Graphs (DAG), forward pass values, backward pass local derivatives, and the multivariate Chain Rule `dL/dx = dL/dy · dy/dx`.
-  * *Visualizer:* [01_concept_computational_graphs/demo.html](01_concept_computational_graphs/demo.html)
 
 * **[Concept 02: Building an Autograd Engine in Pure Python](02_concept_autograd_engine/)**
   * *The Everyday Problem:* How do PyTorch and neural network libraries calculate exact gradients for millions of parameters automatically without manual calculus?
   * *Code & Math:* The 30-line micro-autograd `Value` object, operator overloading (`__add__`, `__mul__`), and topological sort backward traversal.
-  * *Visualizer:* [02_concept_autograd_engine/demo.html](02_concept_autograd_engine/demo.html)
 
 ---
 

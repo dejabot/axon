@@ -18,6 +18,8 @@ Every concept `README.md` follows this six-section shape, in this order:
 
 The companion `demo.html` is embedded via `<iframe>` immediately under the title.
 
+**Index pages link to concepts, never to demos.** Axon and module README files list concepts and link to the concept directory only. A demo is an implementation detail of the concept that owns it — it may be rewritten, split or replaced — so it is reached by reading the concept, not from a table of contents. Do not add "Interactive Visualizer" links to any index.
+
 **Length follows the topic.** These six sections are a shape, not a quota. A concept built on a theorem — the Pythagorean theorem, the ray-casting parity argument, the separating axis — earns a long "Building the Math". A concept that is a definition plus its applications, such as linear interpolation, does not, and inflating it with adjacent material produces a worse page than a short honest one. When in doubt, cut. The test for every paragraph is whether it derives something or prevents a real bug; if it does neither, delete it.
 
 ---
