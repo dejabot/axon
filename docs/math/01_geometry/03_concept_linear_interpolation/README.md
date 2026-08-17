@@ -77,6 +77,7 @@ $$
 Now `a` and `b` can be flywheel speeds, voltages or brightness values, and `t` is the blend fraction: 0 gives `a`, 1 gives `b`, 0.5 gives the average.
 
 > ### Math!
+>
 > $$
 > \operatorname{lerp}(a, b, t) = a + t \cdot (b - a), \quad t \in [0, 1]
 > $$
@@ -121,9 +122,11 @@ $$
 That is **inverse lerp**, better known as normalization. A sensor reading 3.1 V across a 0.2–4.8 V range sits `(3.1 − 0.2) / (4.8 − 0.2) = 0.630` of the way along; feed that `t` into a `lerp` over a different range and you have **remapped** it onto metres: `lerp(0.3, 5.0, 0.630) = 3.263 m`. The denominator is the only failure mode — if `a = b` there is no answer, so guard it rather than let a `NaN` escape into a control loop.
 
 > ### Math!
+>
 > $$
 > \operatorname{invLerp}(a, b, v) = \frac{v - a}{b - a}, \quad a \neq b
 > $$
+>
 > Read as **"inverse lerp of a, b, v equals v minus a, over b minus a."** Statistics calls it **min-max normalization**; graphics calls it `unlerp`. The two undo each other: `invLerp(a, b, lerp(a, b, t)) = t`.
 
 ### Step 4: Interpolating lookup tables, and the dangerous edge

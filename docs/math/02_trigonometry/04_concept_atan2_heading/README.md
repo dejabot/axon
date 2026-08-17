@@ -47,7 +47,7 @@ The angle is the problem, and it is the whole of this concept.
   </svg>
 </div>
 
-The same question has a second face, and you will meet it more often than the first. Your robot sits at field position `(2.0, 1.0)` and a scoring target sits at `(5.0, 5.0)`. Subtract, as Module 1 does for distance, and the difference is `(3.0, 4.0)`: three metres down-field, four metres to the left. Which way does the turret point? Again: two components known, one angle wanted.
+The same question has a second face you will meet more often. Your robot sits at `(2.0, 1.0)` and a scoring target at `(5.0, 5.0)`; subtracting, as Module 1 does for distance, gives `(3.0, 4.0)` — three metres down-field, four to the left. Which way does the turret point? Again: two components known, one angle wanted.
 
 That is the inverse of everything Concept 01 did, and the tool for it has a name most people get wrong the first three times.
 
@@ -363,9 +363,10 @@ static double atan2FromScratch(double y, double x) {
 Run both against the four targets and watch `atan` collapse the plane in half:
 
 ```java
-double[][] targets = { {3, 4}, {-3, 4}, {-3, -4}, {3, -4}, {0, 4}, {0, 0} };
-for (double[] t : targets) {
-    double x = t[0], y = t[1];
+double[] xs = {  3.0, -3.0, -3.0,  3.0,  0.0,  0.0 };
+double[] ys = {  4.0,  4.0, -4.0, -4.0,  4.0,  0.0 };
+for (int i = 0; i < xs.length; i++) {
+    double x = xs[i], y = ys[i];
     double naive = Math.toDegrees(Math.atan(y / x));          // one argument
     double good  = Math.toDegrees(Math.atan2(y, x));          // two arguments
     double mine  = Math.toDegrees(atan2FromScratch(y, x));
@@ -420,7 +421,7 @@ Both tiers produce the same numbers — `30.00°` for the wheel, `53.13°` and `
 
 ### Every heading a robot computes
 
-`atan2` is the single most-called trig function in a drivetrain. `SwerveDriveKinematics` turns a chassis velocity into four module states, and the last thing it does for each wheel is convert that wheel's two velocity components into a `Rotation2d` — an `atan2` per module, fifty times a second. Odometry does the same in reverse to report a pose. Vision code takes an AprilTag's position relative to the camera and produces a bearing with it. `Translation2d.getAngle()`, `Rotation2d(x, y)`, `Transform2d.getTranslation().getAngle()` — every one of them is this function wearing a WPILib name.
+`atan2` is the single most-called trig function in a drivetrain. `SwerveDriveKinematics` turns a chassis velocity into four module states, and the last thing it does for each wheel is convert that wheel's two velocity components into a `Rotation2d` — an `atan2` per module, fifty times a second. Vision code turns an AprilTag's position relative to the camera into a bearing. `Translation2d.getAngle()`, `Rotation2d(x, y)`, `Transform2d.getTranslation().getAngle()` — every one of them is this function wearing a WPILib name.
 
 The reason the library never stores a bare angle is Step 5 and Step 8 combined. `Rotation2d` holds the `(cos, sin)` pair, calls `atan2` once at construction, and hands back the angle only when something asks. No division, no `Infinity`, no quadrant to lose.
 
@@ -428,9 +429,7 @@ The reason the library never stores a bare angle is Step 5 and Step 8 combined. 
 
 Outside robotics, the same operation is called **converting Cartesian coordinates to polar**: a point `(x, y)` becomes a magnitude `r = √(x² + y²)` and an angle `θ = atan2(y, x)`. The magnitude is Module 1's distance formula; the angle is this concept. That pair shows up wherever two orthogonal measurements have to become "how big, and which way".
 
-Signal processing leans on it hardest. A discrete Fourier transform reports each frequency bin as two numbers, a real part and an imaginary part, and the two questions asked of a bin are *how much of this frequency is present* and *where in its cycle did it start*. The first is the magnitude; the second is the **phase**, computed as `atan2(imaginary, real)`. NumPy's `numpy.angle` is exactly this call. The failure mode is identical to the turret's: use the ratio instead of the pair and a signal ends up reported half a cycle out of step, which in radar interferometry or beamforming means a target placed on the wrong side of the antenna.
-
-The same reasoning explains a design choice you will meet in machine learning: models that must predict an orientation — 3D object detectors such as PointPillars, for instance — usually emit a `(cos, sin)` pair from two output units and recover the angle with `atan2`, rather than regressing the angle directly. The reason is the same one that makes `Rotation2d` store a pair.
+Signal processing leans on it hardest. A discrete Fourier transform reports each frequency bin as two numbers, a real part and an imaginary part, and the two questions asked of a bin are *how much of this frequency is present* and *where in its cycle did it start*. The first is the magnitude; the second is the **phase**, computed as `atan2(imaginary, real)` — which is exactly what NumPy's `numpy.angle` calls. The failure mode is identical to the turret's: use the ratio instead of the pair and a signal is reported half a cycle out of step, which in radar interferometry or beamforming puts a target on the wrong side of the antenna.
 
 ---
 

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 06: Two-Link Arm Inverse Kinematics Explorer</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* The container owns its height outright. The canvas is taken out of flow and
+       stretched to fill it, so the canvas size can never feed back into the
+       container size — that loop makes the canvas grow without bound on resize. */
+    .canvas-container {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      height: 400px;
+    }
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    .hint {
+      position: absolute; left: 10px; top: 8px;
+      font-size: 0.7rem; color: var(--muted);
+      pointer-events: none; font-family: system-ui, sans-serif;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
+    }
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=range] { accent-color: var(--accent); width: 130px; }
+    .controls input[type=checkbox], .controls input[type=radio] { accent-color: var(--accent); }
+    .controls button {
+      font: inherit; cursor: pointer; padding: 4px 12px; border-radius: 7px;
+      border: 1px solid var(--line); background: var(--panel-hover); color: var(--ink);
+    }
+    .mono { font-family: ui-monospace, "SF Mono", monospace; }
+    .stats-row {
+      display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: space-between;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.85rem;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="armCanvas"></canvas>
+      <div class="hint">Drag the red target. Drag it outside the ring to watch the solver clamp.</div>
+    </div>
+
+    <div class="controls">
+      <label>Shoulder link L1
+        <input type="range" id="l1Slider" min="0.30" max="1.20" value="0.90" step="0.01">
+        <span id="l1Val" class="mono" style="color: var(--accent);">0.90 m</span>
+      </label>
+      <label>Forearm link L2
+        <input type="range" id="l2Slider" min="0.20" max="1.20" value="0.60" step="0.01">
+        <span id="l2Val" class="mono" style="color: var(--accent-green);">0.60 m</span>
+      </label>
+      <label><input type="radio" name="branch" id="branchUp" checked> elbow-up</label>
+      <label><input type="radio" name="branch" id="branchDown"> elbow-down</label>
+      <label><input type="checkbox" id="showGhost" checked> Show the other branch</label>
+      <label><input type="checkbox" id="showRing" checked> Show reachable ring</label>
+      <button type="button" id="resetBtn">Reset to (0.80, 0.60)</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">commanded target</span>
+        <span class="stat-val" id="tgtText" style="color: var(--accent-red, #f43f5e);">(0.800, 0.600)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">r = distance from shoulder</span>
+        <span class="stat-val" id="rText">1.0000 m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">reachable ring</span>
+        <span class="stat-val" id="ringText">0.300 … 1.500 m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">cos φ before clamping</span>
+        <span class="stat-val" id="rawText" style="color: var(--accent-amber);">+0.15741</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">status</span>
+        <span class="stat-val" id="statusText" style="color: var(--accent-green);">in reach</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">φ (interior elbow angle)</span>
+        <span class="stat-val" id="phiText" style="color: var(--accent-purple);">80.94°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">active branch</span>
+        <span class="stat-val" id="branchText">elbow-up</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">θ1 shoulder</span>
+        <span class="stat-val" id="t1Text" style="color: var(--accent);">+73.21°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">θ2 elbow</span>
+        <span class="stat-val" id="t2Text" style="color: var(--accent-green);">−99.06°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">other branch (θ1, θ2)</span>
+        <span class="stat-val" id="otherText">+0.53°, +99.06°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">forward-kinematics tip</span>
+        <span class="stat-val" id="fkText">(0.800, 0.600)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">shortfall vs command</span>
+        <span class="stat-val" id="errText">0.000 m</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('armCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const l1Slider = document.getElementById('l1Slider');
+    const l2Slider = document.getElementById('l2Slider');
+    const branchUp = document.getElementById('branchUp');
+    const branchDown = document.getElementById('branchDown');
+    const showGhost = document.getElementById('showGhost');
+    const showRing = document.getElementById('showRing');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let L1 = 0.90, L2 = 0.60;      // meters
+    let tx = 0.80, ty = 0.60;      // commanded target, shoulder frame, meters
+    let dragging = false;
+
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    /* ONE scale for both axes. Separate x and y scales would stretch the links,
+       so a 0.90 m segment would not measure 0.90 m on screen and the reachable
+       ring would render as an ellipse. Every length here must stay comparable. */
+    function view() {
+      const { w, h } = cssSize();
+      const span = (L1 + L2) * 1.28;                 // world half-width to show
+      const s = Math.min(w, h) / 2 / span;
+      return { cx: w / 2, cy: h / 2 + 6, s: Math.max(20, s) };
+    }
+
+    function toScreen(x, y) {
+      const v = view();
+      return { x: v.cx + x * v.s, y: v.cy - y * v.s };
+    }
+
+    function toWorld(px, py) {
+      const v = view();
+      return { x: (px - v.cx) / v.s, y: (v.cy - py) / v.s };
+    }
+
+    function palette() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      return {
+        axis:   isLight ? '#94a3b8' : '#475569',
+        line:   isLight ? '#cbd5e1' : '#232b3b',
+        muted:  isLight ? '#64748b' : '#94a3b8',
+        ink:    isLight ? '#0f172a' : '#f1f5f9',
+        blue:   isLight ? '#0284c7' : '#38bdf8',
+        green:  isLight ? '#16a34a' : '#4ade80',
+        amber:  isLight ? '#d97706' : '#fbbf24',
+        red:    isLight ? '#e11d48' : '#f43f5e',
+        purple: isLight ? '#9333ea' : '#c084fc',
+        ring:   isLight ? 'rgba(2,132,199,0.10)' : 'rgba(56,189,248,0.10)'
+      };
+    }
+
+    /* The whole concept, in one function. Both acos arguments are clamped, which
+       is what turns an out-of-reach command into the nearest reachable pose
+       instead of a NaN that spreads silently into every downstream setpoint. */
+    function solve(x, y) {
+      const r = Math.hypot(x, y);
+      const rawPhi = (L1 * L1 + L2 * L2 - r * r) / (2 * L1 * L2);
+      const rawAlpha = r < 1e-9 ? 1 : (L1 * L1 + r * r - L2 * L2) / (2 * L1 * r);
+
+      const phi = Math.acos(clamp(rawPhi, -1, 1));
+      const alpha = Math.acos(clamp(rawAlpha, -1, 1));
+      const beta = Math.atan2(y, x);
+      const bend = Math.PI - phi;
+
+      const outer = L1 + L2, inner = Math.abs(L1 - L2);
+      return {
+        r, rawPhi, phi, alpha, beta, outer, inner,
+        clamped: r > outer + 1e-9 || r < inner - 1e-9,
+        up:   { t1: beta + alpha, t2: -bend },
+        down: { t1: beta - alpha, t2:  bend }
+      };
+    }
+
+    function fk(sol) {
+      const ex = L1 * Math.cos(sol.t1), ey = L1 * Math.sin(sol.t1);
+      const far = sol.t1 + sol.t2;
+      return { ex, ey, gx: ex + L2 * Math.cos(far), gy: ey + L2 * Math.sin(far) };
+    }
+
+    function drawArm(C, sol, colA, colB, alpha) {
+      const p = fk(sol);
+      const O = toScreen(0, 0), E = toScreen(p.ex, p.ey), G = toScreen(p.gx, p.gy);
+      ctx.globalAlpha = alpha;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = colA; ctx.lineWidth = 9;
+      ctx.beginPath(); ctx.moveTo(O.x, O.y); ctx.lineTo(E.x, E.y); ctx.stroke();
+      ctx.strokeStyle = colB; ctx.lineWidth = 9;
+      ctx.beginPath(); ctx.moveTo(E.x, E.y); ctx.lineTo(G.x, G.y); ctx.stroke();
+      ctx.lineCap = 'butt';
+      ctx.fillStyle = C.amber;
+      ctx.beginPath(); ctx.arc(E.x, E.y, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      return { E, G, p };
+    }
+
+    function draw() {
+      const C = palette();
+      const v = view();
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
+
+      const S = solve(tx, ty);
+      const O = toScreen(0, 0);
+
+      // Reachable annulus: outer rim L1 + L2, inner dead hole |L1 - L2|.
+      if (showRing.checked) {
+        ctx.fillStyle = C.ring;
+        ctx.beginPath();
+        ctx.arc(O.x, O.y, S.outer * v.s, 0, Math.PI * 2);
+        ctx.arc(O.x, O.y, S.inner * v.s, 0, Math.PI * 2, true);
+        ctx.fill();
+        ctx.strokeStyle = C.blue; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(O.x, O.y, S.outer * v.s, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = C.red; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+        ctx.beginPath(); ctx.arc(O.x, O.y, S.inner * v.s, 0, Math.PI * 2); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Axes through the shoulder
+      ctx.strokeStyle = C.axis; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(O.x - S.outer * v.s - 14, O.y); ctx.lineTo(O.x + S.outer * v.s + 14, O.y);
+      ctx.moveTo(O.x, O.y - S.outer * v.s - 14); ctx.lineTo(O.x, O.y + S.outer * v.s + 14);
+      ctx.stroke();
+
+      const active = branchUp.checked ? S.up : S.down;
+      const other  = branchUp.checked ? S.down : S.up;
+      const pAct = fk(active);
+
+      // Mirror line: shoulder to the achieved tip. The two branches are
+      // reflections of each other across exactly this line.
+      const T = toScreen(pAct.gx, pAct.gy);
+      ctx.strokeStyle = C.muted; ctx.lineWidth = 1.5; ctx.setLineDash([6, 5]);
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath(); ctx.moveTo(O.x, O.y); ctx.lineTo(T.x, T.y); ctx.stroke();
+      ctx.globalAlpha = 1; ctx.setLineDash([]);
+
+      if (showGhost.checked) drawArm(C, other, C.blue, C.green, 0.22);
+      const A = drawArm(C, active, C.blue, C.green, 1.0);
+
+      // Shoulder pivot
+      ctx.fillStyle = C.amber;
+      ctx.beginPath(); ctx.arc(O.x, O.y, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(O.x, O.y, 8, 0, Math.PI * 2); ctx.stroke();
+
+      // Achieved tip (green) and, when clamped, the commanded point it fell short of
+      const cmd = toScreen(tx, ty);
+      if (S.clamped) {
+        ctx.strokeStyle = C.red; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(A.G.x, A.G.y); ctx.lineTo(cmd.x, cmd.y); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = C.red;
+        ctx.beginPath(); ctx.arc(cmd.x, cmd.y, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText('OUT OF REACH — clamped', cmd.x + 11, cmd.y - 6);
+      } else {
+        ctx.fillStyle = C.red;
+        ctx.beginPath(); ctx.arc(cmd.x, cmd.y, 7, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = C.green;
+      ctx.beginPath(); ctx.arc(A.G.x, A.G.y, 5, 0, Math.PI * 2); ctx.fill();
+
+      // Interior elbow angle arc, drawn at the elbow between the two links
+      const toShoulder = Math.atan2(0 - A.p.ey, 0 - A.p.ex);
+      const toTip = Math.atan2(A.p.gy - A.p.ey, A.p.gx - A.p.ex);
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(A.E.x, A.E.y, 24, -toShoulder, -toTip, active.t2 < 0);
+      ctx.stroke();
+      ctx.fillStyle = C.purple;
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillText('φ = ' + deg(S.phi).toFixed(1) + '°', A.E.x + 14, A.E.y - 16);
+
+      // Labels
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = C.muted;
+      ctx.fillText('shoulder', O.x + 12, O.y + 20);
+      if (showRing.checked) {
+        ctx.fillStyle = C.blue;
+        ctx.fillText('outer ' + S.outer.toFixed(2) + ' m', O.x + 6, O.y - S.outer * v.s - 6);
+        ctx.fillStyle = C.red;
+        ctx.fillText('inner ' + S.inner.toFixed(2) + ' m', O.x + 6, O.y + S.inner * v.s + 14);
+      }
+
+      updateStats(S, active, other, pAct);
+    }
+
+    function deg(rad) { return rad * 180 / Math.PI; }
+    function sd(x, n) { return (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(n); }
+
+    function updateStats(S, active, other, p) {
+      const set = (id, val) => document.getElementById(id).textContent = val;
+      const shortfall = Math.hypot(tx - p.gx, ty - p.gy);
+
+      set('tgtText', '(' + tx.toFixed(3) + ', ' + ty.toFixed(3) + ')');
+      set('rText', S.r.toFixed(4) + ' m');
+      set('ringText', S.inner.toFixed(3) + ' … ' + S.outer.toFixed(3) + ' m');
+      set('rawText', sd(S.rawPhi, 5));
+      set('statusText', S.clamped ? 'CLAMPED (acos would be NaN)' : 'in reach');
+      document.getElementById('statusText').style.color =
+        S.clamped ? 'var(--accent-red, #f43f5e)' : 'var(--accent-green)';
+      set('phiText', deg(S.phi).toFixed(2) + '°');
+      set('branchText', branchUp.checked ? 'elbow-up' : 'elbow-down');
+      set('t1Text', sd(deg(active.t1), 2) + '°');
+      set('t2Text', sd(deg(active.t2), 2) + '°');
+      set('otherText', sd(deg(other.t1), 2) + '°, ' + sd(deg(other.t2), 2) + '°');
+      set('fkText', '(' + p.gx.toFixed(3) + ', ' + p.gy.toFixed(3) + ')');
+      set('errText', shortfall.toFixed(3) + ' m');
+      set('l1Val', L1.toFixed(2) + ' m');
+      set('l2Val', L2.toFixed(2) + ' m');
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+    }
+
+    function setTarget(px, py) {
+      const wpt = toWorld(px, py);
+      tx = wpt.x; ty = wpt.y;
+    }
+
+    function startDrag(e) {
+      dragging = true;
+      const p = getPos(e);
+      setTarget(p.x, p.y);
+      draw();
+    }
+
+    function moveDrag(e) {
+      if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
+      const p = getPos(e);
+      setTarget(p.x, p.y);
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', () => dragging = false);
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('touchend', () => dragging = false);
+
+    l1Slider.addEventListener('input', () => { L1 = +l1Slider.value; draw(); });
+    l2Slider.addEventListener('input', () => { L2 = +l2Slider.value; draw(); });
+    branchUp.addEventListener('change', draw);
+    branchDown.addEventListener('change', draw);
+    showGhost.addEventListener('change', draw);
+    showRing.addEventListener('change', draw);
+    resetBtn.addEventListener('click', () => {
+      L1 = 0.90; L2 = 0.60; tx = 0.80; ty = 0.60;
+      l1Slider.value = '0.90'; l2Slider.value = '0.60';
+      branchUp.checked = true;
+      draw();
+    });
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+    resize();
+  </script>
+</body>
+</html>

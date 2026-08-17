@@ -3,213 +3,481 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Concept 03: Swerve Angle Wrapping Visualizer</title>
+  <title>Concept 05: Shortest Angular Distance &amp; the Swerve Flip</title>
   <script src="../../../assets/theme.js"></script>
   <link rel="stylesheet" href="../../../assets/axon.css">
   <style>
-    .demo-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 12px;
-    }
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* The container owns its height outright. The canvas is taken out of flow and
+       stretched to fill it, so the canvas size can never feed back into the
+       container size — that loop makes the canvas grow without bound on resize. */
     .canvas-container {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 10px;
       position: relative;
       overflow: hidden;
-      min-height: 340px;
+      height: 400px;
     }
     canvas {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
       cursor: crosshair;
+      touch-action: none;
     }
+    .hint {
+      position: absolute; left: 10px; top: 8px;
+      font-size: 0.7rem; color: var(--muted);
+      pointer-events: none; font-family: system-ui, sans-serif;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
+    }
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=range] { accent-color: var(--accent); width: 140px; }
+    .controls input[type=checkbox] { accent-color: var(--accent); }
+    .controls button {
+      font: inherit; cursor: pointer; padding: 4px 12px; border-radius: 7px;
+      border: 1px solid var(--line); background: var(--panel-hover); color: var(--ink);
+    }
+    .mono { font-family: ui-monospace, "SF Mono", monospace; }
     .stats-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-family: ui-monospace, "SF Mono", monospace;
-      font-size: 0.85rem;
+      display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: space-between;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.85rem;
     }
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    .stat-val {
-      font-weight: 700;
-      color: var(--ink);
-    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); }
   </style>
 </head>
 <body>
   <div class="demo-wrap">
     <div class="canvas-container">
-      <canvas id="wrapCanvas"></canvas>
+      <canvas id="angleCanvas"></canvas>
+      <div class="hint">Drag the blue wheel (current) or the amber marker (target)</div>
     </div>
-    
+
+    <div class="controls">
+      <label>Current
+        <input type="range" id="curSlider" min="-360" max="720" value="350" step="1">
+        <span id="curVal" class="mono" style="color: var(--accent);">350.0°</span>
+      </label>
+      <label>Target
+        <input type="range" id="tgtSlider" min="-360" max="720" value="10" step="1">
+        <span id="tgtVal" class="mono" style="color: var(--accent-amber);">10.0°</span>
+      </label>
+      <label>Drive speed
+        <input type="range" id="spdSlider" min="0" max="5" value="3.5" step="0.1">
+        <span id="spdVal" class="mono" style="color: var(--accent-purple);">3.5 m/s</span>
+      </label>
+      <label><input type="checkbox" id="optChk"> Swerve 180° optimisation</label>
+      <label>Blend t
+        <input type="range" id="tSlider" min="0" max="1" value="0" step="0.01">
+        <span id="tVal" class="mono">0.00</span>
+      </label>
+      <button type="button" id="caseBtn">Case: 350° → 10°</button>
+    </div>
+
     <div class="stats-row">
       <div class="stat-item">
-        <span class="stat-label">Current Heading (Cyan)</span>
-        <span class="stat-val" id="currText" style="color: var(--accent);">+170.0°</span>
+        <span class="stat-label">current</span>
+        <span class="stat-val" id="curText" style="color: var(--accent);">350.0°</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Target Heading (Amber)</span>
-        <span class="stat-val" id="targetText" style="color: var(--accent-amber);">-170.0°</span>
+        <span class="stat-label">target</span>
+        <span class="stat-val" id="tgtText" style="color: var(--accent-amber);">10.0°</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Naive Error</span>
-        <span class="stat-val" id="naiveText" style="color: var(--accent-red);">-340.0° (Spin!)</span>
+        <span class="stat-label">naive target − current</span>
+        <span class="stat-val" id="naiveText" style="color: var(--accent-red);">−340.0°</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Shortest Turn</span>
-        <span class="stat-val" id="smartText" style="color: var(--accent-green); font-size: 1.05rem;">+20.0°</span>
+        <span class="stat-label">wrapped (shortest)</span>
+        <span class="stat-val" id="wrapText" style="color: var(--accent-green); font-size: 1.05rem;">+20.0°</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Swerve Speed Flip</span>
-        <span class="stat-val" id="swerveText" style="color: var(--accent-amber);">+1.0×</span>
+        <span class="stat-label">|naive| + |wrapped|</span>
+        <span class="stat-val" id="sumText">360.0°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">commanded angle</span>
+        <span class="stat-val" id="outAngText" style="color: var(--accent-green);">10.0°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">commanded speed</span>
+        <span class="stat-val" id="outSpdText" style="color: var(--accent-purple);">+3.5 m/s</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">actual slew</span>
+        <span class="stat-val" id="slewText" style="color: var(--accent-green);">+20.0°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">slew time at 700°/s</span>
+        <span class="stat-val" id="timeText">0.029 s</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">field velocity (x, y)</span>
+        <span class="stat-val" id="velText">(3.447, 0.608)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">naive lerp at t</span>
+        <span class="stat-val" id="lerpNaiveText" style="color: var(--accent-red);">350.0°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">wrapped lerp at t</span>
+        <span class="stat-val" id="lerpWrapText" style="color: var(--accent-green);">350.0°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">verdict</span>
+        <span class="stat-val" id="verdictText">wrapped route is 320.0° shorter</span>
       </div>
     </div>
   </div>
 
   <script>
-    const canvas = document.getElementById('wrapCanvas');
+    const canvas = document.getElementById('angleCanvas');
     const ctx = canvas.getContext('2d');
 
-    let currDeg = 170.0;
-    let targetDeg = -170.0;
-    let dragging = null;
+    const curSlider = document.getElementById('curSlider');
+    const tgtSlider = document.getElementById('tgtSlider');
+    const spdSlider = document.getElementById('spdSlider');
+    const tSlider   = document.getElementById('tSlider');
+    const optChk    = document.getElementById('optChk');
+    const caseBtn   = document.getElementById('caseBtn');
+
+    const D2R = Math.PI / 180;
+    const SLEW_RATE = 700;      // degrees per second, a typical steering module
+
+    /* Both angles are held as they are WRITTEN, not as they are wrapped. That is
+       the whole point of the demo: 350 and -10 are the same direction, but only
+       the first one makes the naive subtraction produce -340. */
+    let current = 350;          // degrees, the wheel's measured angle
+    let target  = 10;           // degrees, the commanded angle
+    let speed   = 3.5;          // meters per second
+    let blend   = 0;            // t for the interpolation overlay
+    let dragging = null;        // 'current' | 'target' | null
+
+    /* The fold from Step 3, in exactly the form the README derives:
+       shift by half a turn, take a NON-NEGATIVE remainder, shift back. */
+    function wrapDeg(d) {
+      let r = (d + 180) % 360;
+      if (r <= 0) r += 360;
+      return r - 180;
+    }
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
 
     function resize() {
       const rect = canvas.parentElement.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       draw();
     }
-    window.addEventListener('resize', resize);
-    window.addEventListener('axon-theme-changed', draw);
 
-    function wrap180(d) {
-      return (d + 180.0) % 360.0 - 180.0;
+    /* ONE scale for both axes: the circle must render as a circle, or every arc
+       length read off it is a lie. */
+    function view() {
+      const { w, h } = cssSize();
+      const r = Math.min(w, h) / 2 - 54;
+      return { cx: w / 2, cy: h / 2, r: Math.max(40, r) };
+    }
+
+    function pointAt(deg, rad) {
+      const v = view();
+      return { x: v.cx + rad * Math.cos(deg * D2R), y: v.cy - rad * Math.sin(deg * D2R) };
+    }
+
+    function palette() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      return {
+        axis:   isLight ? '#94a3b8' : '#475569',
+        line:   isLight ? '#cbd5e1' : '#232b3b',
+        muted:  isLight ? '#64748b' : '#94a3b8',
+        ink:    isLight ? '#0f172a' : '#f1f5f9',
+        blue:   isLight ? '#0284c7' : '#38bdf8',
+        green:  isLight ? '#16a34a' : '#4ade80',
+        amber:  isLight ? '#d97706' : '#fbbf24',
+        red:    isLight ? '#e11d48' : '#f43f5e',
+        purple: isLight ? '#9333ea' : '#c084fc'
+      };
+    }
+
+    /* Radius used partway along a sweep. Drawn as a gentle inward spiral so that a
+       route covering more than a full turn stays visible as more than a full turn
+       instead of painting over itself. */
+    function sweepRadius(rad, deltaDeg, f) {
+      return rad * (1 - 0.10 * (Math.abs(deltaDeg) / 360) * f);
+    }
+
+    /* Draw a swept route starting at startDeg and covering deltaDeg, plotted point
+       by point so the sweep direction and the lap count are both honest. */
+    function arcSweep(rad, startDeg, deltaDeg, color, width) {
+      if (Math.abs(deltaDeg) < 0.05) return;
+      const steps = Math.max(12, Math.ceil(Math.abs(deltaDeg) / 2));
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const f = i / steps;
+        const p = pointAt(startDeg + deltaDeg * f, sweepRadius(rad, deltaDeg, f));
+        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+
+      // Arrowhead at the finishing end, pointing along the direction of travel.
+      const endDeg = startDeg + deltaDeg;
+      const p = pointAt(endDeg, sweepRadius(rad, deltaDeg, 1));
+      const s = Math.sign(deltaDeg);
+      const tx = -s * Math.sin(endDeg * D2R);         // tangent, screen coords
+      const ty = -s * Math.cos(endDeg * D2R);
+      const px = -ty, py = tx;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(p.x + tx * 11, p.y + ty * 11);
+      ctx.lineTo(p.x + px * 5, p.y + py * 5);
+      ctx.lineTo(p.x - px * 5, p.y - py * 5);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawWheel(deg, rad, color, dashed) {
+      const p = pointAt(deg, rad);
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(-deg * D2R);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      if (dashed) ctx.setLineDash([5, 4]);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.15;
+      ctx.fillRect(-19, -6.5, 38, 13);
+      ctx.globalAlpha = 1;
+      ctx.strokeRect(-19, -6.5, 38, 13);
+      ctx.setLineDash([]);
+      ctx.restore();
+      return p;
     }
 
     function draw() {
-      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      const width = canvas.width / (window.devicePixelRatio || 1);
-      const height = canvas.height / (window.devicePixelRatio || 1);
+      const C = palette();
+      const v = view();
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
 
-      ctx.clearRect(0, 0, width, height);
+      const naive   = target - current;
+      const wrapped = wrapDeg(naive);
 
-      const cx = width / 2;
-      const cy = height / 2;
-      const r = Math.min(width, height) * 0.38;
+      let outAngle = target, outSpeed = speed, flipped = false;
+      if (optChk.checked && Math.abs(wrapped) > 90) {
+        outAngle = wrapDeg(target + 180);
+        outSpeed = -speed;
+        flipped = true;
+      }
+      const slew = wrapDeg(outAngle - current);
 
-      // Outer Circle
-      ctx.strokeStyle = isLight ? '#cbd5e1' : '#232b3b';
-      ctx.lineWidth = 2;
+      // Axes and rim
+      ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.moveTo(v.cx - v.r - 18, v.cy); ctx.lineTo(v.cx + v.r + 18, v.cy);
+      ctx.moveTo(v.cx, v.cy - v.r - 18); ctx.lineTo(v.cx, v.cy + v.r + 18);
       ctx.stroke();
 
-      const cRad = currDeg * Math.PI / 180;
-      const tRad = targetDeg * Math.PI / 180;
-      const rawError = targetDeg - currDeg;
-      const wrappedError = wrap180(rawError);
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(v.cx, v.cy, v.r, 0, Math.PI * 2); ctx.stroke();
 
-      // Shortest arc (green)
-      ctx.strokeStyle = isLight ? '#16a34a' : '#4ade80';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.8, -cRad, -(cRad + wrappedError * Math.PI / 180), wrappedError < 0);
-      ctx.stroke();
+      ctx.font = '10px system-ui, sans-serif';
+      ctx.fillStyle = C.muted;
+      for (const d of [0, 90, 180, 270]) {
+        const a = pointAt(d, v.r + 4), b = pointAt(d, v.r - 6);
+        ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        const t = pointAt(d, v.r + 22);
+        ctx.fillStyle = C.muted;
+        ctx.fillText(d + '°', t.x - 9, t.y + 4);
+      }
 
-      // Current pointer (cyan)
-      const cx_pt = cx + r * Math.cos(-cRad);
-      const cy_pt = cy + r * Math.sin(-cRad);
-      ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx_pt, cy_pt); ctx.stroke();
-      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.beginPath(); ctx.arc(cx_pt, cy_pt, 8, 0, Math.PI * 2); ctx.fill();
+      // The naive route, drawn inside so it cannot hide behind the wrapped one
+      arcSweep(v.r * 0.62, current, naive, C.red, 3);
 
-      // Target pointer (amber)
-      const tx_pt = cx + r * Math.cos(-tRad);
-      const ty_pt = cy + r * Math.sin(-tRad);
-      ctx.strokeStyle = isLight ? '#d97706' : '#fbbf24';
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tx_pt, ty_pt); ctx.stroke();
-      ctx.fillStyle = isLight ? '#d97706' : '#fbbf24';
-      ctx.beginPath(); ctx.arc(tx_pt, ty_pt, 8, 0, Math.PI * 2); ctx.fill();
+      // The wrapped route, on the rim
+      arcSweep(v.r, current, wrapped, C.green, 4.5);
 
-      // Telemetry
-      let speedFlip = 1.0;
-      if (Math.abs(wrappedError) > 90.0) speedFlip = -1.0;
+      // The route actually commanded once the flip is allowed
+      if (flipped) {
+        arcSweep(v.r * 0.81, current, slew, C.purple, 4);
+        // The flip axis: target and target+180 are one line through the centre
+        const a = pointAt(target, v.r), b = pointAt(target + 180, v.r);
+        ctx.strokeStyle = C.purple; ctx.lineWidth = 1.5; ctx.setLineDash([6, 5]);
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        ctx.setLineDash([]);
+      }
 
-      document.getElementById('currText').textContent = `${currDeg >= 0 ? '+' : ''}${currDeg.toFixed(1)}°`;
-      document.getElementById('targetText').textContent = `${targetDeg >= 0 ? '+' : ''}${targetDeg.toFixed(1)}°`;
-      document.getElementById('naiveText').textContent = `${rawError >= 0 ? '+' : ''}${rawError.toFixed(1)}° ${Math.abs(rawError - wrappedError) > 10 ? '(Spin!)' : ''}`;
-      document.getElementById('smartText').textContent = `${wrappedError >= 0 ? '+' : ''}${wrappedError.toFixed(1)}°`;
-      document.getElementById('swerveText').textContent = `${speedFlip >= 0 ? '+1.0×' : '-1.0× (Inverted)'}`;
+      // Interpolation overlay: two ghosts, one per route
+      if (blend > 0) {
+        const naiveLerp = current + blend * naive;
+        const wrapLerp  = current + blend * wrapped;
+        const pn = pointAt(naiveLerp, sweepRadius(v.r * 0.62, naive, blend));
+        const pw = pointAt(wrapLerp, sweepRadius(v.r, wrapped, blend));
+        ctx.fillStyle = C.red;
+        ctx.beginPath(); ctx.arc(pn.x, pn.y, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = C.green;
+        ctx.beginPath(); ctx.arc(pw.x, pw.y, 7, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Target marker, then the commanded angle, then the wheel on top
+      drawWheel(target, v.r, C.amber, true);
+      if (flipped) drawWheel(outAngle, v.r, C.purple, true);
+      const pc = drawWheel(current, v.r, C.blue, false);
+
+      // Spokes
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(v.cx, v.cy); ctx.lineTo(pc.x, pc.y); ctx.stroke();
+
+      ctx.fillStyle = C.ink;
+      ctx.beginPath(); ctx.arc(v.cx, v.cy, 3.5, 0, Math.PI * 2); ctx.fill();
+
+      // Arc length labels, placed at the midpoint of each arc
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      const mn = pointAt(current + naive / 2, sweepRadius(v.r * 0.62, naive, 0.5) - 16);
+      ctx.fillStyle = C.red;
+      ctx.fillText(fmt(naive) + '°', mn.x - 20, mn.y + 4);
+      const mw = pointAt(current + wrapped / 2, v.r + 30);
+      ctx.fillStyle = C.green;
+      ctx.fillText(fmt(wrapped) + '°', mw.x - 20, mw.y + 4);
+      if (flipped) {
+        const mf = pointAt(current + slew / 2, sweepRadius(v.r * 0.81, slew, 0.5) - 16);
+        ctx.fillStyle = C.purple;
+        ctx.fillText(fmt(slew) + '°', mf.x - 18, mf.y + 4);
+      }
+
+      updateStats(naive, wrapped, outAngle, outSpeed, slew, flipped);
     }
 
-    function getAngle(e) {
+    function fmt(x) { return (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(1); }
+    function ang(x) { return (x < 0 ? '−' : '') + Math.abs(x).toFixed(1); }
+
+    function updateStats(naive, wrapped, outAngle, outSpeed, slew, flipped) {
+      const set = (id, val) => document.getElementById(id).textContent = val;
+      const vx = outSpeed * Math.cos(outAngle * D2R);
+      const vy = outSpeed * Math.sin(outAngle * D2R);
+
+      set('curText', ang(current) + '°');
+      set('tgtText', ang(target) + '°');
+      set('naiveText', fmt(naive) + '°');
+      set('wrapText', fmt(wrapped) + '°');
+      set('sumText', (Math.abs(naive) + Math.abs(wrapped)).toFixed(1) + '°');
+      set('outAngText', ang(outAngle) + '°' + (flipped ? '  (flipped)' : ''));
+      set('outSpdText', fmt(outSpeed) + ' m/s');
+      set('slewText', fmt(slew) + '°');
+      set('timeText', (Math.abs(slew) / SLEW_RATE).toFixed(3) + ' s');
+      set('velText', '(' + vx.toFixed(3) + ', ' + vy.toFixed(3) + ')');
+      set('lerpNaiveText', ang(current + blend * naive) + '°');
+      set('lerpWrapText', ang(current + blend * wrapped) + '°');
+
+      const saved = Math.abs(naive) - Math.abs(wrapped);
+      set('verdictText', Math.abs(wrapped) > 179.95
+            ? 'both directions tie at 180.0°'
+            : (saved < 0.05 ? 'naive route was already shortest'
+                            : 'wrapped route is ' + saved.toFixed(1) + '° shorter'));
+
+      set('curVal', ang(current) + '°');
+      set('tgtVal', ang(target) + '°');
+      set('spdVal', speed.toFixed(1) + ' m/s');
+      set('tVal', blend.toFixed(2));
+
+      curSlider.value = Math.round(current);
+      tgtSlider.value = Math.round(target);
+    }
+
+    function getPos(e) {
       const rect = canvas.getBoundingClientRect();
-      const sx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-      const sy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-      const cx = (canvas.width / (window.devicePixelRatio || 1)) / 2;
-      const cy = (canvas.height / (window.devicePixelRatio || 1)) / 2;
-      return -Math.atan2(sy - cy, sx - cx) * 180 / Math.PI;
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
     }
 
-    canvas.addEventListener('mousedown', (e) => {
-      const a = getAngle(e);
-      if (Math.abs(wrap180(a - currDeg)) < 25) dragging = 'curr';
-      else dragging = 'target';
-    });
+    function angleOf(px, py) {
+      const v = view();
+      return Math.atan2(v.cy - py, px - v.cx) / D2R;   // Concept 04's atan2, in degrees
+    }
 
-    window.addEventListener('mousemove', (e) => {
-      if (!dragging) return;
-      const a = getAngle(e);
-      if (dragging === 'curr') currDeg = a;
-      if (dragging === 'target') targetDeg = a;
+    function pick(px, py) {
+      const a = angleOf(px, py);
+      const dc = Math.abs(wrapDeg(a - current));
+      const dt = Math.abs(wrapDeg(a - target));
+      return dc <= dt ? 'current' : 'target';
+    }
+
+    function startDrag(e) {
+      const p = getPos(e);
+      dragging = pick(p.x, p.y);
+      applyDrag(p);
+    }
+
+    /* Keep the lap count the handle already had, so a wheel written as 350 stays
+       written as 350 when nudged instead of snapping to -10. */
+    function nearestSpelling(principal, previous) {
+      const k = Math.round((previous - principal) / 360);
+      return principal + 360 * k;
+    }
+
+    function applyDrag(p) {
+      const a = angleOf(p.x, p.y);
+      if (dragging === 'current') current = nearestSpelling(a, current);
+      else if (dragging === 'target') target = nearestSpelling(a, target);
       draw();
-    });
+    }
 
+    function moveDrag(e) {
+      if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
+      applyDrag(getPos(e));
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
     window.addEventListener('mouseup', () => dragging = null);
-
-    canvas.addEventListener('touchstart', (e) => {
-      const a = getAngle(e);
-      if (Math.abs(wrap180(a - currDeg)) < 30) dragging = 'curr';
-      else dragging = 'target';
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-      if (!dragging) return;
-      e.preventDefault();
-      const a = getAngle(e);
-      if (dragging === 'curr') currDeg = a;
-      if (dragging === 'target') targetDeg = a;
-      draw();
-    }, { passive: false });
-
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
     window.addEventListener('touchend', () => dragging = null);
 
+    curSlider.addEventListener('input', () => { current = +curSlider.value; draw(); });
+    tgtSlider.addEventListener('input', () => { target = +tgtSlider.value; draw(); });
+    spdSlider.addEventListener('input', () => { speed = +spdSlider.value; draw(); });
+    tSlider.addEventListener('input', () => { blend = +tSlider.value; draw(); });
+    optChk.addEventListener('change', draw);
+
+    const cases = [
+      { c: 350, t: 10,   label: 'Case: 350° → 10°' },
+      { c: 10,  t: 350,  label: 'Case: 10° → 350°' },
+      { c: 0,   t: 180,  label: 'Case: the ±180° tie' },
+      { c: 10,  t: 175,  label: 'Case: the swerve flip' },
+      { c: 720, t: 10,   label: 'Case: gyro wound to 720°' }
+    ];
+    let caseIdx = 0;
+    caseBtn.addEventListener('click', () => {
+      caseIdx = (caseIdx + 1) % cases.length;
+      const k = cases[caseIdx];
+      current = k.c;
+      target = k.t;
+      caseBtn.textContent = k.label;
+      draw();
+    });
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
     resize();
   </script>
 </body>

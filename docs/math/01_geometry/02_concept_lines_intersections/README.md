@@ -77,6 +77,7 @@ This form has no division anywhere, so vertical lines are entirely unremarkable.
 That distinction is exactly the difference between a **line** (all values of `t`, extending forever both ways), a **ray** (`t ≥ 0`), and a **segment** (`0 ≤ t ≤ 1`). A path is a segment. A wall is usually a segment. Confusing the three is the single most common source of "my collision check says the path is blocked by a barrier that is nowhere near it" — the barrier's infinite line is blocking it, not the barrier.
 
 > ### Math!
+>
 > $$
 > P(t) = A + t \cdot (B - A), \quad t \in [0, 1]
 > $$
