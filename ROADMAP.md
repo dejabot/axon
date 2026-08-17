@@ -2,7 +2,7 @@
 
 The living plan: seven axons, each a stack of modules, each module a sequence of concepts.
 
-**Status key:** `[deep]` meets the REVIEWER_SPEC bar · `[thin]` exists but under-derived, needs a pass · `[new]` proposed, not yet written · `[stub]` axon has only a README
+**Status key:** `[deep]` meets the REVIEWER_SPEC bar · `[thin]` exists but under-derived, needs a pass · `[new]` proposed and specified, not yet written · `[todo]` agreed in principle but not yet specified · `[stub]` axon has only a README
 
 ---
 
@@ -147,8 +147,16 @@ Each term earns its place by fixing a specific failure of the one before it. No 
 2. **Proportional Control & Steady-State Error** `[new]` — push harder the further you are. Derives why a P-only arm holding against gravity always settles *below* its target, since zero error would mean zero output and nothing holding it up. Raising the gain shrinks the offset and starts oscillation, which motivates the next two terms.
 3. **Integral Control & Windup** `[new]` — accumulated past error drives steady-state offset to zero. Then the failure it creates: while the mechanism is saturated or blocked, the integral keeps growing, and the stored error has to be paid back as overshoot. Anti-windup clamping and integral zones.
 4. **Derivative Control, Damping & Noise** `[new]` — reacting to the rate of change adds damping. Then its two failure modes: derivative kick when the setpoint steps (fixed by differentiating the measurement, not the error), and amplification of encoder noise, since differentiating noise is the worst thing you can do to it.
-5. **Feedforward: Predicting Instead of Reacting** `[thin]` — kS, kV, kA and kG as a physical model of what voltage the mechanism *should* need. Why feedback alone is always late, and why modern robot code lets feedforward do the heavy lifting with PID correcting only the residual.
-6. **Tuning in Practice** `[thin]` — what each gain does to a step response, a practical tuning order, what Ziegler-Nichols is and why teams rarely use it as written, and reading a real response curve to decide which term to reach for.
+5. **Proportional Feedforward: the F Term** `[new]` — the first controller that stops reacting and starts predicting. Output proportional to the *setpoint* rather than to the error: `output = kF · setpoint`. This is the `F` in the PIDF gains on a Talon or Spark, and on a flywheel it does almost all the work while P merely trims the remainder. Derives why kF is roughly the reciprocal of the mechanism's free speed, and why feeding a target forward beats waiting for error to appear. Then its limits: it assumes output is proportional to setpoint, which holds for a flywheel at steady speed and fails for anything fighting gravity or accelerating — which is exactly what motivates the next concept.
+6. **Physical Feedforward Models (kS, kV, kA, kG)** `[thin]` — replacing the single kF with a model of the actual physics: static friction, velocity, acceleration and gravity, each a term that exists because a specific effect broke the simpler model. Why modern robot code lets feedforward carry the load and leaves PID correcting only the residual.
+7. **Tuning in Practice** `[thin]` — what each gain does to a step response, a practical tuning order, what Ziegler-Nichols is and why teams rarely use it as written, and reading a real response curve to decide which term to reach for.
+
+### Module 5: State-Space & Optimal Control `[todo]`
+
+Not yet specified in detail — revisit once Math Module 3 exists, since this needs matrices and eigenvalues.
+
+1. State-Space Representation `[todo]` — a mechanism as `x_dot = Ax + Bu`, and what the eigenvalues of `A` say about stability
+2. LQR & Optimal Control `[todo]` — choosing gains by declaring what you care about via the Q and R cost matrices, rather than by hand-tuning. WPILib's `LinearSystem` and `LinearQuadraticRegulator`.
 
 **Prerequisite note.** The I term is integration and the D term is differentiation, so this module must follow Math Module 4 (Calculus). Concepts 3 and 4 should cite the accumulation and rate-of-change concepts directly rather than re-deriving them.
 
@@ -222,9 +230,10 @@ Proposed from scratch. Python. Depends on Axon 2.
 ```
    existing and deep      7 concepts
    existing but thin     41 concepts
-   proposed new          38 concepts
+   proposed new          39 concepts
+   agreed, not specified  2 concepts
    ----------------------------------
-   full curriculum       86 concepts
+   full curriculum       89 concepts
 ```
 
 ## Build Order
