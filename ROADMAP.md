@@ -139,10 +139,18 @@ Java and WPILib.
 1. Newton's Laws & Friction `[thin]`
 2. Work, Energy & Momentum `[thin]`
 
-### Module 4: Control
-1. Voltage Feedforward Models (kS, kV, kA, kG) `[thin]`
-2. Closed-Loop PID & Tuning `[thin]`
-3. Anti-Windup & Derivative Kick `[new]`
+### Module 4: Feedback Control — built from the ground up
+
+Each term earns its place by fixing a specific failure of the one before it. No concept introduces a gain the reader has not first watched a simpler controller fail without.
+
+1. **Bang-Bang Control & Why It Oscillates** `[new]` — the simplest closed loop there is: below the setpoint, full power; at or above it, none. Introduces setpoint, error, actuator saturation and the limit cycle. Not a strawman — bang-bang genuinely outperforms PID on a flywheel recovering after a shot, and knowing *why* is the point.
+2. **Proportional Control & Steady-State Error** `[new]` — push harder the further you are. Derives why a P-only arm holding against gravity always settles *below* its target, since zero error would mean zero output and nothing holding it up. Raising the gain shrinks the offset and starts oscillation, which motivates the next two terms.
+3. **Integral Control & Windup** `[new]` — accumulated past error drives steady-state offset to zero. Then the failure it creates: while the mechanism is saturated or blocked, the integral keeps growing, and the stored error has to be paid back as overshoot. Anti-windup clamping and integral zones.
+4. **Derivative Control, Damping & Noise** `[new]` — reacting to the rate of change adds damping. Then its two failure modes: derivative kick when the setpoint steps (fixed by differentiating the measurement, not the error), and amplification of encoder noise, since differentiating noise is the worst thing you can do to it.
+5. **Feedforward: Predicting Instead of Reacting** `[thin]` — kS, kV, kA and kG as a physical model of what voltage the mechanism *should* need. Why feedback alone is always late, and why modern robot code lets feedforward do the heavy lifting with PID correcting only the residual.
+6. **Tuning in Practice** `[thin]` — what each gain does to a step response, a practical tuning order, what Ziegler-Nichols is and why teams rarely use it as written, and reading a real response curve to decide which term to reach for.
+
+**Prerequisite note.** The I term is integration and the D term is differentiation, so this module must follow Math Module 4 (Calculus). Concepts 3 and 4 should cite the accumulation and rate-of-change concepts directly rather than re-deriving them.
 
 ---
 
@@ -212,11 +220,11 @@ Proposed from scratch. Python. Depends on Axon 2.
 ## Totals
 
 ```
-   existing and deep      6 concepts
+   existing and deep      7 concepts
    existing but thin     41 concepts
-   proposed new          31 concepts
+   proposed new          38 concepts
    ----------------------------------
-   full curriculum       78 concepts
+   full curriculum       86 concepts
 ```
 
 ## Build Order
