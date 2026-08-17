@@ -32,8 +32,16 @@ def warn(path, msg):
 
 
 def prose_words(text):
-    """Word count excluding fenced code, SVG markup and HTML tags."""
+    """Word count of prose only.
+
+    Excludes fenced code, SVG markup, HTML tags — and math. LaTeX source counts
+    as many "words" (\\begin{aligned}, \\frac, \\text{...}) while representing a
+    single equation the reader takes in at a glance, so leaving it in made every
+    concept appear to grow when its display math was typeset.
+    """
     t = re.sub(r'```.*?```', '', text, flags=re.S)
+    t = re.sub(r'\$\$.*?\$\$', '', t, flags=re.S)
+    t = re.sub(r'\$[^$\n]+\$', '', t)
     t = re.sub(r'<svg.*?</svg>', '', t, flags=re.S)
     t = re.sub(r'<[^>]+>', '', t)
     return len(t.split())

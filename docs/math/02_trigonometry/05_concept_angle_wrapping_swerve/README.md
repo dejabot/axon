@@ -18,7 +18,7 @@ The code computes the error the way code computes every other error:
    error = target − current = 10° − 350° = −340°
 ```
 
-and the module obeys. It slews 340° the wrong way round the circle to reach a direction it was already 20° away from.
+and the module obeys, slewing 340° the wrong way round the circle to reach a direction it was already 20° from.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="400" height="290" viewBox="0 0 400 290" style="max-width: 100%; height: auto;" role="img" aria-label="A circle with the wheel's current direction at 350 degrees and its target at 10 degrees. A short 20 degree arc joins them the near way, while a long 340 degree arc drawn inside the circle takes the far way round.">
@@ -42,7 +42,7 @@ and the module obeys. It slews 340° the wrong way round the circle to reach a d
   </svg>
 </div>
 
-The cost is not theoretical. A module slewing at roughly 700°/s covers 20° in about 0.03 s and 340° in about 0.49 s, so it is out of position for nearly half a second — while being asked to *drive* the whole time. A wheel pointed away from the direction it travels does not roll; it is dragged sideways across the carpet. That is **scrub**: heat, tread wear, and a side force the other three modules must fight. The symptom is a visible lurch at the exact moment the path changes direction, which is every time the trajectory curves.
+The cost is not theoretical. A module slewing at roughly 700°/s covers 20° in about 0.03 s and 340° in about 0.49 s, so it is out of position for nearly half a second — while being asked to *drive* the whole time. A wheel pointed away from the direction it travels does not roll; it is dragged sideways across the carpet. That is **scrub**: heat, tread wear, and a side force the other three modules must fight. The symptom is a visible lurch at the moment the path changes direction — every time the trajectory curves.
 
 Nothing in that subtraction is arithmetically wrong. `10 − 350` really is `−340`. What is wrong is an assumption underneath it that nobody wrote down.
 
@@ -52,9 +52,9 @@ Nothing in that subtraction is arithmetically wrong. `10 − 350` really is `−
 
 ### Step 1: Angles live on a circle, not a line
 
-Concept 01 finished with a small observation: walking right around the rim brings you back to the same point, so `cos(θ + 360°) = cos θ`. That is stronger than it looks. It does not say 350° and 710° *behave similarly*; it says a wheel commanded to 350°, to −10°, or to 710° ends up in **exactly the same physical orientation**. No measurement — no encoder, no camera, no protractor — can tell those commands apart: they are three names for one direction.
+Concept 01 finished with a small observation: walking right around the rim brings you back to the same point, so `cos(θ + 360°) = cos θ`. That is stronger than it looks. It does not say 350° and 710° *behave similarly*; it says a wheel commanded to 350°, to −10°, or to 710° ends up in **exactly the same orientation**. No measurement — no encoder, no camera, no protractor — can tell those commands apart: they are three names for one direction.
 
-A number line has no such property: there, 350 and −10 are 360 apart, and every value is a distinct place. Subtraction is built for that line. `b − a` answers "how far along the line from a to b", and it is *the* answer because a line offers only one route. Feed a circle into a tool built for a line and it answers a question you did not ask. That is the whole bug; everything below is bookkeeping.
+A number line has no such property: there, 350 and −10 are 360 apart, and every value is a distinct place. Subtraction is built for that line — `b − a` answers "how far along the line from a to b", and it is *the* answer because a line offers one route. Feed a circle into a tool built for a line and it answers a question you did not ask. That is the whole bug; everything below is bookkeeping.
 
 > ### Math!
 > ```
@@ -64,7 +64,7 @@ A number line has no such property: there, 350 and −10 are 360 apart, and ever
 
 ### Step 2: Every honest answer at once
 
-Ask the question the mechanism actually cares about: **by how much must the wheel rotate to end up pointing at the target?**
+Ask the question the mechanism cares about: **by how much must the wheel rotate to end up pointing at the target?**
 
 If some amount `d` works, so does `d + 360°` — the same rotation with a spare lap thrown in. So does `d − 360°`, and `d + 720°`. From 350° toward 10° the naive subtraction handed us `−340°`, so the full set of rotations landing the wheel on target is
 
@@ -74,11 +74,11 @@ If some amount `d` works, so does `d + 360°` — the same rotation with a spare
 
 spaced exactly 360° apart, running forever in both directions. Check two: `350 + 20 = 370 ≡ 10` ✓, and `350 + 380 = 730 = 10 + 720 ≡ 10` ✓.
 
-So the naive difference was never *wrong*: it computed one member of an infinite family and handed it over as though it were the only one. The fix is not to repair the subtraction but to **choose the right member** — the smallest, the least rotating.
+So the naive difference was never *wrong*: it computed one member of an infinite family and handed it over as the only one. The fix is not to repair the subtraction but to **choose the right member** — the smallest, the least rotating.
 
 ### Step 3: Folding the answer into a half-turn band
 
-Two equivalent ways to pick it.
+Two equivalent ways.
 
 **Recipe one — add or subtract 360 until it is in range.** Push the naive difference toward zero a full turn at a time until it lands between −180° and +180°:
 
@@ -95,13 +95,13 @@ As a loop:
    while (d ≤ −180°)  d = d + 360°
 ```
 
-**Recipe two — one line with a remainder.** The loop subtracts the right multiple of 360 one step at a time; a remainder operator finds that multiple in one step. Shift the band to start at zero, take the remainder, shift back:
+**Recipe two — one line with a remainder.** The loop subtracts the right multiple of 360 one step at a time; a remainder operator finds it in one. Shift the band to start at zero, take the remainder, shift back:
 
 ```
    wrap(d) = ( (d + 180°) mod 360° ) − 180°
 ```
 
-The `+180°` slides the band `(−180°, 180°]` onto `(0°, 360°]`, `mod 360°` collapses everything into it, and the `−180°` slides it back. On our number: `−340 + 180 = −160`; `−160 mod 360 = 200`; `200 − 180 = +20`. Same answer as the loop ✓
+The `+180°` slides the band `(−180°, 180°]` onto `(0°, 360°]`, `mod 360°` collapses everything into it, and `−180°` slides it back. On our number: `−340 + 180 = −160`; `−160 mod 360 = 200`; `200 − 180 = +20`. Same answer as the loop ✓
 
 Run both on the reverse trip — a wheel at 10° commanded to 350°, naive difference `+340`:
 
@@ -121,9 +121,9 @@ Agreed: **−20°**, 20° in the *negative* direction. The loop makes the mechan
 
 ### Step 4: Why the folded answer is always the shortest route
 
-Two short arguments, and they are why this is a derivation and not a recipe.
+Two arguments, and they are why this is a derivation and not a recipe.
 
-**Exactly one candidate lands in the band.** Step 2's family is a set of numbers spaced exactly 360 apart. The band `(−180°, +180°]` is exactly 360 wide and half-open — one endpoint in, the other out. Evenly spaced marks laid across a gap exactly one spacing wide, open at one end, cover exactly one mark. So the fold never has a choice to make and never fails.
+**Exactly one candidate lands in the band.** Step 2's family is a set of numbers spaced exactly 360 apart, and the band `(−180°, +180°]` is exactly 360 wide and half-open — one endpoint in, the other out. Evenly spaced marks laid across a gap one spacing wide, open at one end, cover exactly one mark. So the fold never has a choice to make and never fails.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="440" height="150" viewBox="0 0 440 150" style="max-width: 100%; height: auto;" role="img" aria-label="A number line marked with the candidate rotations minus 700, minus 340, plus 20, plus 380 and plus 740, spaced 360 apart. A shaded band from minus 180 to plus 180 contains only the plus 20 candidate.">
@@ -158,7 +158,7 @@ Two short arguments, and they are why this is a derivation and not a recipe.
    |−340°| + |+20°| = 340 + 20 = 360°
 ```
 
-Not a coincidence: going one way round and going the other way round together make exactly one complete lap, always. The two routes between any pair of directions have lengths summing to 360°, so **the shorter is always the one at or below 180°** — precisely the one the fold keeps.
+Not a coincidence: going one way round and going the other together make exactly one lap, always. So the two routes between any pair of directions have lengths summing to 360°, and **the shorter is always the one at or below 180°** — precisely the one the fold keeps.
 
 ### Step 5: The cases, including the one with no answer
 
@@ -173,17 +173,17 @@ Not a coincidence: going one way round and going the other way round together ma
       0°      180°      +180°        ±180°      ambiguous — see below
 ```
 
-Work the fourth row by hand, the one that bites in autonomous. Naive: `170 − (−170) = +340`. Wrapped: `340 > 180`, so `340 − 360 = −20`. The heading controller turns 20° clockwise, and `−170 − 20 = −190 ≡ 170` ✓. The fifth row shows the fold is not only about signs: a gyro wound up to 720° names the same direction as 0°, and the wrap strips the two dead laps.
+Work the fourth row by hand, the one that bites in autonomous. Naive: `170 − (−170) = +340`. Wrapped: `340 > 180`, so `340 − 360 = −20`. The heading controller turns 20° clockwise, and `−170 − 20 = −190 ≡ 170` ✓. The fifth row shows the fold is not only about signs: a gyro wound to 720° names the same direction as 0°, and the wrap strips the dead laps.
 
 The last row is different in kind. At exactly 180° apart the two routes are `+180°` and `−180°` — the same length. There is no shortest route, because **both are shortest**, and our recipes even disagree: the loop form leaves `+180` alone while the remainder form returns `−180`. Neither is wrong.
 
-What matters is not which sign you get but that a controller never chooses it fresh every cycle. Real headings hover with a degree or so of sensor noise; at a 180° target that noise pushes the error across the boundary every few milliseconds, the sign flips, and the mechanism dithers instead of turning. The fix is **hysteresis**: once committed to a direction, keep it until the error has shrunk well clear of 180°. Do not chase the tie — remove it.
+What matters is not which sign you get but that a controller never chooses it fresh every cycle. Real headings carry a degree or so of noise; at a 180° target that noise pushes the error across the boundary every few milliseconds, the sign flips, and the mechanism dithers instead of turning. The fix is **hysteresis**: hold the committed direction until the error is well clear of 180°. Do not chase the tie — remove it.
 
 ### Step 6: Closing the loop — interpolating an angle
 
 Geometry Concept 03 built linear interpolation, then stopped at a warning: a turret at 350° blending toward 10° with `lerp(350, 10, 0.5)` returns 180°, pointing exactly backwards. It named the cause — an angle lives on a circle — and handed the fix here.
 
-Lerp is `a + t·(b − a)`: start at `a`, travel `t` of the way along the difference. Exactly one thing in it is broken, and it is the `(b − a)`. Wrap that difference first:
+Lerp is `a + t·(b − a)`: start at `a`, travel `t` of the way along the difference. Exactly one thing in it is broken — the `(b − a)`. Wrap that difference first:
 
 ```
    lerpAngle(a, b, t) = a + t · wrap(b − a)
@@ -198,7 +198,7 @@ From 350° to 10°, `wrap(10 − 350) = +20`, so the blend is `350 + 20t`:
    t = 1.00   350 + 20 = 370° ≡ 10°
 ```
 
-The turret sweeps 355°, 0°, 5°, 10° — the near way, 20° in total. The naive version gave 265°, 180°, 95°, 10°, dragging the mechanism 340° round the back. Same formula, one wrap.
+The turret sweeps 355°, 0°, 5°, 10° — the near way, 20° in all. The naive version gave 265°, 180°, 95°, 10°, dragging the mechanism 340° round the back. Same formula, one wrap.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="400" height="220" viewBox="0 0 400 220" style="max-width: 100%; height: auto;" role="img" aria-label="A circle showing a naive interpolation from 350 to 10 degrees passing through 265, 180 and 95 degrees the long way, beside a wrapped interpolation passing through 355, 0 and 5 degrees the short way.">
@@ -234,9 +234,9 @@ The turret sweeps 355°, 0°, 5°, 10° — the near way, 20° in total. The nai
 
 ### Step 7: The payoff — a steered wheel never turns more than 90°
 
-A steered wheel has two motors: one aims it, one spins it. Its command is a pair — an angle θ and a speed v — which Concept 01 turned into a velocity, `(v cos θ, v sin θ)`.
+A steered wheel has two motors: one aims it, one spins it. Its command is a pair — an angle θ and a speed v — which Concept 01 turned into the velocity `(v cos θ, v sin θ)`.
 
-Ask what happens if you aim the wheel at the *opposite* angle and drive it backwards. On the unit circle the point at `θ + 180°` is diametrically opposite the point at θ, so both coordinates negate:
+Ask what happens if you aim the wheel at the *opposite* angle and drive it backwards. On the unit circle the point at `θ + 180°` is diametrically opposite the point at θ, so both its coordinates negate:
 
 ```
    cos(θ + 180°) = −cos θ            sin(θ + 180°) = −sin θ
@@ -257,13 +257,13 @@ Let `e = wrap(θ − current)` and `e′ = wrap(θ + 180° − current)` be the 
    |e| + |e′| = 180°
 ```
 
-The two options always split 180° between them, so flipping wins exactly when the flipped slew is smaller:
+The two options always split 180°, so flipping wins exactly when the flipped slew is smaller:
 
 ```
    180° − |e| < |e|      ⟺      |e| > 90°
 ```
 
-**That is where 90 comes from.** Not a tuned constant with alternatives worth trying — half of the 180° the two options always share. The consequence is a guarantee: after this check a steered wheel never rotates more than 90° for any command, because if the direct route exceeded 90° the flip was shorter, and if it did not, it was already inside the bound.
+**That is where 90 comes from.** Not a tuned constant with alternatives worth trying — half of the 180° the two options always share. The consequence is a guarantee: after this check a steered wheel never rotates more than 90° for any command — if the direct route exceeded 90° the flip was shorter, and if it did not, it was already inside the bound.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="420" height="250" viewBox="0 0 420 250" style="max-width: 100%; height: auto;" role="img" aria-label="A circle with the wheel currently at 10 degrees, a command at 175 degrees requiring a 165 degree slew, and the flipped command at minus 5 degrees requiring only a 15 degree slew with the drive speed negated.">
@@ -296,7 +296,7 @@ The figure's numbers, worked. The wheel is at 10°; the command is 175° at 3.5 
 4. **Same push?** Direct gives `(3.5·cos 175°, 3.5·sin 175°) = (−3.487, +0.305)` m/s. Flipped gives `(−3.5·cos(−5°), −3.5·sin(−5°)) = (−3.487, +0.305)` m/s ✓
 5. **Cost.** At 700°/s, 165° takes 0.24 s and 15° takes 0.02 s.
 
-Same motion, a tenth of the steering. The flip does reverse the drive motor — but the alternative was to swing the wheel 165° across the carpet while driving, which reverses the robot's push anyway and scrubs the tread doing it.
+Same motion, a tenth of the steering. The flip does reverse the drive motor — but the alternative was swinging the wheel 165° across the carpet while driving, which reverses the robot's push anyway and scrubs the tread doing it.
 
 ---
 
@@ -376,7 +376,7 @@ ModuleState best    = optimize(desired, 10.0);
 // slew required:  shortestDifference(-5.0, 10.0) = -15.0  instead of +165.0
 ```
 
-Comparing with `> 90.0` rather than `>= 90.0` settles Step 5's tie by policy: at exactly 90° both options cost the same, so the choice cannot be wrong, and being deterministic stops a noisy encoder toggling the drive motor's sign every cycle.
+Comparing with `> 90.0` rather than `>= 90.0` settles Step 5's tie by policy: at exactly 90° both options cost the same, so the choice cannot be wrong, and determinism stops a noisy encoder toggling the drive motor's sign.
 
 ### In a Robot Project (Java & WPILib)
 
@@ -408,11 +408,12 @@ SwerveModuleState desired = new SwerveModuleState(3.5, Rotation2d.fromDegrees(17
 desired.optimize(Rotation2d.fromDegrees(10.0));
 // desired.speedMetersPerSecond = -3.5
 // desired.angle                = -5.0 deg
-// (older WPILib exposes this as the static SwerveModuleState.optimize(state, angle),
-//  which returns a new state rather than modifying this one)
+// Note it returns void and edits the state in place. The static form you will
+// see in older code and tutorials, SwerveModuleState.optimize(state, angle),
+// returned a new state and is now deprecated in favour of this one.
 ```
 
-Both tiers return `+20.0` for the heading difference and `(−3.5 m/s, −5.0°)` for the optimised module — the same numbers, one derived and one imported.
+Both tiers return `+20.0` for the heading difference and `(−3.5 m/s, −5.0°)` for the optimised module — the same numbers, derived and imported.
 
 **And the same bug at a different layer.** A heading controller computes `error = setpoint − measurement` internally, on a line, exactly as Section 1 did:
 
@@ -432,11 +433,11 @@ double output = headingPid.calculate(350.0, 10.0);   // driven by +20 deg, not -
 
 ## 4. Bridge to Real Systems
 
-**Swerve module optimisation.** `SwerveModuleState.optimize` is Step 7 shipped: called on every module, every 20 ms loop, in essentially every swerve codebase in FRC. Its companion is `enableContinuousInput` on the steering and heading controllers, which is Step 3 shipped. When a team reports that their robot "unwinds" or "takes the long way" after a rotation, the missing line is almost always one of those two.
+**Swerve module optimisation.** `SwerveModuleState.optimize` is Step 7 shipped: called on every module, every 20 ms loop, in essentially every FRC swerve codebase. Its companion is `enableContinuousInput` on the steering and heading controllers — Step 3 shipped. When a team reports that their robot "unwinds" or "takes the long way" after a rotation, the missing line is almost always one of those two.
 
 **Anything living on a circle needs this, and not only angles.** A compass bearing rolls over from 359 to 0, a wave's phase at 2π, clock time at midnight — which is why "how long between 23:30 and 00:15" is not `00:15 − 23:30`. `MathUtil.inputModulus` takes an arbitrary range because the period is not always 360: an absolute encoder reporting 0 to 4095 counts wraps at 4096, and the identical fold applies.
 
-**In machine learning the fix is to refuse the discontinuity entirely.** Give a model one output holding degrees and train it on squared error, and the loss lies at the seam: predicting 359° when the truth is 1° is off by 2°, but the loss reports 358² and shoves the model hard the wrong way. So angles are fed and predicted as a **(cos θ, sin θ) pair** — two outputs, continuous everywhere, no seam for the loss to trip over — with `atan2` from Concept 04 recovering the angle. Rotated-bounding-box detectors do this for object orientation, and tabular models encode hour-of-day the same way so 23:00 and 01:00 sit near each other in feature space. Which is exactly what `Rotation2d` does: store the pair, never the number.
+**In machine learning the fix is to refuse the discontinuity entirely.** Give a model one output holding degrees and train it on squared error, and the loss lies at the seam: predicting 359° when the truth is 1° is off by 2°, but the loss reports 358² and shoves the model hard the wrong way. So angles are fed and predicted as a **(cos θ, sin θ) pair** — two outputs, continuous everywhere, no seam for the loss to trip over — with `atan2` from Concept 04 recovering the angle. Rotated-bounding-box detectors do this for object orientation, and tabular models encode hour-of-day the same way so 23:00 and 01:00 sit near each other. Which is exactly what `Rotation2d` does: store the pair, never the number.
 
 ---
 
@@ -444,7 +445,7 @@ double output = headingPid.calculate(350.0, 10.0);   // driven by +20 deg, not -
 
 ### Checkpoint 1
 
-The robot's heading is −175° and autonomous commands +175°. Find the shortest turn with both recipes, then say what a `PIDController` without `enableContinuousInput` commands instead.
+The robot's heading is −175° and autonomous commands +175°. Find the shortest turn with both recipes, then say what a `PIDController` without `enableContinuousInput` would command.
 
 **Solution:**
 
@@ -458,7 +459,7 @@ The robot's heading is −175° and autonomous commands +175°. Find the shortes
 
 ### Checkpoint 2
 
-A steered wheel sits at 100°. The command is 4.0 m/s pointing at 350°. Optimise it, verify the velocity is unchanged, and state the slew saved.
+A steered wheel sits at 100°. The command is 4.0 m/s at 350°. Optimise it, verify the velocity is unchanged, and state the slew saved.
 
 **Solution:**
 
@@ -472,11 +473,11 @@ A steered wheel sits at 100°. The command is 4.0 m/s pointing at 350°. Optimis
 
 ### Deep Dive 1
 
-Wrapping assumes the mechanism can keep turning, and plenty cannot: a turret fed by a wire harness may have hard stops at −270° and +270°, so the shortest *angular* route sometimes snaps a cable. Given a current angle, a target and a pair of hard stops, decide between the wrapped route and its 360°-longer partner, and describe the region of the circle where the wrapped answer must be rejected. Then handle a target unreachable without first unwinding.
+Wrapping assumes the mechanism can keep turning, and plenty cannot: a turret fed by a wire harness may have hard stops at ±270°, so the shortest *angular* route sometimes snaps a cable. Given a current angle, a target and a pair of hard stops, decide between the wrapped route and its 360°-longer partner, and describe where on the circle the wrapped answer must be rejected. Then handle a target unreachable without first unwinding.
 
 ### Deep Dive 2
 
-Step 5 claimed a target 180° away makes a controller dither. Test it. Simulate a heading error sitting at 180° with ±0.5° of noise, wrap it for 1,000 cycles, and count the sign changes. Then add hysteresis — hold the previous direction until the error's magnitude drops below some threshold — and find the smallest threshold that stops the flipping. Repeat for the 90° tie in the module flip, where a wrong choice reverses a drive motor rather than turning a wheel, and decide whether the two thresholds should match.
+Step 5 claimed a target 180° away makes a controller dither. Test it. Simulate a heading error sitting at 180° with ±0.5° of noise, wrap it for 1,000 cycles, and count the sign changes. Then add hysteresis — hold the previous direction until the error drops below some threshold — and find the smallest threshold that stops the flipping. Repeat for the 90° tie in the module flip, where a wrong choice reverses a drive motor, and decide whether the two thresholds should match.
 
 ---
 

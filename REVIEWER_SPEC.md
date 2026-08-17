@@ -35,7 +35,13 @@ When a section starts teaching a second subject, cut it to the one sentence the 
 
 The six sections are a shape, not a quota. A concept built on a real derivation earns a long section 2. A concept that is a definition plus its applications does not, and padding it with adjacent material produces a worse page than a short honest one.
 
-Most concepts land at 1,800–2,800 words, or 30–45 minutes including code, demo and checkpoints. Some legitimately land far shorter. Judge against the topic, never against a target. **Under-length and over-length are equally serious failures**: the first usually means results are being asserted rather than derived, the second usually means padding.
+**Do not give an author a word range.** Six trigonometry concepts were commissioned with a stated band of 1,800–2,800 words, and six independent authors landed at 2,800, 2,658, 2,797, 2,796, 2,799 and 2,825 — every one within 1% of the ceiling. The instruction "do not pad" appeared in the same brief and lost. A stated maximum becomes the target. The geometry concepts, written without a tight band, vary naturally from 1,693 to 2,661 because the topics differ.
+
+Brief authors with the **time budget and the principle instead**: a concept is a 30–45 minute session, its length set by what the material genuinely requires. If a number helps, give a midpoint to aim at — around 2,200 words — never a ceiling to fill.
+
+**Under-length and over-length are equally serious failures**: the first usually means results are being asserted rather than derived, the second usually means padding.
+
+Note that word counts exclude code, SVG and math. LaTeX source inflates a naive count badly — `\begin{aligned}` and `\frac` are many "words" for one equation the reader takes in at a glance.
 
 The test for every paragraph: does it derive something, or prevent a real bug? If neither, delete it.
 

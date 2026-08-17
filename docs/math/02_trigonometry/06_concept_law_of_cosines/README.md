@@ -2,7 +2,7 @@
 
 > **▶ Interactive Demo: [Two-Link Arm Inverse Kinematics Explorer](demo.html)**
 >
-> Drag the target anywhere. Watch both elbow-up and elbow-down solutions redraw, read the joint angles live, and see the command clamp to the rim when you drag outside the reachable ring.
+> Drag the target. Both elbow-up and elbow-down solutions redraw live, and dragging outside the reachable ring clamps to the rim instead of breaking.
 
 <iframe src="demo.html" width="100%" height="640" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 
@@ -10,7 +10,7 @@
 
 ## 1. The Real-World Problem: An Arm With Two Joints
 
-Bolt a segment 0.90 m long to a motor on the robot's frame — the **shoulder**. On its far end bolt a second motor and a 0.60 m segment — the **elbow** — and put a gripper on the very end. Both segments are rigid steel: their lengths never change. Only the joint angles do.
+Bolt a 0.90 m segment to a motor on the robot's frame — the **shoulder**. On its far end bolt a second motor and a 0.60 m segment — the **elbow** — and put a gripper on the end. Both segments are rigid steel: only the joint angles change.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="400" height="270" viewBox="0 0 400 262" style="max-width: 100%; height: auto;" role="img" aria-label="A two-segment arm mounted on a robot chassis. A 0.90 metre shoulder segment rises to an elbow, and a 0.60 metre segment reaches from there to a gripper at the target point, with both joint angles marked unknown.">
@@ -41,11 +41,16 @@ Bolt a segment 0.90 m long to a motor on the robot's frame — the **shoulder**.
   </svg>
 </div>
 
-**Forward:** given the joint angles, where does the gripper end up? Concept 01 answers this already. The shoulder segment ends at `(L1 cos θ1, L1 sin θ1)`; the elbow segment leaves that point at the combined angle `θ1 + θ2`, so the gripper lands at `(L1 cos θ1 + L2 cos(θ1 + θ2), L1 sin θ1 + L2 sin(θ1 + θ2))`. Two right triangles end to end.
+**Forward:** given the joint angles, where does the gripper end up? Concept 01 answers this. The shoulder segment ends one link out at angle θ1, and the elbow segment leaves that point at the combined angle θ1 + θ2 — two right triangles end to end:
 
-**Inverse:** the driver wants the gripper at a specific point — say 0.80 m out and 0.60 m up. What must the joint angles be? *That* has no answer yet, and it is what this concept is for.
+```
+   elbow.x   = L1 cos θ1                       elbow.y   = L1 sin θ1
+   gripper.x = elbow.x + L2 cos(θ1 + θ2)       gripper.y = elbow.y + L2 sin(θ1 + θ2)
+```
 
-Look at the figure again. Shoulder, elbow and target form a triangle with sides 0.90, 0.60 and the straight-line distance `r`. **There is no right angle in it.** Every tool in this module so far — SOH-CAH-TOA, the unit circle, `atan2` — assumes a right triangle or an angle at the origin. A general triangle needs a general tool.
+**Inverse:** the driver wants the gripper at a specific point, say 0.80 m out and 0.60 m up. What must the joint angles be? *That* has no answer yet, and is what this concept is for.
+
+Shoulder, elbow and target form a triangle with sides 0.90, 0.60 and the straight-line distance `r` — and **there is no right angle in it**. Every tool in this module so far assumes a right triangle or an angle at the origin. A general triangle needs a general tool.
 
 ---
 
@@ -53,7 +58,7 @@ Look at the figure again. Shoulder, elbow and target form a triangle with sides 
 
 ### Step 1: What a right angle was buying us
 
-Geometry Concept 01 proved `a² + b² = c²` by area rearrangement — four copies of a right triangle packed into a square of side `a + b`, counted from outside and from inside. That proof stands and this concept does not repeat it. But notice what it needed: the legs meeting at *exactly* 90°. Open that corner and the far side stretches, close it and the far side shrinks, and `a² + b² = c²` says nothing about how wrong it has become.
+Geometry Concept 01 proved `a² + b² = c²` by area rearrangement — four copies of a right triangle packed into a square of side `a + b`, its area counted two ways. That proof stands and this concept does not repeat it. But notice what it needed: the legs meeting at *exactly* 90°. Open that corner and the far side stretches, close it and the far side shrinks, and `a² + b² = c²` says nothing about how wrong it has become.
 
 So: **if the angle between two sides is not 90°, what replaces `a² + b² = c²`?**
 
@@ -61,9 +66,9 @@ So: **if the angle between two sides is not 90°, what replaces `a² + b² = c²
 
 Only one honest move is available. We know how to handle right triangles, so make right triangles: **drop a perpendicular from one vertex onto the opposite side.**
 
-Name the triangle first. Vertices A, B, C, each side named for the vertex it does *not* touch — side `a` opposite vertex A, and so on. We want `c`, opposite the angle at C.
+Name the triangle first: vertices A, B, C, each side named for the vertex it does *not* touch, so `a` is opposite A. We want `c`, opposite the angle at C.
 
-Put C at the origin with side `b` along the positive X-axis, so A sits at `(b, 0)`. B is a distance `a` away in the direction of the angle at C, which by the unit-circle definition puts it at `(a cos C, a sin C)`. The perpendicular from B to the X-axis has its foot at `(a cos C, 0)`.
+Put C at the origin with side `b` along the positive X-axis, so A sits at `(b, 0)`. B is a distance `a` away in the direction of the angle at C, which by the unit-circle definition puts it at `(a cos C, a sin C)`, and the perpendicular from B has its foot at `(a cos C, 0)`.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="400" height="310" viewBox="0 0 300 232" style="max-width: 100%; height: auto;" role="img" aria-label="A triangle with vertices C at the origin, A on the positive x-axis and B above, with a perpendicular dropped from B to the x-axis splitting the base into a segment of length a cosine C and a segment of length b minus a cosine C.">
@@ -101,7 +106,7 @@ Look at the right-hand triangle in that figure. Its hypotenuse is the side `c` w
 
 ### Step 3: The algebra
 
-Apply Pythagoras to that right triangle and expand:
+Apply Pythagoras and expand:
 
 ```
    c²  =  (b − a cos C)²  +  (a sin C)²
@@ -111,7 +116,7 @@ Apply Pythagoras to that right triangle and expand:
        =  b² − 2ab cos C + a² (cos²C + sin²C)
 ```
 
-The last bracket is the Pythagorean identity from Concept 01, worth exactly 1. It collapses:
+The last bracket is Concept 01's Pythagorean identity, worth exactly 1:
 
 ```
    c²  =  a² + b² − 2ab cos C
@@ -119,7 +124,7 @@ The last bracket is the Pythagorean identity from Concept 01, worth exactly 1. I
 
 That is the **law of cosines**, and nothing entered it but Pythagoras, the unit-circle definitions of sine and cosine, and `sin² + cos² = 1`.
 
-One objection is worth answering. If the angle at C is obtuse the perpendicular's foot falls *outside* segment CA — so where did `b − a cos C` go? Nowhere. Beyond 90° the cosine is negative, so `b − a cos C` comes out *larger* than `b`, exactly right for a foot on the far side. We never asked whether `cos C` was positive, so we never owed a second case.
+One objection: if C is obtuse the foot falls *outside* segment CA. But beyond 90° the cosine is negative, so `b − a cos C` comes out *larger* than `b` — exactly right for a foot on the far side. We never asked whether `cos C` was positive, so we never owed a second case.
 
 > ### Math!
 > ```
@@ -135,17 +140,23 @@ Set `C = 90°`. On the unit circle the point at 90° is `(0, 1)`, so `cos 90° =
    c² = a² + b² − 2ab·(0) = a² + b²
 ```
 
-Pythagoras, recovered without a scratch. That is the point of this concept: **the law of cosines is not a different theorem, it is Pythagoras plus a correction for the corner not being square.** Read `−2ab cos C` as that correction:
+Pythagoras, recovered without a scratch. That is the point of this concept: **the law of cosines is not a different theorem, it is Pythagoras plus a correction for the corner not being square.** Read `−2ab cos C` as the correction:
 
-* `C < 90°` — corner pinched shut, `cos C > 0`, the term subtracts, and `c` comes out **shorter** than Pythagoras predicts.
-* `C = 90°` — no correction.
-* `C > 90°` — corner levered open, `cos C < 0`, subtracting a negative *adds*, and `c` comes out **longer**.
+* **Under 90°** — corner pinched shut, cosine positive, the term subtracts, and `c` comes out **shorter** than Pythagoras predicts.
+* **Exactly 90°** — no correction.
+* **Over 90°** — corner levered open, cosine negative, subtracting a negative *adds*, and `c` comes out **longer**.
 
-Check it on the arm. `0.90² + 0.60² = 1.17`, so a square elbow would place the gripper `√1.17 = 1.0817` m out. Our target sits at `r = 1.0000` m — closer, so the elbow must be pinched tighter than 90°. Step 6 says by how much.
+Check it on the arm. A square elbow would place the gripper here:
+
+```
+   √(0.90² + 0.60²) = √1.17 = 1.0817 m
+```
+
+Our target sits at `r = 1.0000` m — closer, so the elbow must be pinched tighter than 90°. Step 6 says by how much.
 
 ### Step 5: The law of sines, and the one job it does
 
-The law of cosines wants three sides, or two sides and the angle between them. Sometimes you hold instead **an angle and the side across from it**. Drop a perpendicular again, this time from vertex C onto side `c`, and call its length `h`. It is a leg of two right triangles at once: in the one containing angle A the hypotenuse is `b`, so `h = b sin A`; in the one containing B it is `a`, so `h = a sin B`. Same segment, so:
+The law of cosines wants three sides, or two sides and the angle between them. Sometimes you hold instead **an angle and the side across from it**. Drop a perpendicular `h` from vertex C onto side `c`. It is a leg of two right triangles at once: in the one containing A the hypotenuse is `b`, so `h = b sin A`; in the one containing B it is `a`, so `h = a sin B`. Same segment, so:
 
 ```
    b sin A = a sin B      →      a / sin A  =  b / sin B
@@ -157,9 +168,9 @@ Repeat from another vertex and the third ratio joins:
 > ```
 >    a / sin A  =  b / sin B  =  c / sin C
 > ```
-> Read out loud as **"a over sine A equals b over sine B equals c over sine C."** Each side divided by the sine of the angle opposite it gives the same number for all three pairs. On the arm's triangle in Step 6 that shared value is 1.0126 for all three pairings.
+> Read out loud as **"a over sine A equals b over sine B equals c over sine C."** Each side divided by the sine of the angle opposite it gives the same number for all three pairs — on the arm's triangle in Step 6, 1.0126 every time.
 
-Here is what it buys. Two cameras 2.00 m apart both see the same game piece: the left measures 70° between the baseline and its line of sight, the right measures 50°. Angles sum to 180°, so the angle at the game piece is 60°, and the range from the left camera — the side opposite the 50° vertex — falls straight out:
+Here is what it buys. Two cameras 2.00 m apart both see the same game piece: the left measures 70° between the baseline and its line of sight, the right 50°. Angles sum to 180°, so the angle at the piece is 60°, and the range from the left camera — the side opposite the 50° vertex — falls straight out:
 
 ```
    range = 2.00 × sin 50° / sin 60° = 2.00 × 0.76604 / 0.86603 = 1.769 m
@@ -167,7 +178,7 @@ Here is what it buys. Two cameras 2.00 m apart both see the same game piece: the
 
 Two bearings and a baseline give a position. That is **triangulation**, and it is why the law of sines exists.
 
-It has one trap. Given two sides and an angle *not* between them, `sin B = b sin A / a` may have two valid answers, because sine is positive on both sides of 90° — `sin 40° = sin 140°`. This **ambiguous case** is why the rest of this concept uses the law of cosines instead: cosine is one-to-one across `0°` to `180°`, positive below 90° and negative above, never repeating a value. An angle recovered from a cosine is unique.
+It has one trap. Given two sides and an angle *not* between them, `sin B = b sin A / a` has two valid answers, because sine is positive on both sides of 90° — `sin 40° = sin 140°`. That **ambiguous case** is why the rest of this concept uses the law of cosines: cosine is one-to-one across `0°` to `180°`, positive below 90° and negative above, so an angle recovered from a cosine is unique.
 
 ### Step 6: Solving the arm — the elbow angle
 
@@ -188,7 +199,7 @@ Every quantity but `φ` is known, so rearrange for the cosine:
    φ = arccos(0.15741) = 80.94°
 ```
 
-Under 90°, as Step 4 predicted. But `φ` is the *interior angle of the triangle*, not the number a motor wants. An elbow motor is zeroed with the arm straight out, so its commanded angle `θ2` measures the bend away from straight, and straight means an interior angle of 180°:
+Under 90°, as Step 4 predicted. But `φ` is the triangle's *interior* angle, not the number a motor wants. An elbow motor is zeroed with the arm straight out, so `θ2` measures the bend away from straight, and straight means an interior angle of 180°:
 
 ```
    θ2 = 180° − φ = 180° − 80.94° = 99.06°
@@ -196,7 +207,7 @@ Under 90°, as Step 4 predicted. But `φ` is the *interior angle of the triangle
 
 ### Step 7: The shoulder angle, in two pieces
 
-The shoulder angle splits into a direction and a lift. The **direction** is `β = atan2(0.60, 0.80) = 36.87°` — Concept 04's four-quadrant heading, which keeps this correct when the target is behind or below the shoulder. The **lift** is the same triangle's interior angle at the shoulder, `α`, between the first link and the line to the target. It sits opposite side `L2`, so the law of cosines again:
+The shoulder angle splits into a direction and a lift. The **direction** is `β = atan2(0.60, 0.80) = 36.87°`, Concept 04's four-quadrant heading, which keeps this correct when the target is behind or below the shoulder. The **lift** is the triangle's interior angle at the shoulder, `α`, between the first link and the line to the target. It sits opposite `L2`, so the law of cosines again:
 
 ```
    cos α = (L1² + r² − L2²) / (2·L1·r)
@@ -207,25 +218,25 @@ The shoulder angle splits into a direction and a lift. The **direction** is `β 
    α = arccos(0.80556) = 36.34°
 ```
 
-Sanity check: `80.94° + 36.34° + 62.72° = 180.00°`, the third angle from a third application of the same formula. The triangle closes.
-
-So one solution is `θ1 = β + α = 36.87° + 36.34° = 73.21°` with `θ2 = −99.06°`. Run those through Section 1's forward equations:
+Sanity check: `80.94° + 36.34° + 62.72° = 180.00°`, the third angle from a third use of the same formula. The triangle closes. So one solution is `θ1 = β + α = 73.21°` with `θ2 = −99.06°`. Through Section 1's forward equations:
 
 ```
    elbow   = (0.90 cos θ1, 0.90 sin θ1)                = (0.2600, 0.8616)
    gripper = elbow + (0.60 cos(θ1 + θ2), 0.60 sin(θ1 + θ2)) = (0.8000, 0.6000)
 ```
 
-The gripper lands on the target. (Degrees are shown rounded; at full precision the check closes exactly.) The inverse problem is solved — except that the sign on `θ2` was never actually forced, which is Step 9.
+The gripper lands on the target. (Degrees are shown rounded; at full precision it closes exactly.) The inverse problem is solved — except that the sign on `θ2` was never forced, which is Step 9.
 
 ### Step 8: Reachability, and why the failure is a NaN
 
-Read the elbow formula as software. A cosine is a coordinate on the unit circle, so it can never leave `−1 … +1` — but `r` is a number a driver chose. Push the formula to each limit:
+Read the elbow formula as software. A cosine can never leave `−1 … +1`, but `r` is a number a driver chose. Push the formula to each limit:
 
-* `cos φ = −1`, so `φ = 180°`: links straight in a line, `r² = (L1 + L2)²`, `r = 1.50` m. **Nothing farther is reachable.**
-* `cos φ = +1`, so `φ = 0°`: links folded flat together, `r² = (L1 − L2)²`, `r = 0.30` m. **Nothing nearer is reachable**, because the second link cannot retract past the first.
+```
+   cos φ = −1  →  φ = 180°, links straight  →  r² = (L1 + L2)²  →  r = 1.50 m
+   cos φ = +1  →  φ =   0°, links folded    →  r² = (L1 − L2)²  →  r = 0.30 m
+```
 
-The reachable set is an **annulus**: outer radius `L1 + L2`, with a dead hole of radius `|L1 − L2|`. Equal links close the hole; a short second link leaves a large one. Those bounds are also the **triangle inequality**, so an algebraic and a geometric derivation agree.
+Nothing farther than the first is reachable, and nothing nearer than the second, because the forearm cannot retract past the shoulder segment. The reachable set is an **annulus** — outer radius `L1 + L2`, dead hole of radius `|L1 − L2|` that equal links would close. Those are the **triangle inequality**, so an algebraic and a geometric derivation agree.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="380" height="390" viewBox="0 0 360 370" style="max-width: 100%; height: auto;" role="img" aria-label="A shaded ring around the shoulder showing the reachable region between an inner radius of 0.30 metres and an outer radius of 1.50 metres, with an unreachable target outside the ring and the clamped straight-arm solution touching the outer rim on the way to it.">
@@ -255,13 +266,13 @@ Now the bug. Command a target at `(1.30, 0.90)`, so `r = √(1.69 + 0.81) = 1.58
    cos φ argument = (0.81 + 0.36 − 2.50) / 1.08 = −1.2315
 ```
 
-Java's `Math.acos` of anything outside `−1 … +1` returns **NaN** — not an exception, so it propagates silently into your setpoint, your PID controller and your motor output, and the arm freezes or does something spectacular with no stack trace. It shows up mid-match, not on the bench, because a driver reaching one inch too far is not a condition you tested.
+Java's `Math.acos` of anything outside `−1 … +1` returns **NaN** — not an exception, so it propagates silently into your setpoint, your PID controller and your motor output, and the arm freezes or does something spectacular with no stack trace. It surfaces mid-match, not on the bench, because reaching one inch too far is not a condition you tested.
 
-**Clamp the cosine argument to `−1 … +1` before calling `acos`.** That is not papering over the problem, it is the geometrically correct answer. Clamping to `−1` gives `φ = 180°`, the fully extended arm, and the shoulder's `α` clamps to `0°` in the same breath, leaving `θ1 = β`: the arm goes straight, aimed at the unreachable target, reaching as far along that line as it can. Here it stops at `1.50 × (cos 34.70°, sin 34.70°) = (1.2333, 0.8538)`, `0.081` m short. Report that shortfall so the operator sees it.
+**Clamp the cosine argument to `−1 … +1` before calling `acos`.** That is not papering over the problem, it is the geometrically correct answer. Clamping to `−1` gives `φ = 180°`, and the shoulder's `α` clamps to `0°` in the same breath, leaving `θ1 = β`: the arm goes straight, aimed at the unreachable target, reaching as far along that line as it can. Here it stops at `(1.2333, 0.8538)`, `0.081` m short. Report that shortfall so the operator sees it.
 
 ### Step 9: Elbow-up, elbow-down, and why you must choose
 
-Return to Step 7's loose end. The law of cosines handed back `φ = 80.94°`, one unambiguous number, so the triangle's *shape* is fully pinned down. But a shape is not a placement: the triangle can be laid onto the plane two ways, elbow above the shoulder-to-target line or mirrored below it.
+`φ = 80.94°` came back as one unambiguous number, so the triangle's *shape* is pinned down. But a shape is not a placement: it can be laid onto the plane two ways — elbow above the shoulder-to-target line, or mirrored below.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="400" height="250" viewBox="0 0 400 240" style="max-width: 100%; height: auto;" role="img" aria-label="Two arm configurations reaching the same target point, one with the elbow above the shoulder-to-target line and one with it mirrored below, joined by a dashed mirror line.">
@@ -289,16 +300,16 @@ Return to Step 7's loose end. The law of cosines handed back `φ = 80.94°`, one
   </svg>
 </div>
 
-Algebraically the fork is a missing sign. `arccos` returns a value in `0°` to `180°` — a positive angle — because a function must return one number. But `+99.06°` and `−99.06°` share a cosine, so both satisfy the equation. **The cosine fixed the magnitude of the bend and said nothing about its direction.** The shoulder follows: bend one way and the first link swings to `β + α`, the other way and it swings to `β − α`. The second solution checks out just as exactly:
+The fork is a missing sign. `arccos` returns a value in `0°` to `180°` because a function must return one number — but `+99.06°` and `−99.06°` share a cosine, so both satisfy the equation. **The cosine fixed the magnitude of the bend and said nothing about its direction.** The shoulder follows: bend one way and the first link swings to `β + α`, the other way and it swings to `β − α`. The second solution checks out just as exactly:
 
 ```
    elbow   = (0.90 cos θ1, 0.90 sin θ1)                = (0.9000, 0.0084)
    gripper = elbow + (0.60 cos(θ1 + θ2), 0.60 sin(θ1 + θ2)) = (0.8000, 0.6000)
 ```
 
-Neither is preferable *mathematically*, which is why a real mechanism must choose **deliberately, in code, and stick to it**. Elbow-up here tucks the arm high and close; elbow-down throws the first link nearly flat, putting the elbow 0.90 m horizontally past the shoulder — likely outside the frame perimeter, an inspection failure before it is a collision. Elsewhere the wrong branch fouls the drivetrain or wraps a cable.
+Neither is preferable *mathematically*, which is why a mechanism must choose **deliberately, in code, and stick to it**. Elbow-up here tucks the arm high and close; elbow-down throws the first link nearly flat, putting the elbow 0.90 m past the shoulder — likely outside the frame perimeter, an inspection failure before it is a collision. Elsewhere the wrong branch fouls the drivetrain.
 
-And **never let the branch flip mid-motion**. The two poses are far apart in joint space even when their gripper positions are millimetres apart, so a solver that silently switches sign slams both joints across their full range at speed to reach a target the gripper had nearly arrived at.
+And **never let the branch flip mid-motion**. The two poses are far apart in joint space even when their gripper positions are millimetres apart, so a sign flip slams both joints across their full range at speed.
 
 ---
 
@@ -347,7 +358,7 @@ System.out.printf("elbow-down theta1 %+.2f  theta2 %+.2f%n",
 // elbow-down theta1  +0.53  theta2 +99.06
 ```
 
-Always test inverse kinematics by running the answer back through forward kinematics. Two lines, and it catches every sign error you will make:
+Always test inverse kinematics by running the answer back through forward kinematics. Two lines, and it catches every sign error:
 
 ```java
 double t1 = elbowUpShoulder, t2 = elbowUpElbow;
@@ -357,7 +368,7 @@ double gy = L1 * Math.sin(t1) + L2 * Math.sin(t1 + t2);   // 0.6000
 
 ### In a Robot Project (Java & WPILib)
 
-**WPILib has no arm inverse-kinematics class.** `SwerveDriveKinematics` and `DifferentialDriveKinematics` cover drivetrains; nothing in the library solves a jointed arm. So the production tier here is not a library call — it is the same mathematics in a small, well-named utility built from the pieces WPILib *does* provide: `MathUtil.clamp` for the guard, `Rotation2d` for angles that never lose their units, `Translation2d` for the target.
+**WPILib has no arm inverse-kinematics class.** `SwerveDriveKinematics` and `DifferentialDriveKinematics` cover drivetrains; nothing solves a jointed arm. So the production tier is not a library call but the same mathematics in a small, well-named utility, built from the pieces WPILib *does* give you: `MathUtil.clamp` for the guard, `Rotation2d` for angles that never lose their units, `Translation2d` for the target.
 
 ```java
 import edu.wpi.first.math.MathUtil;
@@ -409,7 +420,7 @@ public final class TwoLinkArmKinematics {
 }
 ```
 
-Called with `new Translation2d(0.80, 0.60)` and `Elbow.UP`, this returns `73.21°` and `−99.06°` — the same numbers as the from-scratch tier, because it is the same arithmetic. `toTip` on that pair returns `(0.800, 0.600)`, the assertion your unit test should make. `r = 0` is the one input to think about: `new Rotation2d(0, 0)` gives `0°` rather than throwing, so the arm folds and points down-field — Concept 04's `(0, 0)` convention.
+Called with `new Translation2d(0.80, 0.60)` and `Elbow.UP` this returns `73.21°` and `−99.06°` — the same numbers as the from-scratch tier, because it is the same arithmetic — and `toTip` on that pair returns `(0.800, 0.600)`, the assertion your unit test should make. The one input to think about is `r = 0`: `new Rotation2d(0, 0)` gives `0°` rather than throwing, so the arm folds and points down-field.
 
 ---
 
@@ -417,15 +428,13 @@ Called with `new Translation2d(0.80, 0.60)` and `Elbow.UP`, this returns `73.21�
 
 ### Robot manipulators, from FRC to industrial arms
 
-Everything above is the standard analytic solution for a **planar 2R manipulator** — two revolute joints in a plane — one of the handful of arm geometries solvable in closed form at all. Past a few joints there is no formula and industrial controllers fall back on iterative numerical solvers, but the properties derived here survive that jump: the workspace is still bounded by a maximum and a minimum reach, solutions still come in discrete branches, and switching branches mid-trajectory is still the classic way to destroy a mechanism.
+Everything above is the standard analytic solution for a **planar 2R manipulator**, one of the few arm geometries solvable in closed form at all. Past a few joints there is no formula and controllers switch to numerical solvers — but the properties derived here survive: a workspace bounded by maximum and minimum reach, solutions in discrete branches, and branch-switching mid-trajectory as the classic way to destroy a mechanism.
 
-The elbow fork has a name in that literature. Configurations where distinct branches meet are **singularities**, and here they sit on Step 8's two rims: at full extension and full fold, `α = 0` and the two solutions collapse into one. Near those rims a tiny change in target demands a large change in joint angle — which is why arm code stays a margin inside the annulus instead of using every last millimetre of reach, a design decision the law of cosines just told you how to compute.
+The elbow fork has a name there. Configurations where branches meet are **singularities**, and here they sit on Step 8's two rims: at full extension and full fold, `α = 0` and the solutions collapse into one. Near a rim a tiny change in target demands a large change in joint angle, which is why arm code stays a margin inside the annulus.
 
 ### Trilateration: the same triangle, solved for position
 
-The law of cosines also underpins **trilateration**, which is how GPS works. A receiver measures its distance to satellites whose positions are known; each distance defines a sphere, and the receiver sits where the spheres intersect. Solving those intersections is this same manoeuvre — known lengths, an unknown angle recovered from a cosine — in three dimensions, with enough measurements to also solve for the receiver's clock error.
-
-The FRC version is closer to home: ultrasonic and time-of-flight sensors report ranges rather than bearings, and two of them at a known separation pin a target to a point by exactly the Step 6 computation, as Checkpoint 2 works through. Ranges take cosines, bearings take sines, and both are this one triangle.
+**Trilateration** is how GPS works: a receiver measures its distance to satellites whose positions are known, each distance defines a sphere, and the receiver sits where the spheres intersect — this same manoeuvre in three dimensions. The FRC version is closer to home: ultrasonic and time-of-flight sensors report ranges rather than bearings, and two of them at a known separation pin a target to a point by exactly the Step 6 computation, as Checkpoint 2 works through. Ranges take cosines, bearings take sines, and both are this triangle.
 
 ---
 
@@ -433,24 +442,39 @@ The FRC version is closer to home: ultrasonic and time-of-flight sensors report 
 
 ### Checkpoint 1
 
-An arm has links `L1 = 0.70` m and `L2 = 0.50` m. Find its reachable ring, decide whether a target 1.30 m from the shoulder is reachable, and say what the code should command if it is not.
+An arm has links `L1 = 0.70` m and `L2 = 0.50` m. Find its reachable ring, decide whether a target 1.30 m out is reachable, and say what the code should command if not.
 
 **Solution:**
 
-1. **The ring.** `cos φ = −1` puts the links in a line: `r = L1 + L2 = 1.20` m. `cos φ = +1` folds them flat: `r = |L1 − L2| = 0.20` m. Reachable between 0.20 and 1.20 m.
-2. **Test it.** `1.30 > 1.20`, out of reach. Confirm as the code will: `cos φ = (0.49 + 0.25 − 1.69) / (2 × 0.70 × 0.50) = −0.95 / 0.70 = −1.357`, outside `−1 … +1`.
-3. **Unclamped.** `Math.acos(−1.357)` returns NaN, contaminating the shoulder angle, the setpoint and the motor output with no error message.
-4. **Clamped.** `cos φ` clamps to `−1`, giving `φ = 180°` and `θ2 = 0°`, arm straight. The shoulder's `cos α = (0.49 + 1.69 − 0.25) / (2 × 0.70 × 1.30) = 1.060` clamps to `+1`, so `α = 0°` and `θ1 = β`. The arm points straight at the target and stops `1.30 − 1.20 = 0.10` m short, the best it can physically do.
+1. **The ring**, from Step 8's two limits:
+
+   ```
+   outer = L1 + L2   = 0.70 + 0.50 = 1.20 m
+   inner = |L1 − L2| = 0.70 − 0.50 = 0.20 m
+   ```
+2. **Test it.** 1.30 lies outside that ring. Confirm as the code will:
+
+   ```
+   cos φ = (0.49 + 0.25 − 1.69) / (2 × 0.70 × 0.50) = −0.95 / 0.70 = −1.357
+   ```
+3. **Unclamped.** `Math.acos(−1.357)` returns NaN, contaminating the shoulder angle, the setpoint and the motor output silently.
+4. **Clamped.** `cos φ` clamps to `−1`, giving `φ = 180°` and `θ2 = 0°`, arm straight. The shoulder's cosine clamps too:
+
+   ```
+   cos α = (0.49 + 1.69 − 0.25) / (2 × 0.70 × 1.30) = 1.060   →   clamps to +1   →   α = 0°
+   ```
+
+   so `θ1 = β`. The arm points straight at the target and stops `1.30 − 1.20 = 0.10` m short, the best it can physically do.
 
 ---
 
 ### Checkpoint 2
 
-A robot at `(2.0, 3.0)` and a teammate at `(6.0, 3.0)` both range the same game piece: the first measures 3.5 m, the second 2.5 m. Find the angle at the first robot between the line to its teammate and the line to the piece, then the piece's field position, taking the larger-Y solution.
+A robot at `(2.0, 3.0)` and a teammate at `(6.0, 3.0)` both range the same game piece: the first measures 3.5 m, the second 2.5 m. Find the angle at the first robot between the lines to its teammate and to the piece, then the piece's field position, taking the larger-Y solution.
 
 **Solution:**
 
-1. **The triangle.** All three sides are known — baseline `6.0 − 2.0 = 4.0` m, ranges 3.5 m and 2.5 m. Three sides is the law of cosines' other input mode.
+1. **The triangle.** All three sides are known — baseline 4.0 m, ranges 3.5 m and 2.5 m. Three sides is the law of cosines' other input mode.
 2. **At the first robot.** Its angle `A` lies between the sides 4.0 and 3.5, and opposite it is the teammate's range, 2.5:
 
    ```
@@ -458,19 +482,23 @@ A robot at `(2.0, 3.0)` and a teammate at `(6.0, 3.0)` both range the same game 
    6.25 = 16.00 + 12.25 − 28.00 cos A
    cos A = 22.00 / 28.00 = 0.78571      →      A = 38.21°
    ```
-3. **Guard it, as code would.** `0.78571` is inside `−1 … +1`, so the three lengths really do close into a triangle. Ranges of 3.5 and 0.4 would not, and would mean the sensors disagree.
-4. **To a field position.** The baseline runs along `+X`, so the bearing is `38.21°` and the piece is 3.5 m along it: `(2.0 + 2.750, 3.0 + 2.165) = (4.750, 5.165)`.
+3. **Guard it, as code would.** `0.78571` is inside `−1 … +1`, so the three lengths really do close into a triangle. Ranges of 3.5 and 0.4 would not, meaning the sensors disagree.
+4. **To a field position.** The baseline runs along `+X`, so the bearing is 38.21° and the piece is 3.5 m along it:
+
+   ```
+   (2.0 + 3.5 cos 38.21°, 3.0 + 3.5 sin 38.21°) = (4.750, 5.165)
+   ```
 5. **Verify.** Its distance to the teammate is `√(1.5625 + 4.6872) = 2.500` m, matching the second range.
 
 ---
 
 ### Deep Dive 1
 
-Step 9 forbade flipping branches mid-motion, but said nothing about how to *change* branch when you genuinely must — stowed elbow-down to an elbow-up scoring pose, say. Work out what the gripper does if you simply command the new joint angles and let both motors drive straight there, and find where on that path the arm is most extended. Then design a safer route: what intermediate target lets the arm cross the branch-change point deliberately, slowly, somewhere nothing can be hit? Decide whether the folded rim or the extended rim is the better crossing.
+Step 9 forbade flipping branches mid-motion, but said nothing about how to *change* branch when you genuinely must — stowed elbow-down to an elbow-up scoring pose, say. Work out what the gripper does if you command the new joint angles and let both motors drive straight there, and where on that path the arm is most extended. Then design a safer route through the branch-change point, and decide whether the folded rim or the extended rim is the better crossing.
 
 ### Deep Dive 2
 
-Real arms cannot use their whole annulus. Suppose the shoulder is limited to `0°` through `120°`, the elbow to `−140°` through `0°`, and the gripper must never dip below the floor line through the shoulder. Work out which parts of the reachable ring survive those three constraints and sketch the surviving region. Then extend Section 3's code: it should report whether each joint angle lies inside its limit, and try elbow-down when elbow-up violates one. Decide what it should do when both branches fail on a target that is inside the annulus.
+Real arms cannot use their whole annulus. Suppose the shoulder is limited to `0°` through `120°`, the elbow to `−140°` through `0°`, and the gripper must never dip below the floor line. Sketch the part of the ring that survives all three constraints. Then extend Section 3's code to report whether each joint angle is inside its limit and to try elbow-down when elbow-up is not — and decide what it should do when both branches fail on a target inside the annulus.
 
 ---
 

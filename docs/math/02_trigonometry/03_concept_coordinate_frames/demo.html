@@ -3,76 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Concept 02: Coordinate Frames Visualizer</title>
+  <title>Concept 03: Frame Transform Explorer</title>
   <script src="../../../assets/theme.js"></script>
   <link rel="stylesheet" href="../../../assets/axon.css">
   <style>
-    .demo-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 12px;
-    }
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* The container owns its height outright. The canvas is taken out of flow and
+       stretched to fill it, so the canvas size can never feed back into the
+       container size — that loop makes the canvas grow without bound on resize. */
     .canvas-container {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 10px;
       position: relative;
       overflow: hidden;
-      min-height: 340px;
+      height: 380px;
     }
     canvas {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
-      cursor: crosshair;
+      cursor: grab;
+      touch-action: none;
     }
+    .hint {
+      position: absolute; left: 10px; top: 8px;
+      font-size: 0.7rem; color: var(--muted);
+      pointer-events: none; font-family: system-ui, sans-serif;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
+    }
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=range] { accent-color: var(--accent); width: 170px; }
+    .controls input[type=checkbox] { accent-color: var(--accent); }
+    .controls button {
+      font: inherit; cursor: pointer; padding: 4px 12px; border-radius: 7px;
+      border: 1px solid var(--line); background: var(--panel-hover); color: var(--ink);
+    }
+    .mono { font-family: ui-monospace, "SF Mono", monospace; }
     .stats-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: space-between;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-family: ui-monospace, "SF Mono", monospace;
-      font-size: 0.85rem;
+      display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: space-between;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.85rem;
     }
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    .stat-val {
-      font-weight: 700;
-      color: var(--ink);
-    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); }
   </style>
 </head>
 <body>
   <div class="demo-wrap">
     <div class="canvas-container">
       <canvas id="frameCanvas"></canvas>
+      <div class="hint">Drag the robot or the target. Use the slider to spin the heading.</div>
     </div>
-    
+
+    <div class="controls">
+      <label>Robot heading θ
+        <input type="range" id="headingSlider" min="-180" max="180" value="35" step="1">
+        <span id="headingVal" class="mono" style="color: var(--accent-purple);">35°</span>
+      </label>
+      <label><input type="checkbox" id="showNaive" checked> Naive addition (the bug)</label>
+      <label><input type="checkbox" id="showAxes" checked> Robot axes</label>
+      <button type="button" id="sweepBtn">Sweep the heading</button>
+      <button type="button" id="resetBtn">Reset</button>
+    </div>
+
     <div class="stats-row">
       <div class="stat-item">
-        <span class="stat-label">Robot Frame Origin (Field X, Y)</span>
-        <span class="stat-val" id="robotPosText" style="color: var(--accent);">[4.0, 2.0] m</span>
+        <span class="stat-label">robot pose (field)</span>
+        <span class="stat-val" id="poseText" style="color: var(--accent);">(5.00, 3.00, 35.0°)</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Local Offset (Robot X, Y)</span>
-        <span class="stat-val" id="localOffText" style="color: var(--accent-green);">[+1.5, +0.5] m</span>
+        <span class="stat-label">target, field frame</span>
+        <span class="stat-val" id="fieldText" style="color: var(--accent-green);">(6.458, 3.533)</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Target on Field (Global X, Y)</span>
-        <span class="stat-val" id="globalPosText" style="color: var(--accent-amber); font-size: 1.05rem;">[5.5, 2.5] m</span>
+        <span class="stat-label">target, robot frame (fwd, left)</span>
+        <span class="stat-val" id="robotText" style="color: var(--accent-amber);">(+1.500, −0.400)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">distance (both frames)</span>
+        <span class="stat-val" id="distText">1.552 m  /  1.552 m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">naive: robot + (fwd, left)</span>
+        <span class="stat-val" id="naiveText" style="color: var(--accent-red, #f43f5e);">(6.500, 2.600)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">naive error</span>
+        <span class="stat-val" id="errText" style="color: var(--accent-red, #f43f5e); font-size: 1.05rem;">0.934 m</span>
       </div>
     </div>
   </div>
@@ -81,162 +108,334 @@
     const canvas = document.getElementById('frameCanvas');
     const ctx = canvas.getContext('2d');
 
-    const fieldX = 10.0;
-    const fieldY = 6.0;
+    const headingSlider = document.getElementById('headingSlider');
+    const showNaive = document.getElementById('showNaive');
+    const showAxes = document.getElementById('showAxes');
+    const sweepBtn = document.getElementById('sweepBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
-    let robot = { x: 3.5, y: 2.5 };
-    let piece = { x: 5.5, y: 3.5 };
-    let dragging = null;
+    // The field, in metres. X runs down-field, Y runs to the left.
+    const FIELD_W = 8.0, FIELD_H = 5.0;
+
+    const START = { rx: 5.0, ry: 3.0, deg: 35, tx: 6.458159, ty: 3.532704 };
+
+    let robot  = { x: START.rx, y: START.ry };
+    let theta  = START.deg * Math.PI / 180;     // radians, counter-clockwise
+    let target = { x: START.tx, y: START.ty };  // in FIELD coordinates
+    let dragging = null;                        // 'robot' | 'target' | null
+    let sweeping = false, rafId = null;
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
 
     function resize() {
       const rect = canvas.parentElement.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
+      canvas.width  = rect.width  * dpr;
       canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       draw();
     }
-    window.addEventListener('resize', resize);
-    window.addEventListener('axon-theme-changed', draw);
 
-    function toScreen(mx, my) {
-      const pad = 35;
-      const w = (canvas.width / (window.devicePixelRatio || 1)) - pad * 2;
-      const h = (canvas.height / (window.devicePixelRatio || 1)) - pad * 2;
+    /* ONE scale for both axes. Two would stretch the field, and every angle read
+       off the picture — the whole point of this demo — would be a lie. */
+    function view() {
+      const { w, h } = cssSize();
+      const padX = 34, padTop = 30, padBottom = 26;
+      const s = Math.min((w - 2 * padX) / FIELD_W, (h - padTop - padBottom) / FIELD_H);
+      const scale = Math.max(12, s);
       return {
-        x: pad + (mx / fieldX) * w,
-        y: pad + h - (my / fieldY) * h
+        scale,
+        ox: (w - FIELD_W * scale) / 2,
+        oy: padTop + (h - padTop - padBottom + FIELD_H * scale) / 2
       };
     }
 
-    function toMeters(sx, sy) {
-      const pad = 35;
-      const w = (canvas.width / (window.devicePixelRatio || 1)) - pad * 2;
-      const h = (canvas.height / (window.devicePixelRatio || 1)) - pad * 2;
+    function toScreen(x, y) {
+      const v = view();
+      return { x: v.ox + x * v.scale, y: v.oy - y * v.scale };
+    }
+
+    function toField(px, py) {
+      const v = view();
+      return { x: (px - v.ox) / v.scale, y: (v.oy - py) / v.scale };
+    }
+
+    function palette() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       return {
-        x: Math.max(0, Math.min(fieldX, ((sx - pad) / w) * fieldX)),
-        y: Math.max(0, Math.min(fieldY, (1.0 - (sy - pad) / h) * fieldY))
+        grid:   isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.06)',
+        axis:   isLight ? '#94a3b8' : '#475569',
+        line:   isLight ? '#cbd5e1' : '#232b3b',
+        muted:  isLight ? '#64748b' : '#94a3b8',
+        ink:    isLight ? '#0f172a' : '#f1f5f9',
+        blue:   isLight ? '#0284c7' : '#38bdf8',
+        green:  isLight ? '#16a34a' : '#4ade80',
+        amber:  isLight ? '#d97706' : '#fbbf24',
+        red:    isLight ? '#e11d48' : '#f43f5e',
+        purple: isLight ? '#9333ea' : '#c084fc',
+        fill:   isLight ? 'rgba(56,189,248,0.14)' : 'rgba(56,189,248,0.16)'
       };
+    }
+
+    // Subtract first, then un-rotate by -theta. The concept's Step 5.
+    function toRobotFrame(fx, fy) {
+      const c = Math.cos(theta), s = Math.sin(theta);
+      const dx = fx - robot.x, dy = fy - robot.y;
+      return { a: dx * c + dy * s, b: -dx * s + dy * c };
+    }
+
+    function arrow(from, to, colour, width) {
+      const dx = to.x - from.x, dy = to.y - from.y;
+      const len = Math.hypot(dx, dy);
+      if (len < 1) return;
+      const ux = dx / len, uy = dy / len;
+      ctx.strokeStyle = colour; ctx.lineWidth = width;
+      ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+      ctx.fillStyle = colour;
+      ctx.beginPath();
+      ctx.moveTo(to.x, to.y);
+      ctx.lineTo(to.x - 9 * ux + 4.5 * uy, to.y - 9 * uy - 4.5 * ux);
+      ctx.lineTo(to.x - 9 * ux - 4.5 * uy, to.y - 9 * uy + 4.5 * ux);
+      ctx.closePath(); ctx.fill();
     }
 
     function draw() {
-      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      const width = canvas.width / (window.devicePixelRatio || 1);
-      const height = canvas.height / (window.devicePixelRatio || 1);
+      const C = palette();
+      const v = view();
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
+      ctx.font = '11px system-ui, sans-serif';
 
-      ctx.clearRect(0, 0, width, height);
+      const O  = toScreen(0, 0);
+      const TR = toScreen(FIELD_W, FIELD_H);
 
-      // Global Field Axes
-      const originScr = toScreen(0, 0);
-      const maxXScr = toScreen(fieldX, 0);
-      const maxYScr = toScreen(0, fieldY);
+      // Field carpet and one-metre grid
+      ctx.fillStyle = C.grid;
+      ctx.fillRect(O.x, TR.y, TR.x - O.x, O.y - TR.y);
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let gx = 1; gx < FIELD_W; gx++) {
+        const p = toScreen(gx, 0);
+        ctx.beginPath(); ctx.moveTo(p.x, O.y); ctx.lineTo(p.x, TR.y); ctx.stroke();
+      }
+      for (let gy = 1; gy < FIELD_H; gy++) {
+        const p = toScreen(0, gy);
+        ctx.beginPath(); ctx.moveTo(O.x, p.y); ctx.lineTo(TR.x, p.y); ctx.stroke();
+      }
+      ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5;
+      ctx.strokeRect(O.x, TR.y, TR.x - O.x, O.y - TR.y);
 
-      ctx.strokeStyle = isLight ? '#94a3b8' : '#334155';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(originScr.x, originScr.y); ctx.lineTo(maxXScr.x, maxXScr.y);
-      ctx.moveTo(originScr.x, originScr.y); ctx.lineTo(maxYScr.x, maxYScr.y);
-      ctx.stroke();
+      // Field origin and axis labels
+      ctx.fillStyle = C.muted;
+      ctx.fillText('field (0, 0)', O.x + 5, O.y - 7);
+      ctx.fillText('field X →', TR.x - 56, O.y + 16);
+      ctx.save();
+      ctx.translate(O.x - 10, TR.y + 54);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('field Y →', 0, 0);
+      ctx.restore();
 
-      ctx.font = '11px sans-serif';
-      ctx.fillStyle = isLight ? '#64748b' : '#94a3b8';
-      ctx.fillText('Field X (East)', maxXScr.x - 70, maxXScr.y + 16);
-      ctx.fillText('Field Y (North)', maxYScr.x - 20, maxYScr.y - 8);
+      const R = toScreen(robot.x, robot.y);
+      const T = toScreen(target.x, target.y);
+      const local = toRobotFrame(target.x, target.y);
 
-      const rScr = toScreen(robot.x, robot.y);
-      const pScr = toScreen(piece.x, piece.y);
+      const c = Math.cos(theta), s = Math.sin(theta);
+      // Robot axis directions, in screen pixels per metre (y flips)
+      const fwd  = { x:  c * v.scale, y: -s * v.scale };
+      const left = { x: -s * v.scale, y: -c * v.scale };
 
-      // Local Robot Axes
-      const rAxisLen = 45;
-      ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(rScr.x, rScr.y); ctx.lineTo(rScr.x + rAxisLen, rScr.y);
-      ctx.moveTo(rScr.x, rScr.y); ctx.lineTo(rScr.x, rScr.y - rAxisLen);
-      ctx.stroke();
+      // The naive answer: robot position plus the camera reading, unrotated.
+      const naive = { x: robot.x + local.a, y: robot.y + local.b };
+      const N = toScreen(naive.x, naive.y);
 
-      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.fillText('+X_robot (Forward)', rScr.x + rAxisLen + 4, rScr.y + 4);
-      ctx.fillText('+Y_robot (Left)', rScr.x - 15, rScr.y - rAxisLen - 6);
+      // Robot axes
+      if (showAxes.checked) {
+        const L = 0.85;
+        arrow(R, { x: R.x + fwd.x * L,  y: R.y + fwd.y * L  }, C.blue, 2.5);
+        arrow(R, { x: R.x + left.x * L, y: R.y + left.y * L }, C.green, 2.5);
+        // Nudge each label sideways from its own arrow so the two never overlap.
+        ctx.fillStyle = C.blue;
+        ctx.fillText('forward',
+          R.x + fwd.x * L - left.x * 0.16 + 4, R.y + fwd.y * L - left.y * 0.16 + 4);
+        ctx.fillStyle = C.green;
+        ctx.fillText('left',
+          R.x + left.x * L + fwd.x * 0.16 + 4, R.y + left.y * L + fwd.y * 0.16 + 4);
+      }
 
-      // Dashed local offset line
-      ctx.setLineDash([3, 3]);
-      ctx.strokeStyle = isLight ? '#16a34a' : '#4ade80';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(rScr.x, rScr.y);
-      ctx.lineTo(pScr.x, rScr.y);
-      ctx.lineTo(pScr.x, pScr.y);
-      ctx.stroke();
+      // The decomposition: a metres along forward, then b metres along left.
+      const CORNER = { x: R.x + fwd.x * local.a, y: R.y + fwd.y * local.a };
+      ctx.setLineDash([6, 4]); ctx.lineWidth = 2;
+      ctx.strokeStyle = C.amber;
+      ctx.beginPath(); ctx.moveTo(R.x, R.y); ctx.lineTo(CORNER.x, CORNER.y);
+      ctx.lineTo(T.x, T.y); ctx.stroke();
       ctx.setLineDash([]);
 
-      // Robot Box
-      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.fillRect(rScr.x - 14, rScr.y - 14, 28, 28);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(rScr.x - 14, rScr.y - 14, 28, 28);
+      // Naive ghost, and the gap it opens up
+      if (showNaive.checked) {
+        ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+        ctx.strokeStyle = C.red;
+        ctx.beginPath(); ctx.moveTo(T.x, T.y); ctx.lineTo(N.x, N.y); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.strokeStyle = C.red; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(N.x - 7, N.y - 7); ctx.lineTo(N.x + 7, N.y + 7);
+        ctx.moveTo(N.x + 7, N.y - 7); ctx.lineTo(N.x - 7, N.y + 7);
+        ctx.stroke();
+        const gap = Math.hypot(target.x - naive.x, target.y - naive.y);
+        ctx.fillStyle = C.red;
+        ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.fillText(gap.toFixed(3) + ' m off', (T.x + N.x) / 2 + 8, (T.y + N.y) / 2);
+        ctx.font = '11px system-ui, sans-serif';
+        ctx.fillText('naive addition', N.x + 10, N.y + 16);
+      }
 
-      // Piece Circle
-      ctx.fillStyle = isLight ? '#d97706' : '#fbbf24';
-      ctx.beginPath(); ctx.arc(pScr.x, pScr.y, 8, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+      // The robot chassis, drawn turned to its heading
+      ctx.save();
+      ctx.translate(R.x, R.y);
+      ctx.rotate(-theta);
+      const half = Math.max(10, 0.36 * v.scale);
+      ctx.fillStyle = C.fill;
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (ctx.roundRect) { ctx.roundRect(-half, -half, half * 2, half * 2, 5); }
+      else { ctx.rect(-half, -half, half * 2, half * 2); }
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = C.blue;
+      ctx.beginPath();
+      ctx.moveTo(half, -half * 0.5); ctx.lineTo(half + half * 0.5, 0); ctx.lineTo(half, half * 0.5);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
 
-      // Telemetry
-      const localX = piece.x - robot.x;
-      const localY = piece.y - robot.y;
+      // Target
+      ctx.fillStyle = C.green;
+      ctx.beginPath(); ctx.arc(T.x, T.y, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = C.green;
+      ctx.font = 'bold 11px system-ui, sans-serif';
+      ctx.fillText('target', T.x + 11, T.y - 8);
+      ctx.font = '11px system-ui, sans-serif';
 
-      document.getElementById('robotPosText').textContent = `[${robot.x.toFixed(1)}, ${robot.y.toFixed(1)}] m`;
-      document.getElementById('localOffText').textContent = `[${localX >= 0 ? '+' : ''}${localX.toFixed(1)}, ${localY >= 0 ? '+' : ''}${localY.toFixed(1)}] m`;
-      document.getElementById('globalPosText').textContent = `[${piece.x.toFixed(1)}, ${piece.y.toFixed(1)}] m`;
+      // Heading arc at the robot, measured from the field X direction
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 2;
+      const arcR = Math.max(18, 0.55 * v.scale);
+      ctx.beginPath();
+      ctx.arc(R.x, R.y, arcR, 0, -theta, theta > 0);
+      ctx.stroke();
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(R.x, R.y); ctx.lineTo(R.x + arcR + 10, R.y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = C.purple;
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillText('θ = ' + (theta * 180 / Math.PI).toFixed(1) + '°', R.x + arcR + 6, R.y - 8);
+
+      updateStats(local, naive);
+    }
+
+    function signed(x, digits) {
+      const t = x.toFixed(digits);
+      return (x >= 0 ? '+' : '−') + t.replace('-', '');
+    }
+
+    function updateStats(local, naive) {
+      const set = (id, val) => document.getElementById(id).textContent = val;
+      const deg = theta * 180 / Math.PI;
+
+      set('poseText', '(' + robot.x.toFixed(2) + ', ' + robot.y.toFixed(2) + ', ' + deg.toFixed(1) + '°)');
+      set('fieldText', '(' + target.x.toFixed(3) + ', ' + target.y.toFixed(3) + ')');
+      set('robotText', '(' + signed(local.a, 3) + ', ' + signed(local.b, 3) + ')');
+
+      const dField = Math.hypot(target.x - robot.x, target.y - robot.y);
+      const dLocal = Math.hypot(local.a, local.b);
+      set('distText', dField.toFixed(3) + ' m  /  ' + dLocal.toFixed(3) + ' m');
+
+      set('naiveText', '(' + naive.x.toFixed(3) + ', ' + naive.y.toFixed(3) + ')');
+      set('errText', Math.hypot(target.x - naive.x, target.y - naive.y).toFixed(3) + ' m');
+      set('headingVal', deg.toFixed(0) + '°');
+      headingSlider.value = Math.round(deg);
     }
 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
-      const cx = e.touches ? e.touches[0].clientX : e.clientX;
-      const cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: cx - rect.left, y: cy - rect.top };
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
     }
 
-    canvas.addEventListener('mousedown', (e) => {
-      const p = getPos(e);
-      const rScr = toScreen(robot.x, robot.y);
-      const pScr = toScreen(piece.x, piece.y);
-      if (Math.hypot(p.x - rScr.x, p.y - rScr.y) < 25) dragging = 'robot';
-      else if (Math.hypot(p.x - pScr.x, p.y - pScr.y) < 25) dragging = 'piece';
-    });
+    function clampField(p) {
+      p.x = Math.min(FIELD_W, Math.max(0, p.x));
+      p.y = Math.min(FIELD_H, Math.max(0, p.y));
+      return p;
+    }
 
-    window.addEventListener('mousemove', (e) => {
+    function pick(px, py) {
+      const R = toScreen(robot.x, robot.y);
+      const T = toScreen(target.x, target.y);
+      const dR = Math.hypot(px - R.x, py - R.y);
+      const dT = Math.hypot(px - T.x, py - T.y);
+      if (dT <= 22 && dT <= dR) return 'target';
+      if (dR <= 30) return 'robot';
+      return null;
+    }
+
+    function startDrag(e) {
+      const p = getPos(e);
+      dragging = pick(p.x, p.y);
+      if (dragging) { stopSweep(); moveDrag(e); }
+    }
+
+    function moveDrag(e) {
       if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
       const p = getPos(e);
-      const m = toMeters(p.x, p.y);
-      if (dragging === 'robot') { robot.x = m.x; robot.y = m.y; }
-      if (dragging === 'piece') { piece.x = m.x; piece.y = m.y; }
+      const f = clampField(toField(p.x, p.y));
+      if (dragging === 'robot') robot = f; else target = f;
       draw();
-    });
+    }
 
+    function stopSweep() {
+      sweeping = false;
+      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+      sweepBtn.textContent = 'Sweep the heading';
+    }
+
+    function sweepStep() {
+      theta += 0.01;
+      if (theta > Math.PI) theta -= 2 * Math.PI;
+      draw();
+      rafId = requestAnimationFrame(sweepStep);
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
     window.addEventListener('mouseup', () => dragging = null);
-
-    canvas.addEventListener('touchstart', (e) => {
-      const p = getPos(e);
-      const rScr = toScreen(robot.x, robot.y);
-      const pScr = toScreen(piece.x, piece.y);
-      if (Math.hypot(p.x - rScr.x, p.y - rScr.y) < 30) dragging = 'robot';
-      else if (Math.hypot(p.x - pScr.x, p.y - pScr.y) < 30) dragging = 'piece';
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-      if (!dragging) return;
-      e.preventDefault();
-      const p = getPos(e);
-      const m = toMeters(p.x, p.y);
-      if (dragging === 'robot') { robot.x = m.x; robot.y = m.y; }
-      if (dragging === 'piece') { piece.x = m.x; piece.y = m.y; }
-      draw();
-    }, { passive: false });
-
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
     window.addEventListener('touchend', () => dragging = null);
 
+    headingSlider.addEventListener('input', () => {
+      stopSweep();
+      theta = (+headingSlider.value) * Math.PI / 180;
+      draw();
+    });
+    showNaive.addEventListener('change', draw);
+    showAxes.addEventListener('change', draw);
+    sweepBtn.addEventListener('click', () => {
+      if (sweeping) { stopSweep(); return; }
+      sweeping = true;
+      sweepBtn.textContent = 'Stop sweep';
+      rafId = requestAnimationFrame(sweepStep);
+    });
+    resetBtn.addEventListener('click', () => {
+      stopSweep();
+      robot  = { x: START.rx, y: START.ry };
+      target = { x: START.tx, y: START.ty };
+      theta  = START.deg * Math.PI / 180;
+      draw();
+    });
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
     resize();
   </script>
 </body>

@@ -104,8 +104,8 @@
         <span class="stat-val" id="wrapText" style="color: var(--accent-green); font-size: 1.05rem;">+20.0°</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">|naive| + |wrapped|</span>
-        <span class="stat-val" id="sumText">360.0°</span>
+        <span class="stat-label">short way + long way</span>
+        <span class="stat-val" id="sumText">20.0 + 340.0 = 360.0°</span>
       </div>
       <div class="stat-item">
         <span class="stat-label">commanded angle</span>
@@ -137,7 +137,7 @@
       </div>
       <div class="stat-item">
         <span class="stat-label">verdict</span>
-        <span class="stat-val" id="verdictText">wrapped route is 320.0° shorter</span>
+        <span class="stat-val" id="verdictText">wrapping saves 320.0°</span>
       </div>
     </div>
   </div>
@@ -378,20 +378,36 @@
       set('tgtText', ang(target) + '°');
       set('naiveText', fmt(naive) + '°');
       set('wrapText', fmt(wrapped) + '°');
-      set('sumText', (Math.abs(naive) + Math.abs(wrapped)).toFixed(1) + '°');
+      // Step 4's identity: the two ways round always add up to one whole lap.
+      const shortWay = Math.abs(wrapped), longWay = 360 - shortWay;
+      set('sumText', shortWay.toFixed(1) + ' + ' + longWay.toFixed(1) + ' = 360.0°');
       set('outAngText', ang(outAngle) + '°' + (flipped ? '  (flipped)' : ''));
       set('outSpdText', fmt(outSpeed) + ' m/s');
       set('slewText', fmt(slew) + '°');
       set('timeText', (Math.abs(slew) / SLEW_RATE).toFixed(3) + ' s');
       set('velText', '(' + vx.toFixed(3) + ', ' + vy.toFixed(3) + ')');
-      set('lerpNaiveText', ang(current + blend * naive) + '°');
-      set('lerpWrapText', ang(current + blend * wrapped) + '°');
+      // Show the walked value, plus its wrapped spelling when the walk has left
+      // the band — 360 deg and 0 deg are the same direction, and saying so is
+      // the point of the whole page.
+      const spell = (v) => {
+        const w = wrapDeg(v);
+        return ang(v) + '°' + (Math.abs(w - v) > 0.05 ? '  ≡ ' + ang(w) + '°' : '');
+      };
+      set('lerpNaiveText', spell(current + blend * naive));
+      set('lerpWrapText', spell(current + blend * wrapped));
 
       const saved = Math.abs(naive) - Math.abs(wrapped);
-      set('verdictText', Math.abs(wrapped) > 179.95
-            ? 'both directions tie at 180.0°'
-            : (saved < 0.05 ? 'naive route was already shortest'
-                            : 'wrapped route is ' + saved.toFixed(1) + '° shorter'));
+      let verdict;
+      if (flipped) {
+        verdict = 'flip saves ' + (Math.abs(wrapped) - Math.abs(slew)).toFixed(1) + '° of steering';
+      } else if (Math.abs(wrapped) > 179.95) {
+        verdict = 'both directions tie at 180.0°';
+      } else if (saved < 0.05) {
+        verdict = 'naive difference was already shortest';
+      } else {
+        verdict = 'wrapping saves ' + saved.toFixed(1) + '°';
+      }
+      set('verdictText', verdict);
 
       set('curVal', ang(current) + '°');
       set('tgtVal', ang(target) + '°');

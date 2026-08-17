@@ -2,7 +2,7 @@
 
 > **▶ Interactive Demo: [Frame Transform Explorer](demo.html)**
 >
-> Drag the robot, spin its heading, drag the target. Read the target in both frames at once, and switch on the naive-addition overlay to watch the wrong answer drift away as soon as the heading leaves zero.
+> Drag the robot, spin its heading, drag the target. Read the target in both frames at once, and switch on the naive-addition overlay to watch the wrong answer drift away from the right one.
 
 <iframe src="demo.html" width="100%" height="660" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 
@@ -12,12 +12,12 @@
 
 A camera on the robot spots a game piece and reports one thing: **1.5 metres ahead of me, 0.4 metres to my right.**
 
-That is all a camera can ever say. It has no gyro and no idea where the field's corner is, while the path planner that must drive there speaks only **field** coordinates. Two frames, used throughout:
+That is all a camera can say. It has no gyro and no idea where the field's corner is, while the path planner that must drive there speaks only **field** coordinates. Two frames, used throughout:
 
 * The **field frame**: origin at a corner of the carpet, X down-field, Y to the left as you look down-field, angles counter-clockwise from X. WPILib's convention.
 * The **robot frame**: origin at the centre of the drive base, x out of the front bumper, y out of the left side. Same handedness, carried around by the robot.
 
-Odometry puts the robot at field `(5.00, 3.00)`. The sighting, in the robot frame, is `(1.5, −0.4)` — 1.5 forward, and 0.4 in the *negative* left direction, which is 0.4 to the right. The obvious move is to add: `(5.00 + 1.5, 3.00 − 0.4) = (6.50, 2.60)`.
+Odometry puts the robot at field `(5.00, 3.00)`. The sighting, in the robot frame, is `(1.5, −0.4)` — 1.5 forward and 0.4 in the *negative* left direction, which is 0.4 right. The obvious move is to add: `(5.00 + 1.5, 3.00 − 0.4) = (6.50, 2.60)`.
 
 **At heading 0°, that is right.** The nose points down-field, so "1.5 m ahead" is 1.5 m further along field X and "0.4 m right" is 0.4 m along field −Y. **At heading 90° it is badly wrong**, because the nose now points along field +Y: "ahead" has become field **Y** and "to my right" has become field **+X**.
 
@@ -28,7 +28,7 @@ Odometry puts the robot at field `(5.00, 3.00)`. The sighting, in the robot fram
                  gap = √(1.1² + 1.9²) = √4.82 = 2.20 m
 ```
 
-Two point two metres: most of a robot length past the piece, and well off to the side.
+Most of a robot length past the piece, and well off to the side.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="480" height="240" viewBox="0 0 460 234" style="max-width: 100%; height: auto;" role="img" aria-label="Two field panels. On the left the robot faces down-field at heading zero and the naive sum lands on the true game piece position. On the right the robot is turned ninety degrees, the true piece has moved up and left, and the naive sum is left stranded two point two metres away.">
@@ -71,7 +71,7 @@ Two point two metres: most of a robot length past the piece, and well off to the
   </svg>
 </div>
 
-The bug never crashes, always returns a plausible spot on the carpet, and is *exactly correct* whenever the robot is square to the field — precisely how things get tested in the shop.
+The bug never crashes, returns a plausible spot on the carpet, and is *exactly correct* whenever the robot is square to the field — which is how things get tested in the shop.
 
 ---
 
@@ -81,7 +81,7 @@ The bug never crashes, always returns a plausible spot on the carpet, and is *ex
 
 `(1.5, −0.4)` in the robot frame is a set of walking directions:
 
-> Stand at the robot's origin. Walk 1.5 metres along whatever direction the robot calls **forward**. Then walk 0.4 metres along whatever direction it calls **right**.
+> Stand at the robot's origin. Walk 1.5 metres along whatever direction the robot calls **forward**, then 0.4 metres along whatever it calls **right**.
 
 Everything there is known in field terms except the two direction words, so the problem reduces to: **in field coordinates, which way is the robot's forward, and which way is its left?**
 
@@ -92,7 +92,7 @@ Concept 02 answered that. The forward axis is a unit vector, and the heading θ 
    robot left,    in field coordinates  =  (−sin θ,  cos θ )
 ```
 
-These are exactly the images of `î` and `ĵ`. The robot's own axes, seen from the stands, *are* the rotated basis vectors.
+These are exactly the images of `î` and `ĵ`: the robot's own axes, seen from the stands, *are* the rotated basis vectors.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="340" height="250" viewBox="0 0 340 250" style="max-width: 100%; height: auto;" role="img" aria-label="A robot origin with its forward axis drawn at thirty-five degrees above the field X direction and its left axis a quarter turn beyond it, and a dashed path walking one point five metres along forward then zero point four metres along right to reach the game piece.">
@@ -121,21 +121,21 @@ These are exactly the images of `î` and `ĵ`. The robot's own axes, seen from t
 
 ### Step 2: Walk the directions, then start from the right place
 
-A walk of `a` along forward plus `b` along left, in field coordinates, is those two direction vectors scaled and added:
+A walk of `a` along forward plus `b` along left is those two direction vectors scaled and added:
 
 ```
    a · ( cos θ, sin θ )  +  b · (−sin θ, cos θ )
      = ( a·cos θ − b·sin θ ,  a·sin θ + b·cos θ )
 ```
 
-That is Concept 02's rotation, arriving on its own rather than being imposed. The walk has the right *shape* but starts at the origin, so start it where the robot is:
+That is Concept 02's rotation, arriving on its own rather than imposed. The walk has the right *shape* but starts at the origin, so start it where the robot is:
 
 ```
    field_x = rx + ( a·cos θ − b·sin θ )
    field_y = ry + ( a·sin θ + b·cos θ )
 ```
 
-**Rotate the local offset by the heading, then translate by the robot's position.** A rotation followed by a translation is a **rigid transform**: Concept 02 Step 4 proved rotation preserves length, and sliding everything by a fixed amount clearly does too, so distances survive — the right property for a robot, which does not stretch.
+**Rotate the local offset by the heading, then translate by the robot's position.** A rotation followed by a translation is a **rigid transform**: Concept 02 Step 4 proved rotation preserves length, sliding everything by a fixed amount clearly does too, so distances survive — the right property for a robot, which does not stretch.
 
 At heading 35°, with `a = 1.5` and `b = −0.4`:
 
@@ -149,18 +149,16 @@ At heading 35°, with `a = 1.5` and `b = −0.4`:
    field_y = 3.00 + 0.5327 = 3.533
 ```
 
-Nothing stretched: `√(1.4582² + 0.5327²) = 1.5524`, matching the original `√(1.5² + 0.4²) = 1.5524`.
-
-Set θ = 0 and the naive version reappears: `cos 0 = 1`, `sin 0 = 0`, leaving `field_x = rx + a` and `field_y = ry + b`. Plain addition is not a different rule — it is this rule with the heading quietly assumed away.
+Nothing stretched: `√(1.4582² + 0.5327²) = 1.5524`, matching the original `√(1.5² + 0.4²) = 1.5524`. And set θ = 0 — `cos 0 = 1`, `sin 0 = 0` — and the naive version reappears as `field_x = rx + a`, `field_y = ry + b`. Plain addition is not a different rule; it is this rule with the heading quietly assumed away.
 
 > ### Math!
-> Name a transform by the two frames it connects. Write the one we just built as **field ← robot**, read out loud as **"field from robot"**: it eats a point in robot coordinates and hands back the same point in field coordinates.
+> Name a transform by the two frames it connects. Write the one just built as **field ← robot**, read out loud as **"field from robot"**: it eats a point in robot coordinates and hands back the same point in field coordinates.
 >
 > Three numbers describe it fully — the child frame's origin and heading as seen from the parent — so it is usually written as a **pose**, the triple `(x, y, θ)`. Ours is `(5.00, 3.00, 35°)`, read out loud as **"the pose of the robot in the field frame"**. Every rigid transform here is one of these triples, and each means: rotate by θ, then translate by `(x, y)`.
 
 ### Step 3: Why the order is rotate-then-translate
 
-Swapping the two operations gives a different answer, and the reversed version is a common bug that does not look like one in code. Same sighting, heading 35°: translate first, giving `(6.50, 2.60)`, then rotate *that*.
+Swapping the two operations gives a different answer, and the reversed version is a common bug that does not look like one in code. Same sighting, heading 35°: translate first to `(6.50, 2.60)`, then rotate that.
 
 ```
    x' = 6.50(0.81915) − 2.60(0.57358) = 5.32449 − 1.49130 = 3.833
@@ -191,11 +189,11 @@ Swapping the two operations gives a different answer, and the reversed version i
   </svg>
 </div>
 
-The rule: **the rotation may act only on quantities measured in the robot frame.** The moment a field-frame number is inside the thing being rotated, you are spinning the field about its own corner.
+The rule: **the rotation may act only on quantities measured in the robot frame.** Put a field-frame number inside the thing being rotated and you are spinning the field about its own corner.
 
 ### Step 4: Chaining — field ← robot ← camera
 
-A camera is never at the robot's centre. Ours is mounted 0.30 m forward and 0.10 m left of it, yawed 20° to the left to watch the intake lane, so its reading `(1.5, −0.4)` is in *camera* coordinates. Apply the same idea twice. The camera's pose in the robot frame is `(0.30, 0.10, 20°)`, so **robot ← camera** rotates by 20° and then translates by `(0.30, 0.10)`:
+A camera is never at the robot's centre. Ours sits 0.30 m forward and 0.10 m left of it, yawed 20° left to watch the intake lane, so its reading `(1.5, −0.4)` is in *camera* coordinates. Apply the same idea twice. The camera's pose in the robot frame is `(0.30, 0.10, 20°)`, so **robot ← camera** rotates by 20° then translates by `(0.30, 0.10)`:
 
 ```
    x = 1.5(0.93969) − (−0.4)(0.34202) = 1.40954 + 0.13681 = 1.5463
@@ -254,7 +252,7 @@ Apply that single transform to the raw sighting:
    field: (5.188 + 1.188, 3.254 + 0.999) = (6.376, 4.253)
 ```
 
-The same answer to every digit. A chain of any length collapses to a single pose — which is why robot code describes each sensor by its own mounting pose and lets the library do the bookkeeping.
+The same answer to every digit. A chain of any length collapses to a single pose — which is why robot code gives each sensor its own mounting pose and lets the library compose them.
 
 > ### Math!
 > The chaining rule is easiest to read with the frame labels written out:
@@ -267,7 +265,7 @@ The same answer to every digit. A chain of any length collapses to a single pose
 
 ### Step 5: Running it backwards, and the trap in doing so
 
-An AprilTag's field position is published in the game manual, and you want to know where the robot should look for it. That is **robot ← field**, and here is the trap. The forward transform is "rotate by θ, then add `(rx, ry)`", so it is tempting to invert it as "rotate by −θ, then subtract `(rx, ry)`" — negate both parts and be done. **That is wrong.** Reversing a two-step process reverses the *order* of the steps as well as each step: socks then shoes undoes as shoes off, then socks off.
+An AprilTag's field position is published in the game manual, and you want to know where the robot should look for it. That is **robot ← field**, and here is the trap. The forward transform is "rotate by θ, then add `(rx, ry)`", so it is tempting to invert it as "rotate by −θ, then subtract `(rx, ry)`" — negate both parts and be done. **That is wrong.** Reversing a two-step process reverses the *order* as well as each step: socks then shoes undoes as shoes off, then socks off.
 
 Derive it instead. For the local coordinates `(a, b)` we want, the forward transform claims `fx = rx + (a·cos θ − b·sin θ)` and `fy = ry + (a·sin θ + b·cos θ)`. Name the difference `(dx, dy) = (fx − rx, fy − ry)`; two equations, two unknowns. Multiply the first by `cos θ`, the second by `sin θ`, and add:
 
@@ -289,6 +287,8 @@ The `b` terms cancel outright, and `cos²θ + sin²θ = 1` is Concept 01's Pytha
 
 Those coefficients are exactly Concept 02 Step 5's rotation by `−θ`, applied to the difference. In words: **subtract first, then un-rotate.** The subtraction happens in the field frame where both positions are known; the rotation acts afterwards, on a pure offset.
 
+
+
 Robot still at `(5.00, 3.00, 35°)`; a tag at field `(8.00, 4.00)`; difference `(3.00, 1.00)`:
 
 ```
@@ -296,7 +296,7 @@ Robot still at `(5.00, 3.00, 35°)`; a tag at field `(8.00, 4.00)`; difference `
    b = −3.00(0.57358) + 1.00(0.81915) = −1.72073 + 0.81915 = −0.902
 ```
 
-The tag is 3.03 m ahead and 0.90 m to the robot's right, and the length agrees: `√(3² + 1²) = √(3.031² + 0.902²) = 3.162`. A frame change can never alter a distance, so this catches almost every sign error for free.
+The tag is 3.03 m ahead and 0.90 m to the robot's right, and the length agrees: `√(3² + 1²) = √(3.031² + 0.902²) = 3.162`. A frame change can never alter a distance, so this catches almost every sign error.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="320" height="240" viewBox="0 0 320 240" style="max-width: 100%; height: auto;" role="img" aria-label="A field with the robot at five three heading thirty-five degrees and a tag at eight four. The difference vector between them is decomposed into three point zero three metres along the robot's forward axis and zero point nine metres along its right axis.">
@@ -332,18 +332,18 @@ The swapped order — un-rotate the tag's field position first, then subtract th
    minus the robot position: (8.848 − 5.00, −1.312 − 3.00) = (3.848, −4.312)
 ```
 
-Off by 3.51 m, and the length check flags it immediately: `√(3.848² + 4.312²) = 5.78`, not 3.162. That 3.51 m is the same error as Step 3's wrong order, for the same reason — the robot's own field position got rotated when it should not have.
+Off by 3.51 m, and the length check flags it: `√(3.848² + 4.312²) = 5.78`, not 3.162. That 3.51 m is the same error as Step 3's wrong order, for the same reason — the robot's own field position got rotated when it should not have.
 
 ### Step 6: The rule for which direction takes −θ
 
-You should not have to memorise where the minus sign goes. **Every transform is written once, in one direction: the child frame's pose as seen from the parent.** The robot's pose `(5.00, 3.00, 35°)` is in the field's terms; the camera's `(0.30, 0.10, 20°)` is in the robot's. That written direction is the one that uses θ as written.
+You should not have to memorise where the minus sign goes. **Every transform is written once, in one direction: the child frame's pose as seen from the parent.** The robot's pose `(5.00, 3.00, 35°)` is in field terms; the camera's `(0.30, 0.10, 20°)` is in robot terms. That direction uses θ as written.
 
 ```
    Child → parent  (robot to field):   rotate by +θ,  then  ADD    the child's position
    Parent → child  (field to robot):   SUBTRACT the child's position,  then  rotate by −θ
 ```
 
-Reversing direction always does two things at once: the sign of θ flips **and** the translation swaps sides of the rotation. Change only one and you have written one of the two bugs above.
+Reversing direction always does two things: the sign of θ flips **and** the translation swaps sides of the rotation. Change only one and you have written one of the two bugs above.
 
 One more distinction. Everything so far concerned **points** — spots on the carpet, which have a location. A **direction**, such as a velocity, has none, so translating it is meaningless; directions rotate only. That is why Concept 02's field-oriented drive used `−heading` with no subtraction anywhere: a stick command is a velocity, not a place. Ask "position, or only direction?" and the presence of the translation answers itself.
 
@@ -448,7 +448,7 @@ Pose2d tagPose = new Pose2d(8.00, 4.00, new Rotation2d());
 Pose2d tagFromRobot = tagPose.relativeTo(robotPose);   // (3.031, -0.902, -35 deg)
 ```
 
-Every number matches the from-scratch tier digit for digit: `(1.8463, 0.2372)` in the robot frame, `(6.376, 4.253)` on the field, `(3.031, −0.902)` coming back. `Pose2d.plus(Transform2d)` is not a different rule from Step 2 — it *is* Step 2, and `relativeTo` is Step 5. `Translation2d.rotateBy` only rotates: an offset is a direction, and directions do not translate. And `Pose2d.plus` takes a `Transform2d`, never another `Pose2d` — the type system enforcing the sidebar's label discipline, refusing to add two poses that both live in the field frame.
+Every number matches the from-scratch tier digit for digit: `(1.8463, 0.2372)` in the robot frame, `(6.376, 4.253)` on the field, `(3.031, −0.902)` coming back. `Pose2d.plus(Transform2d)` is not a different rule from Step 2 — it *is* Step 2, and `relativeTo` is Step 5. `Translation2d.rotateBy` only rotates: an offset is a direction, and directions do not translate. And `plus` takes a `Transform2d`, never another `Pose2d` — the type system enforcing the sidebar's label discipline.
 
 ---
 
@@ -456,23 +456,23 @@ Every number matches the from-scratch tier digit for digit: `(1.8463, 0.2372)` i
 
 ### Robotics: AprilTag pose estimation, running the chain in reverse
 
-A vision coprocessor running PhotonVision or a Limelight never sees a robot pose. It solves for **camera ← tag**: the tag relative to the lens. Turning that into "where is my robot" is this concept's chain, inverted end to end. `AprilTagFieldLayout`, shipped with the game manual, gives **field ← tag**; the vision solve gives **camera ← tag**, inverted to **tag ← camera**; the mounting measurements give **robot ← camera**, inverted to **camera ← robot**. Line the labels up:
+A vision coprocessor running PhotonVision or a Limelight never sees a robot pose. It solves for **camera ← tag**: the tag relative to the lens. Turning that into "where is my robot" is this concept's chain, inverted end to end. `AprilTagFieldLayout`, shipped with the game manual, gives **field ← tag**; the vision solve gives **camera ← tag**, inverted to **tag ← camera**; the mount measurements give **robot ← camera**, inverted to **camera ← robot**:
 
 ```
    (field ← tag) ∘ (tag ← camera) ∘ (camera ← robot)  =  (field ← robot)
 ```
 
-Every inner pair cancels and out drops the robot's field pose, fed to `SwerveDrivePoseEstimator.addVisionMeasurement` and blended with wheel odometry. That estimator is why a robot can run a scripted path for fifteen seconds without accumulating enough wheel slip to miss a scoring location.
+Every inner pair cancels and out drops the robot's field pose, fed to `SwerveDrivePoseEstimator.addVisionMeasurement` and blended with wheel odometry. That estimator is why a robot can run a scripted path for fifteen seconds without enough accumulated wheel slip to miss a scoring location.
 
-Two things go wrong in exactly the ways derived above. A camera mount recorded with the wrong sign — 0.10 m left written as 0.10 m right — gives a pose error that is zero facing down-field and grows with heading: the Step 3 signature. Inverting by negating both parts gives an estimate correct near the field origin and wrong everywhere else: the Step 5 signature. Both survive a shop test.
+Two things go wrong in the ways derived above. A camera mount recorded with the wrong sign — 0.10 m left written as 0.10 m right — gives a pose error that is zero facing down-field and grows with heading: the Step 3 signature. Inverting by negating both parts gives an estimate correct near the field origin and wrong everywhere else: the Step 5 signature. Both survive a shop test.
 
 ### Machine learning: bird's-eye-view perception in autonomous driving
 
-The same chain is the backbone of modern camera-only driving stacks. Six surround cameras produce six detections per frame, each in the frame of the lens that saw it and none comparable to any other. The nuScenes dataset encodes the fix literally: every sensor sample carries a `calibrated_sensor` record — the fixed sensor-to-ego transform, a mounting pose exactly like our `robotToCamera` — and an `ego_pose` record giving ego-to-global at that instant, exactly like our `robotPose`.
+The same chain is the backbone of modern camera-only driving stacks. Six surround cameras produce six detections per frame, each in the frame of the lens that saw it and none comparable to any other. The nuScenes dataset encodes the fix literally: every sensor sample carries a `calibrated_sensor` record — the fixed sensor-to-ego transform, a mounting pose exactly like our `robotToCamera` — and an `ego_pose` record giving ego-to-global, exactly like our `robotPose`.
 
-Architectures such as Lift-Splat-Shoot and BEVFormer make the transform part of the network. Each camera's image features are lifted into 3D, moved into the shared ego frame using that camera's known extrinsic pose, and splatted onto one bird's-eye-view grid on which the detection head runs. The network therefore never learns where the cameras are bolted: mounting geometry arrives as an exact transform, so the weights spend their capacity on recognising vehicles rather than memorising a rig.
+Architectures such as Lift-Splat-Shoot and BEVFormer make the transform part of the network. Each camera's image features are lifted into 3D, moved into the shared ego frame using that camera's known extrinsic pose, and splatted onto one bird's-eye-view grid on which the detection head runs. The network therefore never learns where the cameras are bolted: mounting geometry arrives as an exact transform, so the weights go on recognising vehicles rather than memorising a rig.
 
-The inverse direction does real work too. Temporal fusion — using the last few frames to stabilise a detection or estimate another car's speed — needs the previous timestep's BEV grid expressed in the *current* ego frame, and the car has moved and turned in between. That is subtract-then-un-rotate applied to every cell: Step 5 at scale. The failure is familiar too. A stale extrinsic calibration, or an ego pose off by a degree of yaw, and detections land metres from the vehicles they describe — which is why calibration drift is routine fleet maintenance.
+The inverse direction does real work too. Temporal fusion — using the last few frames to stabilise a detection or estimate another car's speed — needs the previous timestep's BEV grid expressed in the *current* ego frame, and the car has moved and turned in between. That is subtract-then-un-rotate applied to every cell: Step 5 at scale. The failure is familiar too: a stale extrinsic calibration, or an ego pose off by a degree of yaw, and detections land metres from the vehicles they describe.
 
 ---
 
@@ -492,7 +492,7 @@ A robot sits at field `(2.00, 6.00)` with heading 120°. A rear sensor reports a
    translate:  (2.00 + 0.400, 6.00 − 0.693) = (2.400, 5.307)
 ```
 
-1. **Length check:** `√(0.400² + 0.693²) = √0.640 = 0.800`, matching the sensor reading.
+1. **Length check:** `√(0.400² + 0.693²) = 0.800`, matching the sensor reading.
 2. **Naive addition** gives `(1.200, 6.000)`, which is `√(1.200² + 0.693²) = 1.386` m away.
 3. **Why that far.** Both answers sit 0.8 m from the robot — one along field −X, one along the robot's actual backward direction — and those differ by 120°. The gap is the chord of a 120° arc of radius 0.8, so the error is *larger* than the obstacle's distance.
 
@@ -512,19 +512,19 @@ A robot is at field `(3.00, 1.00)` with heading `−40°`, turned 40° to its ow
                b = −3.00(−0.64279) + 0.00(0.76604) = 1.928
 ```
 
-1. **Result:** `(2.298, 1.928)` — 2.30 m ahead, 1.93 m to the robot's **left**. Right sense: the robot is turned to its right, so something straight down-field appears off to its left.
+1. **Result:** `(2.298, 1.928)` — 2.30 m ahead, 1.93 m to the robot's **left**. Right sense: the robot is turned right, so something straight down-field appears off to its left.
 2. **The wrong order.** Un-rotating `(6.00, 1.00)` gives `(3.953, 4.623)`; subtracting the robot position leaves `(0.953, 3.623)`.
-3. **Catching it.** The tag is `√(3² + 0²) = 3.000` m away and a frame change cannot alter a distance. The correct answer gives `√(2.298² + 1.928²) = 3.000`; the wrong one gives `√(0.953² + 3.623²) = 3.746`. One length check, no known answer needed, and it fires at every heading but 0°.
+3. **Catching it.** The tag is `√(3² + 0²) = 3.000` m away and a frame change cannot alter a distance. The correct answer gives `√(2.298² + 1.928²) = 3.000`; the wrong one `√(0.953² + 3.623²) = 3.746`. One length check, no known answer needed, and it fires at every heading but 0°.
 
 ---
 
 ### Deep Dive 1
 
-A camera's optical convention is not WPILib's: vision libraries put +Z out of the lens, +X to the image right and +Y *down*, while the robot frame has +x forward, +y left, +z up. Work out the relabelling connecting them, and confirm it is a pure axis permutation with sign flips rather than a rotation by any angle. Then argue why such a mistake is harder to spot than a heading error: what does a swapped-sign Y axis do to a detection directly ahead, and what to one off to the side?
+A camera's optical convention is not WPILib's: vision libraries put +Z out of the lens, +X to the image right and +Y *down*, while the robot frame has +x forward, +y left, +z up. Work out the relabelling connecting them, and confirm it is a pure axis permutation with sign flips rather than a rotation by any angle. Then argue why that is harder to spot than a heading error: what does a swapped-sign Y axis do to a detection directly ahead, versus one off to the side?
 
 ### Deep Dive 2
 
-Two tags are visible at once, and inverting each chain gives two estimates of the robot's field pose differing by 4 cm and 1.5°. Averaging the translations is straightforward; averaging the *headings* is not. Try 179° and −179° and see what the arithmetic mean claims, then design a fix using the fact that `Rotation2d` stores a `(cos, sin)` pair rather than an angle. Concept 05 attacks wraparound head-on; Module 5 gives the principled way to weight two disagreeing measurements.
+Two tags are visible at once, and inverting each chain gives two estimates of the robot's field pose differing by 4 cm and 1.5°. Averaging the translations is straightforward; averaging the *headings* is not. Try 179° and −179°, see what the arithmetic mean claims, then design a fix using the fact that `Rotation2d` stores a `(cos, sin)` pair rather than an angle. Concept 05 attacks wraparound head-on; Module 5 weights disagreeing measurements properly.
 
 ---
 
