@@ -45,44 +45,42 @@ If your robot is sitting at `(x = 3.0m, y = 2.0m)` and wants to shoot a game pie
 
 ---
 
-## 2. Solving It in Code
-We can compute the straight-line distance in just a few lines of Python:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-import math
+### First-Principles Java
+We can calculate the Euclidean distance using standard Java `Math`:
 
-# 1. Define the robot and target positions
-robot_x = 3.0
-robot_y = 2.0
+```java
+// 1. Define robot and target positions (in meters)
+double robotX = 3.0;
+double robotY = 2.0;
 
-target_x = 12.0
-target_y = 6.0
+double targetX = 12.0;
+double targetY = 6.0;
 
-# 2. Find the differences in x and y
-dx = target_x - robot_x   # 12.0 - 3.0 = 9.0 meters
-dy = target_y - robot_y   #  6.0 - 2.0 = 4.0 meters
-# 3. Calculate straight-line distance
-distance = math.sqrt(dx**2 + dy**2)
+// 2. Find differences in X and Y
+double dx = targetX - robotX; // 12.0 - 3.0 = 9.0 meters
+double dy = targetY - robotY; //  6.0 - 2.0 = 4.0 meters
 
-print(f"Distance to target: {distance:.2f} meters")  # Output: 9.85 meters
+// 3. Calculate straight-line distance (Pythagorean Theorem)
+double distance = Math.hypot(dx, dy); // or Math.sqrt(dx * dx + dy * dy)
+
+System.out.printf("Straight-line Distance: %.2f meters%n", distance);
+// Output: 9.85 meters
 ```
 
----
+### Production WPILib Equivalent
+In WPILib, positions on the field are represented by `Translation2d` and `Pose2d`:
 
-> 💡 **Math Sidebar: The Pythagorean Distance Formula**
->
-> In mathematics, the straight-line distance between two points `(x₁, y₁)` and `(x₂, y₂)` is written as:
->
-> ```
->    d = √[ (x₂ - x₁)² + (y₂ - y₁)² ]
-> ```
->
-> **How to read this equation out loud:**
-> * `(x₂ - x₁)` is the horizontal difference `dx`.
-> * `(y₂ - y₁)` is the vertical difference `dy`.
-> * Square both differences: `dx²` and `dy²`.
-> * Add them together: `dx² + dy²`.
-> * Take the square root `√`: This gives the length of the triangle's hypotenuse `d`.
+```java
+import edu.wpi.first.math.geometry.Translation2d;
+
+Translation2d robot = new Translation2d(3.0, 2.0);
+Translation2d target = new Translation2d(12.0, 6.0);
+
+// One-liner distance calculation
+double distance = robot.getDistance(target);
+```
 
 ---
 

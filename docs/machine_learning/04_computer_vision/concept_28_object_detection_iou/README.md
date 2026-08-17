@@ -43,45 +43,42 @@ IoU = Area of Overlap / Area of Union
 
 ---
 
-## 2. Python Implementation: IoU & NMS
+## 2. Solving It in Code (Java)
 
-Here is how IoU and Non-Maximum Suppression are computed in pure Python:
+### First-Principles Java: IoU & Non-Maximum Suppression (NMS)
+```java
+import java.util.*;
 
-```python
-def compute_iou(boxA, boxB):
-    # box format: [x1, y1, x2, y2]
-    xA = max(boxA[0], boxB[0])
-    yA = max(boxA[1], boxB[1])
-    xB = min(boxA[2], boxB[2])
-    yB = min(boxA[3], boxB[3])
+public class YoloNMS {
+    public record Box(double x1, double y1, double x2, double y2, double conf, String label) {}
 
-    # Compute area of intersection
-    inter_area = max(0, xB - xA) * max(0, yB - yA)
+    public static double computeIoU(Box a, Box b) {
+        double interX1 = Math.max(a.x1, b.x1);
+        double interY1 = Math.max(a.y1, b.y1);
+        double interX2 = Math.min(a.x2, b.x2);
+        double interY2 = Math.min(a.y2, b.y2);
 
-    # Compute area of both boxes
-    boxA_area = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
-    boxB_area = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
+        double interArea = Math.max(0, interX2 - interX1) * Math.max(0, interY2 - interY1);
+        double areaA = (a.x2 - a.x1) * (a.y2 - a.y1);
+        double areaB = (b.x2 - b.x1) * (b.y2 - b.y1);
 
-    # IoU = Intersection / Union
-    union_area = boxA_area + boxB_area - inter_area
-    return inter_area / union_area if union_area > 0 else 0.0
+        double unionArea = areaA + areaB - interArea;
+        return unionArea > 0 ? interArea / unionArea : 0.0;
+    }
 
-def non_max_suppression(boxes_with_conf, iou_threshold=0.45):
-    # Sort boxes by confidence score descending
-    sorted_boxes = sorted(boxes_with_conf, key=lambda b: b['conf'], reverse=True)
-    kept_boxes = []
+    public static List<Box> nonMaxSuppression(List<Box> boxes, double iouThreshold) {
+        List<Box> sorted = new ArrayList<>(boxes);
+        sorted.sort((a, b) -> Double.compare(b.conf, a.conf)); // Descending
 
-    while sorted_boxes:
-        best_box = sorted_boxes.pop(0)
-        kept_boxes.append(best_box)
-
-        # Eliminate any remaining box with high overlap (IoU > threshold)
-        sorted_boxes = [
-            b for b in sorted_boxes
-            if compute_iou(best_box['coords'], b['coords']) < iou_threshold
-        ]
-
-    return kept_boxes
+        List<Box> kept = new ArrayList<>();
+        while (!sorted.isEmpty()) {
+            Box best = sorted.remove(0);
+            kept.add(best);
+            sorted.removeIf(other -> other.label.equals(best.label) && computeIoU(best, other) >= iouThreshold);
+        }
+        return kept;
+    }
+}
 ```
 
 ---

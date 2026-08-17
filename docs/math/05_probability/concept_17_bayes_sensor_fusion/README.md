@@ -35,54 +35,28 @@ Neither sensor is 100% right! Instead of blindly picking one, we mathematically 
 
 ---
 
-## 2. Solving It in Code: 1D Kalman Fusion
-The optimal way to fuse two Gaussian sensors is the **Kalman Filter update formula**:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-def fuse_two_sensors(mu_prior, sigma_prior, mu_meas, sigma_meas):
-    """
-    Fuses two independent Gaussian estimates into a single optimal posterior belief.
-    """
-    var_prior = sigma_prior ** 2
-    var_meas = sigma_meas ** 2
-    
-    # 1. Kalman Gain: How much weight to give the new vision measurement
-    kalman_gain = var_prior / (var_prior + var_meas)
-    
-    # 2. Updated Mean (Blended estimate)
-    fused_mu = mu_prior + kalman_gain * (mu_meas - mu_prior)
-    
-    # 3. Updated Variance (Always smaller than either sensor alone!)
-    fused_var = (1.0 - kalman_gain) * var_prior
-    fused_sigma = fused_var ** 0.5
-    
-    return fused_mu, fused_sigma
+### First-Principles Java: 1D Kalman Sensor Fusion
+```java
+// Sensor 1: Wheel Odometry (Position = 5.2m, variance = 0.09)
+double odomPos = 5.20;
+double odomVar = 0.09;
 
-# Fuse Odometry (4.00m ± 0.20m) with Vision (4.50m ± 0.40m)
-μ, σ = fuse_two_sensors(4.00, 0.20, 4.50, 0.40)
+// Sensor 2: Vision AprilTag (Position = 4.8m, variance = 0.04)
+double visionPos = 4.80;
+double visionVar = 0.04;
 
-print(f"Optimal Estimated Position : {μ:.3f} meters")  # 4.100m
-print(f"Combined Uncertainty (σ)   : ±{σ:.3f} meters")  # ±0.179m (Tighter than both!)
+// Optimal Bayes / Kalman Fusion:
+// Fused variance: 1 / var_fused = (1 / odomVar) + (1 / visionVar)
+double fusedVar = 1.0 / ( (1.0 / odomVar) + (1.0 / visionVar) );
+
+// Fused mean: Weighted average proportional to inverse variance
+double fusedPos = fusedVar * ( (odomPos / odomVar) + (visionPos / visionVar) );
+
+System.out.printf("Fused Robot Position: %.3f m (±%.3f m)%n", fusedPos, Math.sqrt(fusedVar));
+// Output: 4.923 m (closer to vision because vision is more accurate!)
 ```
-
----
-
-> 💡 **Math Sidebar: Bayes' Rule**
->
-> In probability theory, updating our belief after observing new evidence is governed by **Bayes' Theorem**:
->
-> ```
->                            P(Sensor | State) · P(State)
->    P(State | Sensor)  =   ------------------------------
->                                     P(Sensor)
-> ```
->
-> **How to interpret the terms:**
-> * **`P(State)` [Prior]:** What we believed before looking at the camera (Wheel Odometry).
-> * **`P(Sensor | State)` [Likelihood]:** What the camera just saw.
-> * **`P(State | Sensor)` [Posterior]:** Our updated belief after combining both!
->
-> Multiplying two Gaussian curves produces a new Gaussian that is **taller, narrower, and more certain** than either input!
 
 ---
 

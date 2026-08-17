@@ -44,52 +44,30 @@ How do we convert raw numbers into clean, calibrated probabilities that sum to 1
 
 ---
 
-## 2. Solving It in Code: The Softmax Function
-To convert logits into valid probabilities:
-1. Take the exponential `e^z` of every score (turning all numbers positive).
-2. Divide each by the sum of all exponentials (so the total equals `1.0`):
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-import math
+### First-Principles Java: Softmax Probabilities
+```java
+// Raw neuron outputs (logits)
+double[] logits = {2.5, 1.0, 0.2}; // [Note, Coral, Algae]
 
-def softmax(logits, temperature=1.0):
-    """
-    Converts raw unconstrained logits into a probability distribution.
-    """
-    # 1. Exponentiate scaled logits: e^(z / T)
-    exp_scores = [math.exp(z / temperature) for z in logits]
-    
-    # 2. Normalize by total sum
-    total_sum = sum(exp_scores)
-    probabilities = [score / total_sum for score in exp_scores]
-    
-    return probabilities
+// 1. Exponentiate each logit
+double expSum = 0.0;
+double[] expValues = new double[logits.length];
+for (int i = 0; i < logits.length; i++) {
+    expValues[i] = Math.exp(logits[i]);
+    expSum += expValues[i];
+}
 
-labels = ["Game Piece", "Field Element", "Opponent Robot"]
-raw_logits = [3.2, 1.1, -0.8]
+// 2. Normalize to sum to 1.0 (100%)
+double[] probabilities = new double[logits.length];
+for (int i = 0; i < logits.length; i++) {
+    probabilities[i] = expValues[i] / expSum;
+}
 
-probs = softmax(raw_logits, temperature=1.0)
-
-for label, prob in zip(labels, probs):
-    print(f"{label:<16}: {prob * 100:5.1f}%")
+System.out.printf("P(Note): %.1f%%, P(Coral): %.1f%%, P(Algae): %.1f%%%n",
+    probabilities[0] * 100, probabilities[1] * 100, probabilities[2] * 100);
 ```
-
----
-
-> 💡 **Math Sidebar: The Softmax Function**
->
-> In machine learning, the **Softmax** formula for class `i` is defined as:
->
-> ```
->               e^(zᵢ / T)
->    P(y = i) = -----------
->               ∑ⱼ e^(zⱼ / T)
-> ```
->
-> **What the Temperature parameter `T` controls:**
-> * **`T = 1.0` (Standard):** Faithful exponential mapping.
-> * **`T ➔ 0` (Cold / Confident):** Approaches **`argmax`** (the highest score gets 100%, all others get 0%).
-> * **`T ➔ ∞` (Hot / Uniform):** All classes approach an equal 33.3% coin-flip probability.
 
 ---
 

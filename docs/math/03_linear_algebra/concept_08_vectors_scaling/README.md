@@ -38,39 +38,39 @@ You simply place the tail of Move B at the tip of Move A (**Head-to-Tail additio
 
 ---
 
-## 2. Solving It in Code
-In Python, adding and scaling vectors is straightforward list arithmetic:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-def add_vectors(v1, v2):
-    """Adds two 2D vectors together."""
-    return [v1[0] + v2[0], v1[1] + v2[1]]
+### First-Principles Java
+Vector addition and scalar scaling:
 
-def scale_vector(v, scalar):
-    """Multiplies a vector by a scalar number."""
-    return [v[0] * scalar, v[1] * scalar]
+```java
+// Robot starting velocity vector (vx, vy)
+double v1x = 2.0;
+double v1y = 1.0;
 
-move_A = [2.0, 1.0]
-move_B = [1.0, 2.0]
+// Acceleration boost vector
+double ax = 1.5;
+double ay = 2.0;
+double dt = 0.5; // half second
 
-# 1. Total Move (Vector Addition)
-total_move = add_vectors(move_A, move_B)
-print(f"Total move: {total_move}")  # [3.0, 3.0] meters
-# 2. Scale by 2.0x (Drive twice as far)
-boosted_move = scale_vector(total_move, 2.0)
-print(f"Twice as far: {boosted_move}")  # [6.0, 6.0] meters
+// v_new = v1 + a * dt
+double vNewX = v1x + ax * dt; // 2.0 + 0.75 = 2.75 m/s
+double vNewY = v1y + ay * dt; // 1.0 + 1.00 = 2.00 m/s
+
+System.out.printf("New Velocity: (%.2f, %.2f) m/s%n", vNewX, vNewY);
 ```
 
----
+### Production WPILib Equivalent
+In WPILib, `Translation2d` supports vector arithmetic:
 
-> 💡 **Math Sidebar: Vectors, Scalars & Basis Steps**
->
-> * **Vector:** An ordered list of numbers representing direction and distance (written as a column `[x, y]ᵀ`).
-> * **Scalar:** A single ordinary number (like `2.0` or `0.5`) that **scales** (stretches or shrinks) a vector.
-> * **Elementary Steps (Basis Vectors):** Every 2D vector `[3, 2]` is just a combination of two standard 1-step moves:
->   * `1 step East` (called `î` or `e₁`): `[1, 0]`
->   * `1 step North` (called `ĵ` or `e₂`): `[0, 1]`
->   * `[3, 2] = 3 · [1, 0] + 2 · [0, 1]`
+```java
+import edu.wpi.first.math.geometry.Translation2d;
+
+Translation2d velocity = new Translation2d(2.0, 1.0);
+Translation2d acceleration = new Translation2d(1.5, 2.0);
+
+Translation2d newVelocity = velocity.plus(acceleration.times(0.5));
+```
 
 ---
 

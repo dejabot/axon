@@ -81,31 +81,80 @@ class Value:
 
 ---
 
-## 2. Using Our Autograd Engine
+## 2. Solving It in Code (Java Micro-Autograd Engine)
 
-Now we can write math just like normal Python, and backpropagate with zero effort:
+Here is a complete, self-contained `Value` class with automatic differentiation in pure Java:
 
-```python
-# 1. Define input parameters
-x = Value(2.0)
-w = Value(3.0)
-b = Value(1.0)
+```java
+import java.util.*;
 
-# 2. Forward pass: y = w * x + b
-y = (w * x) + b           # y.data = 7.0
+public class Value {
+    public double data;
+    public double grad = 0.0;
+    private final List<Value> prev;
+    private Runnable backward = () -> {};
 
-# 3. Loss: L = (y - 10.0)^2
-target = Value(10.0)
-diff = y + (target * -1.0) # diff.data = -3.0
-loss = diff * diff        # loss.data = 9.0
+    public Value(double data, Value... children) {
+        this.data = data;
+        this.prev = Arrays.asList(children);
+    }
 
-# 4. Automatic differentiation!
-loss.backward()
+    public Value add(Value other) {
+        Value out = new Value(this.data + other.data, this, other);
+        out.backward = () -> {
+            this.grad += 1.0 * out.grad;
+            other.grad += 1.0 * out.grad;
+        };
+        return out;
+    }
 
-print(f"Loss: {loss.data:.2f}")
-print(f"dL / dw: {w.grad:.2f}")   # Output: -12.00
-print(f"dL / dx: {x.grad:.2f}")   # Output: -18.00
-print(f"dL / db: {b.grad:.2f}")   # Output: -6.00
+    public Value mul(Value other) {
+        Value out = new Value(this.data * other.data, this, other);
+        out.backward = () -> {
+            this.grad += other.data * out.grad;
+            other.grad += this.data * out.grad;
+        };
+        return out;
+    }
+
+    public void backward() {
+        List<Value> topo = new ArrayList<>();
+        Set<Value> visited = new HashSet<>();
+        buildTopo(this, topo, visited);
+
+        this.grad = 1.0;
+        for (int i = topo.size() - 1; i >= 0; i--) {
+            topo.get(i).backward.run();
+        }
+    }
+
+    private void buildTopo(Value v, List<Value> topo, Set<Value> visited) {
+        if (!visited.contains(v)) {
+            visited.add(v);
+            for (Value child : v.prev) buildTopo(child, topo, visited);
+            topo.add(v);
+        }
+    }
+
+    public static void main(String[] args) {
+        Value x = new Value(2.0);
+        Value w = new Value(3.0);
+        Value b = new Value(1.0);
+
+        // Forward: y = w * x + b
+        Value y = w.mul(x).add(b); // 7.0
+
+        // Loss: L = (y - 10)^2
+        Value diff = y.add(new Value(-10.0));
+        Value loss = diff.mul(diff); // 9.0
+
+        // Auto-differentiate!
+        loss.backward();
+
+        System.out.printf("Loss: %.2f | dL/dw: %.2f | dL/dx: %.2f | dL/db: %.2f%n",
+            loss.data, w.grad, x.grad, b.grad);
+    }
+}
 ```
 
 ---

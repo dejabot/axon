@@ -41,25 +41,29 @@ To heavily penalize confident mistakes, we take the **negative natural logarithm
 
 ---
 
-## 2. Python Implementation
+## 2. Solving It in Code (Java)
 
-Here is how Cross-Entropy Loss is calculated in pure Python:
+### First-Principles Java: Cross-Entropy Loss
+```java
+public class CrossEntropy {
+    public static void main(String[] args) {
+        // True One-Hot Label: [Note, Coral, Algae] (True object is Note at index 0)
+        double[] yTrue = {1.0, 0.0, 0.0};
 
-```python
-import math
+        // Model Predicted Probabilities (from Softmax)
+        double[] yPred = {0.85, 0.10, 0.05};
 
-# True one-hot label: [Note, Coral, Algae]
-# The object is a Note (index 0)
-y_true = [1.0, 0.0, 0.0]
+        // Cross-Entropy: -sum(yTrue * ln(yPred))
+        double loss = 0.0;
+        for (int i = 0; i < yTrue.length; i++) {
+            if (yTrue[i] > 0.0) {
+                loss -= yTrue[i] * Math.log(Math.max(yPred[i], 1e-15));
+            }
+        }
 
-# Model output probabilities (from Softmax)
-y_pred = [0.85, 0.10, 0.05]
-
-# Cross-Entropy: -sum(y_true * ln(y_pred))
-# Since only the correct class has y_true = 1.0, this simplifies to -ln(y_pred[correct])
-loss = -sum(t * math.log(max(p, 1e-15)) for t, p in zip(y_true, y_pred))
-
-print(f"Cross-Entropy Loss: {loss:.4f}")
+        System.out.printf("Cross-Entropy Loss: %.4f%n", loss);
+    }
+}
 ```
 
 ---

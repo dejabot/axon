@@ -35,50 +35,35 @@ How does the robot software break this diagonal stick push into two separate mot
 
 ---
 
-## 2. Solving It in Code
-We decompose any diagonal angle `θ` into horizontal and vertical components using Python's `math.cos` and `math.sin`:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-import math
+### First-Principles Java
+Resolving joystick speed and angle into X and Y velocities:
 
-def joystick_to_speeds(angle_degrees, power=1.0):
-    """
-    Decomposes a joystick angle into forward (vx) and strafe (vy) speeds.
-    """
-    # Python's math library expects angles in Radians!
-    angle_radians = math.radians(angle_degrees)
-    
-    # cos gives horizontal forward speed (X)
-    vx = power * math.cos(angle_radians)
-    
-    # sin gives vertical strafe speed (Y)
-    vy = power * math.sin(angle_radians)
-    
-    return vx, vy
+```java
+double speed = 4.0;              // 4.0 m/s total speed
+double angleDegrees = 30.0;      // 30 degrees heading
 
-# Example: Push stick diagonally at 30 degrees at full power (1.0)
-vx, vy = joystick_to_speeds(30.0, power=1.0)
-print(f"Forward speed (vx): {vx:.3f}")  # cos(30°) ≈ 0.866
-print(f"Strafe speed  (vy): {vy:.3f}")  # sin(30°) = 0.500
+// 1. Convert degrees to radians (Java trigonometric functions expect radians)
+double angleRadians = Math.toRadians(angleDegrees);
+
+// 2. Resolve into component speeds
+double vx = speed * Math.cos(angleRadians); // Forward speed: 4.0 * 0.866 = 3.46 m/s
+double vy = speed * Math.sin(angleRadians); // Strafe speed:  4.0 * 0.500 = 2.00 m/s
+
+System.out.printf("Speeds -> vx: %.2f m/s, vy: %.2f m/s%n", vx, vy);
 ```
 
----
+### Production WPILib Equivalent
+In WPILib, `Rotation2d` stores trigonometric values without constant recalculation:
 
-> 💡 **Math Sidebar: The Unit Circle & SOH-CAH-TOA**
->
-> A circle with a radius of `1.0` is called the **Unit Circle**.
->
-> For any angle `θ`:
-> ```
->    cos(θ) = Adjacent / Hypotenuse = X / 1.0 = X
->    sin(θ) = Opposite / Hypotenuse = Y / 1.0 = Y
-> ```
->
-> **How to remember this intuitively:**
-> * **Cosine (`cos`):** The **horizontal shadow** cast on the floor.
-> * **Sine (`sin`):** The **vertical height** reached on the wall.
-> * **Pythagorean Identity:** Because the stick length is always 1:
->   `cos²(θ) + sin²(θ) = 1`
+```java
+import edu.wpi.first.math.geometry.Rotation2d;
+
+Rotation2d heading = Rotation2d.fromDegrees(30.0);
+double vx = speed * heading.getCos(); // 3.46 m/s
+double vy = speed * heading.getSin(); // 2.00 m/s
+```
 
 ---
 

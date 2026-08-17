@@ -40,51 +40,44 @@ What happens if the matrix squashes 2D space down into a single 1D line? You los
 
 ---
 
-## 2. Solving It in Code
-In Python, we compute the determinant `det` first to verify that the matrix is safe to invert:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-def invert_2x2_matrix(A):
-    """
-    Computes the inverse of a 2x2 matrix [[a, b], [c, d]].
-    """
-    a, b = A[0][0], A[0][1]
-    c, d = A[1][0], A[1][1]
-    
-    # 1. Calculate the Determinant (Area scaling factor)
-    det = a * d - b * c
-    
-    # 2. Check for Singularity (Cannot invert if det is zero!)
-    if abs(det) < 1e-6:
-        raise ValueError("Matrix is Singular (det=0)! Inverse does not exist.")
-        
-    # 3. Swap diagonal, negate off-diagonal, and divide by det
-    return [
-        [ d / det, -b / det],
-        [-c / det,  a / det]
-    ]
+### First-Principles Java: 2x2 Matrix Inversion
+```java
+// Matrix M = [[a, b], [c, d]]
+double a = 2.0, b = 1.0;
+double c = 1.0, d = 3.0;
 
-# Example: Inverting a scaling matrix
-matrix_A = [[2.0, 0.0], [0.0, 4.0]]
-inv_A = invert_2x2_matrix(matrix_A)
+// 1. Calculate Determinant: det(M) = a*d - b*c
+double det = a * d - b * c; // 2*3 - 1*1 = 5.0
 
-print(f"Inverse Matrix: {inv_A}")  # [[0.5, 0.0], [0.0, 0.25]]
+if (Math.abs(det) < 1e-9) {
+    throw new IllegalArgumentException("Matrix is singular (cannot be inverted)!");
+}
+
+// 2. Invert Matrix: M^(-1) = (1/det) * [[d, -b], [-c, a]]
+double invA =  d / det;
+double invB = -b / det;
+double invC = -c / det;
+double invD =  a / det;
+
+System.out.printf("Inverse Matrix: [[%.2f, %.2f], [%.2f, %.2f]]%n", invA, invB, invC, invD);
 ```
 
----
+### Production WPILib Matrix
+```java
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.numbers.*;
 
-> 💡 **Math Sidebar: Determinant & Inverse**
->
-> * **Determinant (`det A`):** Measures how much the matrix stretches or shrinks 2D areas:
->   ```
->      det(A) = a·d - b·c
->   ```
-> * **The Inverse Matrix (`A⁻¹`):** The undo button that reverses the transformation:
->   ```
->      A⁻¹ = (1 / det(A)) · [  d   -b ]
->                           [ -c    a ]
->   ```
-> * **Singular Matrix:** If `det(A) = 0`, `1 / det` divides by zero. The matrix has no inverse.
+// WPILib Matrix types: Matrix<Rows, Cols>
+Matrix<N2, N2> mat = new Matrix<>(Nat.N2(), Nat.N2());
+mat.set(0, 0, 2.0); mat.set(0, 1, 1.0);
+mat.set(1, 0, 1.0); mat.set(1, 1, 3.0);
+
+Matrix<N2, N2> inv = mat.inv(); // Invert matrix
+double det = mat.det();          // Compute determinant
+```
 
 ---
 

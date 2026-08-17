@@ -36,38 +36,42 @@ The path-following software needs to know:
 
 ---
 
-## 2. Solving It in Code: The Dot Product
-To compute how aligned two vectors are, we multiply matching components and add them up:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-def dot_product(v1, v2):
-    """Computes the dot product of two vectors."""
-    return v1[0] * v2[0] + v1[1] * v2[1]
+### First-Principles Java
+Calculating dot product, magnitudes, and directional alignment:
 
-# Path direction and actual robot velocity
-path_dir = [1.0, 0.0]
-robot_vel = [2.0, 1.5]
+```java
+// Vector A: Robot Heading Vector (Facing 45 degrees)
+double ax = 1.0, ay = 1.0;
 
-# Calculate forward progress along path
-forward_progress = dot_product(path_dir, robot_vel)
+// Vector B: Target Line-of-Sight Vector
+double bx = 3.0, by = 1.0;
 
-print(f"Forward progress along path: {forward_progress:.2f} m/s")  # 2.00 m/s
+// 1. Compute Dot Product: A · B = ax*bx + ay*by
+double dotProduct = ax * bx + ay * by; // 1*3 + 1*1 = 4.0
+
+// 2. Compute Magnitudes
+double magA = Math.hypot(ax, ay); // 1.414
+double magB = Math.hypot(bx, by); // 3.162
+
+// 3. Cosine of the angle between them: cos(θ) = (A · B) / (|A| * |B|)
+double cosTheta = dotProduct / (magA * magB);
+double angleDegrees = Math.toDegrees(Math.acos(cosTheta));
+
+System.out.printf("Alignment Angle: %.1f degrees%n", angleDegrees);
 ```
 
----
+### Production WPILib Equivalent
+```java
+import edu.wpi.first.math.geometry.Translation2d;
 
-> 💡 **Math Sidebar: The Dot Product Formula**
->
-> In linear algebra, the dot product between vectors `u` and `v` is written as:
->
-> ```
->    u · v = u_x · v_x + u_y · v_y = ||u|| · ||v|| · cos(θ)
-> ```
->
-> **How to interpret the result:**
-> * **`u · v > 0` (Positive):** The vectors point generally in the same direction (`θ < 90°`).
-> * **`u · v = 0` (Zero):** The vectors are strictly **perpendicular / orthogonal** (`θ = 90°`). Zero progress is made along `u`!
-> * **`u · v < 0` (Negative):** The vectors point in opposite directions (`θ > 90°`). The robot is driving backward relative to the path.
+Translation2d heading = new Translation2d(1.0, 1.0);
+Translation2d targetDir = new Translation2d(3.0, 1.0);
+
+// Angle between vectors using WPILib Rotation2d
+double angleDiff = heading.getAngle().minus(targetDir.getAngle()).getDegrees();
+```
 
 ---
 

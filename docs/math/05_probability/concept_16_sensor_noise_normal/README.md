@@ -38,61 +38,22 @@ How do we model this uncertainty mathematically so our robot can trust its senso
 
 ---
 
-## 2. Solving It in Code: Mean, Variance & Standard Deviation
-We summarize a collection of noisy readings using three core statistical metrics:
-1. **Sample Mean (`μ`):** The average measurement (best estimate of true location).
-2. **Variance (`σ²`):** The average squared spread (how noisy the sensor is).
-3. **Standard Deviation (`σ`):** The square root of variance, measured in original units (e.g. meters).
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-import math
+### First-Principles Java: Simulating Sensor Gaussian Noise
+```java
+import java.util.Random;
 
-def analyze_sensor_noise(readings):
-    """
-    Computes the sample mean, variance, and standard deviation of sensor readings.
-    """
-    n = len(readings)
-    
-    # 1. Mean (Average value)
-    mean = sum(readings) / n
-    
-    # 2. Variance (Average squared distance from the mean)
-    variance = sum((x - mean) ** 2 for x in readings) / (n - 1)
-    
-    # 3. Standard Deviation (Spread in original units)
-    std_dev = math.sqrt(variance)
-    
-    return mean, variance, std_dev
+Random rng = new Random();
+double trueDistance = 5.00; // 5 meters
+double sensorNoiseSigma = 0.08; // 8 cm standard deviation (±0.08 m)
 
-samples = [3.98, 4.04, 3.95, 4.01, 4.02, 3.97, 4.05, 3.99, 4.00, 3.99]
-μ, var, σ = analyze_sensor_noise(samples)
-
-print(f"Mean Distance (μ)        : {μ:.3f} meters")
-print(f"Noise Spread  (σ)        : ±{σ:.3f} meters")
-print(f"68% Confidence Interval  : [{μ - σ:.3f}, {μ + σ:.3f}] meters")
+for (int i = 0; i < 5; i++) {
+    // nextGaussian() generates numbers from N(0, 1)
+    double noisyReading = trueDistance + rng.nextGaussian() * sensorNoiseSigma;
+    System.out.printf("Sample %d: %.3f meters%n", i + 1, noisyReading);
+}
 ```
-
----
-
-> 💡 **Math Sidebar: The Gaussian (Normal) Distribution**
->
-> In probability, the most ubiquitous probability density function is the **Gaussian Bell Curve**:
->
-> ```
->              1               - (x - μ)² / (2σ²)
->    P(x) = -------  ·  e
->           σ · √(2π)
-> ```
->
-> **How to read this equation out loud:**
-> * `μ` (*μ*) is the **center / peak** of the bell curve.
-> * `σ` (*σ*) is the **width / spread** of the curve.
-> * `e^(-...)` creates the symmetric bell shape that drops off rapidly away from `μ`.
->
-> **The 68-95-99.7 Rule:**
-> * **`68%`** of all sensor readings land within `±1σ` of the mean.
-> * **`95%`** of all readings land within `±2σ`.
-> * **`99.7%`** of all readings land within `±3σ`.
 
 ---
 

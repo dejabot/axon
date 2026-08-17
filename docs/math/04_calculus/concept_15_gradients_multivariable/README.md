@@ -39,56 +39,25 @@ Imagine you are hiking blindfolded on a foggy, hilly mountain. Your elevation (h
 
 ---
 
-## 2. Solving It in Code: Artificial Potential Fields
-In autonomous robotics, we steer around obstacles by creating a virtual energy surface `U(x, y)`:
-* The goal is a low bowl pulling the robot in.
-* Obstacles are tall mountains repelling the robot away.
-* The steering force is simply **`-∇U`**!
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-def potential_field_force(robot_x, robot_y, goal_x=4.0, goal_y=0.0, obs_x=2.0, obs_y=0.0):
-    """
-    Computes steering force vector -∇U to navigate toward goal while avoiding obstacle.
-    """
-    # 1. Attractive pull toward goal: U_att = 0.5 * dist_to_goal^2
-    pull_x = -(robot_x - goal_x)
-    pull_y = -(robot_y - goal_y)
-    
-    # 2. Repulsive push from obstacle
-    dx_obs = robot_x - obs_x
-    dy_obs = robot_y - obs_y
-    dist_obs_sq = max(0.1, dx_obs**2 + dy_obs**2)
-    push_x = (dx_obs / (dist_obs_sq**1.5)) * 2.0
-    push_y = (dy_obs / (dist_obs_sq**1.5)) * 2.0
-    
-    # Total downhill steering force: F = -∇U
-    fx = pull_x + push_x
-    fy = pull_y + push_y
-    return fx, fy
+### First-Principles Java: Numerical Gradient
+```java
+// Loss function: Error as a function of shooter angle and flywheel RPM
+public static double computeLoss(double angle, double rpm) {
+    return Math.pow(angle - 45.0, 2) + 0.01 * Math.pow(rpm - 3500.0, 2);
+}
 
-# Robot approaching obstacle at (2.0, 0.0)
-fx, fy = potential_field_force(robot_x=1.5, robot_y=0.2)
-print(f"Steering Force Vector: [{fx:.2f}, {fy:.2f}] N")
-# Output automatically bends around the obstacle!
+// Numerical gradient estimation
+double angle = 40.0;
+double rpm = 3200.0;
+double eps = 1e-5;
+
+double gradAngle = (computeLoss(angle + eps, rpm) - computeLoss(angle - eps, rpm)) / (2 * eps);
+double gradRpm   = (computeLoss(angle, rpm + eps) - computeLoss(angle, rpm - eps)) / (2 * eps);
+
+System.out.printf("Gradient Vector: [dLoss/dAngle = %.2f, dLoss/dRPM = %.4f]%n", gradAngle, gradRpm);
 ```
-
----
-
-> 💡 **Math Sidebar: The Gradient Vector (Del / Nabla ∇)**
->
-> In multivariable calculus, the gradient of a 2D scalar surface `f(x, y)` is written as:
->
-> ```
->          [ ∂f / ∂x ]
->   ∇f =   [         ]
->          [ ∂f / ∂y ]
-> ```
->
-> **How to read this out loud:**
-> * `∇` is pronounced *"del"* or *"nabla"*.
-> * `∂` is the partial derivative symbol.
-> * `∇f` is the arrow pointing straight uphill.
-> * `-∇f` is the arrow pointing straight downhill (**Gradient Descent**).
 
 ---
 

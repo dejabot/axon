@@ -34,22 +34,37 @@ def relu(x):
 
 ---
 
-### 2. GELU (Gaussian Error Linear Unit)
-The modern standard used in Transformer architectures (like GPT, Gemini, and LLaMA):
+### 2. Solving It in Code (Java)
 
-```python
-import math
+### First-Principles Java: Activation Functions
+```java
+public class ActivationFunctions {
+    public static double relu(double x) {
+        return Math.max(0.0, x);
+    }
 
-def gelu(x):
-    # Smooth approximation of Gaussian CDF weighting
-    return 0.5 * x * (1.0 + math.tanh(math.sqrt(2.0 / math.pi) * (x + 0.044715 * x ** 3)))
+    public static double sigmoid(double x) {
+        return 1.0 / (1.0 + Math.exp(-x));
+    }
+
+    public static double gelu(double x) {
+        return 0.5 * x * (1.0 + Math.tanh(Math.sqrt(2.0 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))));
+    }
+
+    public static void main(String[] args) {
+        double[] logits = {-3.0, -1.0, 0.0, 1.0, 3.0};
+
+        for (double z : logits) {
+            System.out.printf("z = %5.1f | ReLU = %5.2f | Sigmoid = %5.3f | GELU = %5.3f%n",
+                z, relu(z), sigmoid(z), gelu(z));
+        }
+    }
+}
 ```
-
-* Unlike ReLU, GELU has a smooth, curved dip for negative values around `x ≈ -1.0`, allowing small negative gradients to flow during backpropagation.
 
 ---
 
-### 3. Sigmoid (The Gatekeeper)
+## 3. Sigmoid (The Gatekeeper)
 Squashes any real number from `-∞` to `+∞` into a probability range between `0.0` and `1.0`:
 
 ```python

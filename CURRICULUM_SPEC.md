@@ -6,7 +6,7 @@ Axon bridges high school mathematics and physics into modern machine learning, l
 ## Pedagogical Rules
 1. **Paced & Approachable**: Build each concept step-by-step from everyday physical and software intuition. Avoid dense jargon dumps.
 2. **Everyday FRC & Robotics Scenarios**: Ground every concept in a real robot challenge (e.g. reef distances, joystick steering, sensor jitter, elevator chains, shooter ballistics, swerve twist) before introducing formal equations.
-3. **Code-First (Python)**: 5–15 lines of pure, syntax-highlighted Python with clear variable names.
+3. **Code-First (Java & WPILib)**: Clean, boilerplate-free Java with clear variable names, paired with the official production WPILib equivalent class (`Translation2d`, `Pose2d`, `Rotation2d`, `MathUtil`, `TrapezoidProfile`, `Matrix`, etc.).
 4. **"Math!" Sidebars**: Introduce formal notations as translations of the code, with explicit pronunciation and "how to read out loud" guides.
 5. **Bridge to Machine Learning & Modern Autonomy**: Explicitly demonstrate how the concept is used in modern deep learning (LLMs, Diffusion Models, Transformer Attention, Vision Classifiers) and robotic autonomy.
 6. **Interactive Companion Demos**: Clean, focused HTML5/Canvas visualizers with dark/light mode toggle.

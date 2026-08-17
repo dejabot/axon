@@ -31,42 +31,30 @@ Imagine you are standing inside an elevator holding a full cup of hot coffee fil
 
 ---
 
-## 2. Solving It in Code: S-Curve Smoothing
-To protect mechanical chains and gearboxes, software bounds the maximum **Jerk** (`j_max`), producing a smooth "S-shaped" velocity curve:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-def generate_scurve_step(t, total_time, distance):
-    """
-    Smoothly ramps position, velocity, and acceleration using a bounded jerk curve.
-    """
-    p = min(1.0, max(0.0, t / total_time))
-    
-    # 5th-order smooth polynomial (zero jerk at endpoints)
-    smooth_fraction = 10*(p**3) - 15*(p**4) + 6*(p**5)
-    
-    current_position = distance * smooth_fraction
-    return current_position
+### Production WPILib Equivalent: Motion Profiling
+In WPILib, motion constraints are generated and evaluated via `TrapezoidProfile`:
 
-# Calculate elevator position at 0.5 seconds into a 2.0-second move
-x = generate_scurve_step(t=0.5, total_time=2.0, distance=2.0)
-print(f"Elevator height at 0.5s: {x:.3f} meters")  # 0.206m (gentle start)
+```java
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
+// Constrain Max Velocity to 3.0 m/s, Max Acceleration to 6.0 m/s²
+TrapezoidProfile.Constraints constraints = 
+    new TrapezoidProfile.Constraints(3.0, 6.0);
+
+TrapezoidProfile profile = new TrapezoidProfile(constraints);
+
+// Set current state (at 0 m) and desired goal (at 5 m)
+TrapezoidProfile.State current = new TrapezoidProfile.State(0.0, 0.0);
+TrapezoidProfile.State goal = new TrapezoidProfile.State(5.0, 0.0);
+
+// Calculate setpoint for the next 20ms robot loop
+TrapezoidProfile.State nextSetpoint = profile.calculate(0.020, current, goal);
+
+System.out.printf("Target Position: %.3f m, Target Velocity: %.3f m/s%n",
+    nextSetpoint.position, nextSetpoint.velocity);
 ```
-
----
-
-> 💡 **Math Sidebar: The Hierarchy of Motion Derivatives**
->
-> In physics and calculus, each concept is the derivative (rate of change) of the previous one:
->
-> ```
->    Position:     x(t)          (meters)
->    Velocity:     v(t) = dx/dt  (meters per second)
->    Acceleration: a(t) = dv/dt  (meters per second squared)
->    Jerk:         j(t) = da/dt  (meters per second cubed)
-> ```
->
-> **Why Infinite Jerk Breaks Mechanisms:**
-> By Newton's second law, `Force = mass · acceleration` (`F = m·a`). An instantaneous step in acceleration requires an instantaneous change in mechanical force, producing shockwaves that shear gear teeth.
 
 ---
 

@@ -46,40 +46,47 @@ If the robot is located at `(x = 4.0m, y = 2.0m)` facing directly East:
 
 ---
 
-## 2. Solving It in Code
-Here is how we convert a local sensor measurement into a global field coordinate when the robot is facing along the field axis:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-# 1. Global position of the robot on the field
-robot_field_x = 4.0
-robot_field_y = 2.0
+### First-Principles Java
+Converting a local offset into global field coordinates:
 
-# 2. Local position of the object detected by the camera
-object_robot_x = 1.5   # 1.5 meters forward
-object_robot_y = 0.5   # 0.5 meters left
-# 3. Calculate object's true position on the field (Translation)
-object_field_x = robot_field_x + object_robot_x
-object_field_y = robot_field_y + object_robot_y
+```java
+// 1. Robot position in Global Field Coordinates
+double robotFieldX = 5.0;
+double robotFieldY = 3.0;
 
-print(f"Object on Field: ({object_field_x:.2f}, {object_field_y:.2f}) meters")
-# Output: (5.50, 2.50) meters
+// 2. Camera offset relative to Robot Center
+double cameraOffsetX = 0.3; // 30 cm forward
+double cameraOffsetY = 0.0; // centered left/right
+
+// 3. Detected Game Piece relative to Camera
+double pieceCameraX = 1.5;  // 1.5 meters ahead of camera lens
+double pieceCameraY = -0.4; // 0.4 meters to the right
+
+// 4. Transform to Global Field Coordinates
+double pieceFieldX = robotFieldX + cameraOffsetX + pieceCameraX; // 5.0 + 0.3 + 1.5 = 6.8 m
+double pieceFieldY = robotFieldY + cameraOffsetY + pieceCameraY; // 3.0 + 0.0 - 0.4 = 2.6 m
+
+System.out.printf("Piece on Field: (%.2f, %.2f) m%n", pieceFieldX, pieceFieldY);
 ```
 
----
+### Production WPILib Equivalent
+WPILib handles rigid-body spatial transforms using `Pose2d` and `Transform2d`:
 
-> 💡 **Math Sidebar: Frame Translation**
->
-> In geometry, shifting an object from one origin to another without rotating is called a **Translation**:
->
-> ```
->    P_field = P_robot_origin + P_relative
-> ```
->
-> **How to read this equation out loud:**
-> * `P_field` is the final position of the object on the global field map.
-> * `P_robot_origin` is the `(x, y)` location of the robot itself.
-> * `P_relative` is the offset measured from the robot's local sensors.
-> * Shifting frames simply means adding the offset vectors together!
+```java
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+
+Pose2d robotPose = new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0));
+Transform2d robotToCamera = new Transform2d(new Translation2d(0.3, 0.0), new Rotation2d());
+Transform2d cameraToPiece = new Transform2d(new Translation2d(1.5, -0.4), new Rotation2d());
+
+// Chained spatial transform
+Pose2d pieceFieldPose = robotPose.plus(robotToCamera).plus(cameraToPiece);
+```
 
 ---
 

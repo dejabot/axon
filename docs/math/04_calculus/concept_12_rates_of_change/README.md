@@ -36,38 +36,20 @@ To find the robot's speed, we calculate the **rate of change**:
 
 ---
 
-## 2. Solving It in Code
-Here is how a robot control loop calculates instantaneous velocity from successive position samples:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-def calculate_velocity(prev_position, current_position, dt=0.020):
-    """
-    Computes velocity (dx/dt) from two consecutive position readings.
-    """
-    dx = current_position - prev_position
-    velocity = dx / dt
-    return velocity
+### First-Principles Java: Numerical Derivative
+```java
+// Sensor position readings (meters) at two timestamps
+double x1 = 3.00, t1 = 1.00;
+double x2 = 3.42, t2 = 1.05;
 
-# Example: Robot traveled from 2.00m to 2.08m over 20ms
-v = calculate_velocity(prev_position=2.00, current_position=2.08, dt=0.020)
-print(f"Robot Velocity: {v:.2f} m/s")  # 4.00 m/s
+// Finite difference derivative: v = dx / dt
+double dt = t2 - t1; // 0.05 seconds
+double velocity = (x2 - x1) / dt; // 0.42 / 0.05 = 8.40 m/s
+
+System.out.printf("Instantaneous Velocity: %.2f m/s%n", velocity);
 ```
-
----
-
-> 💡 **Math Sidebar: The Derivative**
->
-> In calculus, the instantaneous velocity is the **Derivative** of position with respect to time `t`:
->
-> ```
->    v(t) = dx / dt = lim [ (x(t + Δt) - x(t)) / Δt ]
->                     Δt➔0
-> ```
->
-> **How to read this equation out loud:**
-> * `dx / dt` means *"the tiny change in position `dx` divided by the tiny change in time `dt`"*.
-> * `lim (Δt ➔ 0)` means shrinking the time window between samples down to almost zero.
-> * Geometrically, the derivative is the exact **slope of the tangent line** at that instant!
 
 ---
 

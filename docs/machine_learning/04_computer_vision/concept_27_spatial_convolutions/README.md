@@ -49,36 +49,35 @@ What happens when this kernel slides over different regions of an image?
 
 ---
 
-## 2. Python Implementation
+## 2. Solving It in Code (Java)
 
-Here is a 2D convolution sliding window in pure Python:
+### First-Principles Java: 2D Spatial Convolution Window
+```java
+public class Convolution2D {
+    public static double[][] conv2d(double[][] image, double[][] kernel) {
+        int imgH = image.length;
+        int imgW = image[0].length;
+        int kH = kernel.length;
+        int kW = kernel[0].length;
 
-```python
-def conv2d(image, kernel):
-    img_h, img_w = len(image), len(image[0])
-    k_h, k_w = len(kernel), len(kernel[0])
-    out_h, out_w = img_h - k_h + 1, img_w - k_w + 1
-    
-    feature_map = [[0.0] * out_w for _ in range(out_h)]
-    
-    for r in range(out_h):
-        for c in range(out_w):
-            # 3x3 Dot Product
-            pixel_sum = sum(
-                image[r + kr][c + kc] * kernel[kr][kc]
-                for kr in range(k_h)
-                for kc in range(k_w)
-            )
-            feature_map[r][c] = pixel_sum
-            
-    return feature_map
+        int outH = imgH - kH + 1;
+        int outW = imgW - kW + 1;
+        double[][] featureMap = new double[outH][outW];
 
-# 3x3 Vertical Sobel Kernel
-sobel_v = [
-    [-1, 0, 1],
-    [-2, 0, 2],
-    [-1, 0, 1]
-]
+        for (int r = 0; r < outH; r++) {
+            for (int c = 0; c < outW; c++) {
+                double pixelSum = 0.0;
+                for (int kr = 0; kr < kH; kr++) {
+                    for (int kc = 0; kc < kW; kc++) {
+                        pixelSum += image[r + kr][c + kc] * kernel[kr][kc];
+                    }
+                }
+                featureMap[r][c] = pixelSum;
+            }
+        }
+        return featureMap;
+    }
+}
 ```
 
 ---

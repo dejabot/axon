@@ -34,51 +34,29 @@ Before moving the drivetrain motors, how does the software know if our robot's b
 
 ---
 
-## 2. Solving It in Code: The AABB Overlap Test
-The fastest way to test for collisions is an **Axis-Aligned Bounding Box (AABB)** check. 
+## 2. Solving It in Code (Java & WPILib)
 
-Two boxes overlap **if and only if** they overlap on **both the X-axis AND the Y-axis simultaneously**:
+### First-Principles Java: 2D Bounding Box Check
+We define an Axis-Aligned Bounding Box (AABB) using a clean Java `record`:
 
-```python
-def check_collision(box_a, box_b):
-    """
-    Checks if two 2D boxes overlap.
-    Each box is defined by [x_min, y_min, x_max, y_max].
-    """
-    # Check if box_a is completely to the left or right of box_b
-    no_x_overlap = (box_a['x_max'] < box_b['x_min']) or (box_a['x_min'] > box_b['x_max'])
-    
-    # Check if box_a is completely above or below box_b
-    no_y_overlap = (box_a['y_max'] < box_b['y_min']) or (box_a['y_min'] > box_b['y_max'])
-    
-    # If there is separation on either axis, they do NOT collide!
-    return not (no_x_overlap or no_y_overlap)
+```java
+public record BoundingBox(double minX, double minY, double maxX, double maxY) {
+    // Two boxes collide IF AND ONLY IF they overlap on BOTH the X and Y axes
+    public boolean overlaps(BoundingBox other) {
+        boolean xOverlap = this.maxX >= other.minX && this.minX <= other.maxX;
+        boolean yOverlap = this.maxY >= other.minY && this.minY <= other.maxY;
+        return xOverlap && yOverlap;
+    }
+}
 
-# Example: Robot bumper vs Field Barrier
-robot = {'x_min': 2.0, 'y_min': 1.0, 'x_max': 2.9, 'y_max': 1.9}
-barrier = {'x_min': 2.5, 'y_min': 1.5, 'x_max': 3.5, 'y_max': 2.5}
+// Example usage:
+BoundingBox robotBox = new BoundingBox(2.0, 1.0, 3.0, 2.0); // 1.0m x 1.0m robot
+BoundingBox barrier = new BoundingBox(2.5, 1.5, 4.0, 3.5);  // Field obstacle
 
-if check_collision(robot, barrier):
-    print("COLLISION DETECTED! Stop motors immediately.")
-else:
-    print("Path is clear.")
+if (robotBox.overlaps(barrier)) {
+    System.out.println("WARNING: Collision detected! Re-routing path...");
+}
 ```
-
----
-
-> 💡 **Math Sidebar: Interval Intersection**
->
-> In mathematics, a 2D box is the product of two 1D intervals: an X-interval `[x_min, x_max]` and a Y-interval `[y_min, y_max]`.
->
-> Two boxes `A` and `B` intersect if:
-> ```
->    (A_x ∩ B_x ≠ ∅)  AND  (A_y ∩ B_y ≠ ∅)
-> ```
->
-> **How to read this equation out loud:**
-> * `∩` means **intersection** (the numbers shared in common).
-> * `≠ ∅` means **not empty** (the two intervals overlap).
-> * If the shadows cast on both walls overlap at the same time, the 3D objects are touching!
 
 ---
 

@@ -34,52 +34,33 @@ How does the chassis controller translate the driver's field command `[v_field_x
 
 ---
 
-## 2. Solving It in Code: 2D Matrix Rotation
-A **Matrix** is a machine that moves the coordinate grid. We transform a 2D vector by multiplying it with the rotation matrix:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-import math
+### First-Principles Java: 2D Rotation Matrix
+```java
+// Point (x, y) = (2.0, 1.0)
+double px = 2.0;
+double py = 1.0;
+double theta = Math.toRadians(90.0); // 90 degree rotation
 
-def rotate_to_robot_frame(vx_field, vy_field, heading_deg):
-    """
-    Transforms field-centric speeds into local robot-centric chassis speeds.
-    """
-    rad = math.radians(heading_deg)
-    cos_h = math.cos(rad)
-    sin_h = math.sin(rad)
-    
-    # Apply 2D rotation transformation
-    vx_robot =  cos_h * vx_field + sin_h * vy_field
-    vy_robot = -sin_h * vx_field + cos_h * vy_field
-    
-    return vx_robot, vy_robot
+// 2x2 Rotation Matrix Transformation:
+// [ x_new ] = [ cos -sin ] [ px ]
+// [ y_new ]   [ sin  cos ] [ py ]
+double newX = Math.cos(theta) * px - Math.sin(theta) * py; // 0*2 - 1*1 = -1.0
+double newY = Math.sin(theta) * px + Math.cos(theta) * py; // 1*2 + 0*1 =  2.0
 
-# Example: Driver pushes straight forward (vx=2.0 m/s), but robot is rotated 90°
-vx_r, vy_r = rotate_to_robot_frame(vx_field=2.0, vy_field=0.0, heading_deg=90.0)
-print(f"Chassis Motor Commands -> vx: {vx_r:.1f} m/s, vy: {vy_r:.1f} m/s")
-# Output: vx: 0.0 m/s (zero forward), vy: -2.0 m/s (full strafe right!)
+System.out.printf("Rotated Vector: (%.2f, %.2f)%n", newX, newY);
 ```
 
----
+### Production WPILib Equivalent
+```java
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
-> 💡 **Math Sidebar: What is a Matrix?**
->
-> A 2x2 matrix is simply a compact table that records where the two basic 1-step moves land:
->
-> ```
->        [ a   b ]  <-- Column 1: where [1, 0] (î) lands
->    A = [       ]
->        [ c   d ]  <-- Column 2: where [0, 1] (ĵ) lands
-> ```
->
-> **How to multiply Matrix A by Vector v = [x, y]ᵀ:**
-> ```
->    A · v = [ a·x + b·y ]
->            [ c·x + d·y ]
-> ```
->
-> **How to read this out loud:**
-> Take `x` copies of where `î` landed, plus `y` copies of where `ĵ` landed!
+Translation2d point = new Translation2d(2.0, 1.0);
+Translation2d rotated = point.rotateBy(Rotation2d.fromDegrees(90.0));
+// Output: (-1.0, 2.0)
+```
 
 ---
 

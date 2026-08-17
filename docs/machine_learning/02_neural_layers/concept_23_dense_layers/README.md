@@ -34,26 +34,29 @@ predicted_voltage = (w₁ · current) + (w₂ · temperature) + bias
 
 ---
 
-## 2. Python Implementation
+## 2. Solving It in Code (Java & WPILib)
 
-In Python, computing a linear layer with 2 inputs and 1 output is a clean dot product:
+### First-Principles Java: Linear Layer Forward Pass
+```java
+public class LinearNeuron {
+    public static void main(String[] args) {
+        // Inputs: [Current = 120.0 Amps, Temperature = 35.0 °C]
+        double[] inputs = {120.0, 35.0};
 
-```python
-# Inputs: [Current = 120.0 Amps, Temperature = 35.0 °C]
-inputs = [120.0, 35.0]
+        // Learned Weights and Baseline Bias
+        double[] weights = {-0.018, -0.025};
+        double bias = 12.60;
 
-# Learned Weights & Baseline Bias
-weights = [-0.018, -0.025]
-bias = 12.60
+        // Linear Output: y = dot_product(w, x) + b
+        double predictedVoltage = bias;
+        for (int i = 0; i < weights.length; i++) {
+            predictedVoltage += weights[i] * inputs[i];
+        }
 
-# Linear Layer Output: y = dot_product(w, x) + b
-output = sum(w * x for w, x in zip(weights, inputs)) + bias
-
-print(f"Predicted Battery Voltage: {output:.2f} Volts")
-# Output: 12.60 - (2.16) - (0.875) = 9.56 Volts
+        System.out.printf("Predicted Battery Voltage: %.2f Volts%n", predictedVoltage);
+    }
+}
 ```
-
-For multiple inputs and multiple outputs, this is written as matrix multiplication: `y = W @ x + b`.
 
 ---
 

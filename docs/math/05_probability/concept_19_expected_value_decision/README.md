@@ -38,54 +38,23 @@ How does an autonomous robot evaluate risk vs. reward dynamically during a match
 
 ---
 
-## 2. Solving It in Code: Expected Value & Monte Carlo
-We compute the **Expected Value `E[X]`** by multiplying every possible outcome by its probability:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-import random
+### First-Principles Java: Expected Value & Strategy Decision
+```java
+// Strategy A: Reef High Goal (5 points, 70% success, 0 points on miss)
+double evA = 0.70 * 5.0 + 0.30 * 0.0; // 3.50 points
 
-def calculate_expected_value(outcomes):
-    """
-    Computes theoretical expected value: E[X] = sum(score * prob)
-    """
-    return sum(score * prob for score, prob in outcomes)
+// Strategy B: Reef Low Goal (2 points, 99% guaranteed)
+double evB = 0.99 * 2.0 + 0.01 * 0.0; // 1.98 points
 
-def run_monte_carlo(outcomes, num_trials=1000):
-    """
-    Simulates playing thousands of matches to verify the average payoff.
-    """
-    total_score = 0
-    scores, probs = zip(*outcomes)
-    for _ in range(num_trials):
-        total_score += random.choices(scores, weights=probs)[0]
-    return total_score / num_trials
+System.out.printf("Expected Value Strategy A (High): %.2f pts%n", evA);
+System.out.printf("Expected Value Strategy B (Low):  %.2f pts%n", evB);
 
-# Strategy A: [ (Points, Probability) ]
-strat_A = [(2, 1.00)]
-# Strategy B: [ (5 pts, 65%), (0 pts, 35%) ]
-strat_B = [(5, 0.65), (0, 0.35)]
-
-ev_A = calculate_expected_value(strat_A)
-ev_B = calculate_expected_value(strat_B)
-
-print(f"Strategy A Expected Payoff : {ev_A:.2f} points")  # 2.00 pts
-print(f"Strategy B Expected Payoff : {ev_B:.2f} points")  # 3.25 pts (Higher on average!)
-print(f"Strategy B Simulated (1000x): {run_monte_carlo(strat_B):.2f} points")
+if (evA > evB) {
+    System.out.println("Autonomous Decision: Attempt High Goal (Higher Long-Term Score)");
+}
 ```
-
----
-
-> 💡 **Math Sidebar: Expected Value & Variance**
->
-> In probability theory, the **Expected Value `E[X]`** (or long-run mean) of a random variable `X` is written as:
->
-> ```
->    E[X] = ∑ xᵢ · P(xᵢ)
-> ```
->
-> **When to override pure Expected Value in competition:**
-> * **Trailing by 4 points:** Strategy A gives `+2` (guaranteed loss). You **must** pick Strategy B despite the 35% failure risk!
-> * **Leading by 1 point:** Strategy A guarantees a `+2` win. Picking Strategy B risks scoring 0 points and blowing the lead.
 
 ---
 

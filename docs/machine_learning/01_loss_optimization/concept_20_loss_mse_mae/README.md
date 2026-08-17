@@ -36,23 +36,32 @@ To prevent cancellation, we have two classic solutions:
 
 ---
 
-## 2. Python Implementation
+## 2. Solving It in Code (Java)
 
-Here is how we calculate both MSE and MAE in pure Python:
+### First-Principles Java: MSE & MAE Loss Functions
+```java
+public class LossCalculator {
+    public static void main(String[] args) {
+        double[] actuals = {2.0, 3.0, 4.0, 5.0};
+        double[] predictions = {2.2, 2.9, 5.0, 4.8};
 
-```python
-# Actual target distances vs predicted landing distances
-actuals = [2.0, 3.0, 4.0, 5.0]
-predictions = [2.2, 2.9, 5.0, 4.8]
+        double totalAbsError = 0.0;
+        double totalSqError = 0.0;
+        int n = actuals.length;
 
-# 1. Mean Absolute Error (MAE)
-mae = sum(abs(p - a) for p, a in zip(predictions, actuals)) / len(actuals)
+        for (int i = 0; i < n; i++) {
+            double err = predictions[i] - actuals[i];
+            totalAbsError += Math.abs(err);
+            totalSqError += err * err;
+        }
 
-# 2. Mean Squared Error (MSE)
-mse = sum((p - a) ** 2 for p, a in zip(predictions, actuals)) / len(actuals)
+        double mae = totalAbsError / n;
+        double mse = totalSqError / n;
 
-print(f"MAE: {mae:.3f} meters")
-print(f"MSE: {mse:.3f} meters²")
+        System.out.printf("Mean Absolute Error (MAE): %.3f meters%n", mae);
+        System.out.printf("Mean Squared Error (MSE):  %.3f meters²%n", mse);
+    }
+}
 ```
 
 ---

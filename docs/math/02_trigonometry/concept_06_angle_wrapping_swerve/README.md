@@ -38,21 +38,35 @@ During autonomous, the trajectory planner commands the robot to turn to **South-
 
 ---
 
-## 2. Solving It in Code: Shortest-Path Angle Wrapping
-Because angles wrap around on a circle, we constrain the angular error into the range `[-180°, +180°]` using modular arithmetic:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-def shortest_angle_error(target_deg, current_deg):
-    """
-    Computes the shortest angular turn from current to target in [-180, +180].
-    """
-    raw_error = target_deg - current_deg
-    # Wrap into [-180, +180] degrees
-    return (raw_error + 180.0) % 360.0 - 180.0
+### First-Principles Java: Shortest Angle Path
+```java
+public static double shortestAngleDiff(double targetDeg, double currentDeg) {
+    double diff = (targetDeg - currentDeg) % 360.0;
+    if (diff > 180.0) diff -= 360.0;
+    if (diff < -180.0) diff += 360.0;
+    return diff;
+}
+```
 
-# Example: Turning from +170° to -170°
-error = shortest_angle_error(target_deg=-170.0, current_deg=170.0)
-print(f"Shortest turn command: {error:+.1f}°")  # Output: -20.0° (Clean 20° clockwise turn!)
+### Production WPILib Equivalent
+WPILib provides built-in utilities in `MathUtil` and `SwerveModuleState`:
+
+```java
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+
+// 1. Angle modulus wrapping [-pi, +pi]
+double wrappedAngle = MathUtil.angleModulus(rawAngleRadians);
+
+// 2. Swerve 180-degree module optimization (reversing speed instead of spinning 180°)
+SwerveModuleState desiredState = new SwerveModuleState(3.5, Rotation2d.fromDegrees(170.0));
+Rotation2d currentAzimuth = Rotation2d.fromDegrees(0.0);
+
+SwerveModuleState optimized = SwerveModuleState.optimize(desiredState, currentAzimuth);
+// Automatically inverts speed to -3.5 m/s and targets -10.0°!
 ```
 
 ---

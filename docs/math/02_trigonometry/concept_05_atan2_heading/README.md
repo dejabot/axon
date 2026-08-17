@@ -40,41 +40,41 @@ Because the two negative signs cancel out (`-2 / -2 = +1`), regular `tan⁻¹` i
 
 ---
 
-## 2. Solving It in Code: The `atan2` Function
-Programming languages solve this by providing **`math.atan2(y, x)`**, which takes `y` and `x` as **two separate parameters** rather than dividing them first:
+## 2. Solving It in Code (Java & WPILib)
 
-```python
-import math
+### First-Principles Java
+Using `Math.atan2(dy, dx)` for robust 4-quadrant heading calculation:
 
-def calculate_aim_angle(dx, dy):
-    """
-    Computes the true 4-quadrant heading angle in degrees.
-    """
-    angle_rad = math.atan2(dy, dx)  # Note: y comes first, then x!
-    return math.degrees(angle_rad)
+```java
+double robotX = 4.0, robotY = 5.0;
+double targetX = 2.0, targetY = 3.0;
 
-# Target A: North-East (+2m, +2m)
-angle_A = calculate_aim_angle(dx=2.0, dy=2.0)
-print(f"Target A Heading: {angle_A:+.1f}°")  # Output: +45.0° (Quad I)
-# Target B: South-West (-2m, -2m)
-angle_B = calculate_aim_angle(dx=-2.0, dy=-2.0)
-print(f"Target B Heading: {angle_B:+.1f}°")  # Output: -135.0° (Quad III)
+// Differences
+double dx = targetX - robotX; // -2.0 meters
+double dy = targetY - robotY; // -2.0 meters
+
+// Calculate 4-quadrant heading in radians and degrees
+double angleRadians = Math.atan2(dy, dx);
+double angleDegrees = Math.toDegrees(angleRadians);
+
+System.out.printf("Heading to Target: %.1f degrees%n", angleDegrees);
+// Output: -135.0° (points correctly Southwest!)
 ```
 
----
+### Production WPILib Equivalent
+In WPILib, you can construct a `Rotation2d` directly from `(dx, dy)`:
 
-> 💡 **Math Sidebar: The 4 Quadrants**
->
-> The 2D plane is divided into 4 quadrants based on the signs of `(x, y)`:
->
-> | Quadrant | X Sign | Y Sign | Angle Range |
-> |---|---|---|---|
-> | **I (North-East)** | `+` | `+` | `0°` to `+90°` |
-> | **II (North-West)** | `-` | `+` | `+90°` to `+180°` |
-> | **III (South-West)** | `-` | `-` | `-180°` to `-90°` |
-> | **IV (South-East)** | `+` | `-` | `-90°` to `0°` |
->
-> `atan2(y, x)` automatically inspects the positive/negative signs of both inputs and returns the correct angle across all 4 quadrants from `-180°` to `+180°`.
+```java
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+
+Translation2d robot = new Translation2d(4.0, 5.0);
+Translation2d target = new Translation2d(2.0, 3.0);
+
+// Relative translation vector and angle
+Translation2d delta = target.minus(robot);
+Rotation2d heading = delta.getAngle(); // -135.0°
+```
 
 ---
 

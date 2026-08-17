@@ -38,48 +38,27 @@ If a robot's 3D gyro (like a Pigeon 2.0 or NavX) pitches straight up by `90°`:
 
 ---
 
-## 2. The Solution: What is a Quaternion?
-Instead of using 3 angles that can lock up, modern robotics software (like WPILib's `Rotation3d`) uses a **Quaternion**.
+## 2. Solving It in Code (Java & WPILib)
 
-A unit quaternion packages a 3D rotation into **4 numbers**: `(w, x, y, z)`:
-* **`w`:** Measures the **amount of rotation**: `w = cos(θ / 2)`.
-* **`(x, y, z)`:** A 3D vector arrow pointing along the **axis of rotation**, scaled by `sin(θ / 2)`.
+### Production WPILib Equivalent
+WPILib contains full 3D rotation and quaternion support in `Rotation3d` and `Quaternion`:
 
-```python
-import math
+```java
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Quaternion;
 
-def euler_to_quaternion(roll_deg, pitch_deg, yaw_deg):
-    """
-    Converts Roll, Pitch, Yaw angles into a 4-component Unit Quaternion (w, x, y, z).
-    """
-    r = math.radians(roll_deg) / 2.0
-    p = math.radians(pitch_deg) / 2.0
-    y = math.radians(yaw_deg) / 2.0
-    
-    w = math.cos(r)*math.cos(p)*math.cos(y) + math.sin(r)*math.sin(p)*math.sin(y)
-    x = math.sin(r)*math.cos(p)*math.cos(y) - math.cos(r)*math.sin(p)*math.sin(y)
-    y_q = math.cos(r)*math.sin(p)*math.cos(y) + math.sin(r)*math.cos(p)*math.sin(y)
-    z = math.cos(r)*math.cos(p)*math.sin(y) - math.sin(r)*math.sin(p)*math.cos(y)
-    
-    return [w, x, y_q, z]
+// 1. Create a 3D rotation from Euler angles (Roll, Pitch, Yaw)
+Rotation3d gyroRotation = new Rotation3d(
+    Math.toRadians(2.0),  // Roll
+    Math.toRadians(-5.0), // Pitch
+    Math.toRadians(45.0)  // Yaw
+);
 
-# Example: A 90-degree pitch up
-q = euler_to_quaternion(roll_deg=0.0, pitch_deg=90.0, yaw_deg=0.0)
-print(f"Quaternion (w, x, y, z): [{q[0]:.3f}, {q[1]:.3f}, {q[2]:.3f}, {q[3]:.3f}]")
+// 2. Extract unit Quaternion (w, x, y, z) for gimbal-lock-free fusion
+Quaternion q = gyroRotation.getQuaternion();
+System.out.printf("Quaternion: (w: %.3f, x: %.3f, y: %.3f, z: %.3f)%n",
+    q.getW(), q.getX(), q.getY(), q.getZ());
 ```
-
----
-
-> 💡 **Math Sidebar: 4D Unit Sphere**
->
-> A unit quaternion lives on a 4-dimensional sphere (written as **`S³`**).
->
-> Its 4 components always satisfy:
-> ```
->    w² + x² + y² + z² = 1
-> ```
->
-> Because there are no trigonometric denominators (`tan(θ)`), quaternions **never divide by zero** and can smoothly interpolate any 3D orientation without Gimbal Lock!
 
 ---
 

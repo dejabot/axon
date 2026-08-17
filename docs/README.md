@@ -7,7 +7,7 @@ Axon is an educational curriculum designed from first principles to bridge high-
 ## Pedagogical Philosophy
 
 * **FRC & Everyday Intuition First:** We start with real robot scenarios (scoring targets, joystick steering, sensor jitter, elevator chains, shooter ballistics, obstacle avoidance) before presenting formal equations.
-* **Code-First Explanations:** Every concept is solved in 5–15 lines of clean, readable Python with descriptive variable names.
+* **Code-First Explanations (Java & WPILib):** Every concept is solved in clean, boilerplate-free Java with descriptive variable names, paired with the official production WPILib class equivalent.
 * **"Math!" Translation Sidebars:** Formal mathematical symbols, equations, and pronunciation guides are introduced as friendly translations of the code.
 * **Bridge to Machine Learning & Modern Robotics:** Every concept explicitly connects to its role in modern deep learning (embeddings, transformer position encoding, dense layers, diffusion models, backpropagation) and physical robotic autonomy.
 * **Clean Interactive Visualizers:** Concepts include companion interactive HTML5/Canvas demos with dark/light theming.

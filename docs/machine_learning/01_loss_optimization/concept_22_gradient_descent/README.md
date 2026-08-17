@@ -36,13 +36,32 @@ Why the minus sign?
 
 ---
 
-## 2. The Goldilocks Problem: Learning Rate
+## 2. Solving It in Code (Java)
 
-The **learning rate** (often called `lr` or `α`) controls how big of a leap we take in the downhill direction:
+### First-Principles Java: Gradient Descent Loop
+```java
+public class GradientDescent {
+    public static void main(String[] args) {
+        // Initial parameter guess
+        double w = 8.0;
+        double learningRate = 0.20;
 
-* **Learning Rate Too Small (`lr = 0.01`):** The model takes tiny baby steps. It will take thousands of iterations to reach the bottom.
-* **Learning Rate Too Large (`lr = 1.10`):** The model overshoots the valley, bounces violently up the opposite hill, and explodes off to infinity!
-* **Learning Rate Just Right (`lr = 0.20`):** The model takes large steps when far away (where the slope is steep) and naturally slows down as it nears the flat bottom.
+        for (int step = 0; step < 20; step++) {
+            // Loss = (w - 3.5)^2 + 2.0
+            double loss = Math.pow(w - 3.5, 2) + 2.0;
+
+            // Derivative: dLoss / dw = 2 * (w - 3.5)
+            double gradient = 2.0 * (w - 3.5);
+
+            // Step downhill: w_new = w - lr * gradient
+            w = w - learningRate * gradient;
+
+            System.out.printf("Step %02d: w = %.4f | Loss = %.4f | Slope = %.4f%n",
+                step, w, loss, gradient);
+        }
+    }
+}
+```
 
 ---
 

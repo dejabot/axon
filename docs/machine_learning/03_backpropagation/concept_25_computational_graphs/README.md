@@ -52,30 +52,33 @@ This tells us: If we increase `motor_speed` by `+1.0`, our `loss` will drop by `
 
 ---
 
-## 2. Python Implementation
+## 2. Solving It in Code (Java)
 
-Here is how the forward and backward passes execute in pure Python:
+### First-Principles Java: Computational Graph Forward & Backward Passes
+```java
+public class ComputationalGraph {
+    public static void main(String[] args) {
+        // --- Forward Pass (Left to Right) ---
+        double motorSpeed = 66.67;
+        double flywheelRpm = 3.0 * motorSpeed;            // 200.0 RPM
+        double exitVelocity = 0.05 * flywheelRpm;         // 10.0 m/s
+        double targetVelocity = 12.0;
+        double loss = Math.pow(exitVelocity - targetVelocity, 2); // 4.0 (m/s)^2
 
-```python
-# --- Forward Pass (Left to Right) ---
-motor_speed = 66.67
-flywheel_rpm = 3.0 * motor_speed            # = 200.0 RPM
-exit_velocity = 0.05 * flywheel_rpm         # = 10.0 m/s
-target_velocity = 12.0
-loss = (exit_velocity - target_velocity) ** 2 # = 4.0 (m/s)^2
+        // --- Backward Pass (Right to Left via Chain Rule) ---
+        // 1. dLoss / d(exitVelocity)
+        double dLoss_dVel = 2.0 * (exitVelocity - targetVelocity); // -4.0
 
-# --- Backward Pass (Right to Left) ---
-# 1. dLoss / d(exit_velocity)
-d_loss_d_vel = 2.0 * (exit_velocity - target_velocity)  # = -4.0
+        // 2. dLoss / d(flywheelRpm) = dLoss/dVel * dVel/dRpm
+        double dLoss_dRpm = dLoss_dVel * 0.05;                     // -0.20
 
-# 2. dLoss / d(flywheel_rpm) = dLoss / d_vel * d_vel / d_rpm
-d_loss_d_rpm = d_loss_d_vel * 0.05                      # = -0.20
+        // 3. dLoss / d(motorSpeed) = dLoss/dRpm * dRpm/dSpeed
+        double dLoss_dSpeed = dLoss_dRpm * 3.0;                    // -0.60
 
-# 3. dLoss / d(motor_speed) = dLoss / d_rpm * d_rpm / d_speed
-d_loss_d_speed = d_loss_d_rpm * 3.0                     # = -0.60
-
-print(f"Forward Loss: {loss:.2f}")
-print(f"Gradient dLoss/d(motor_speed): {d_loss_d_speed:.2f}")
+        System.out.printf("Forward Loss: %.2f%n", loss);
+        System.out.printf("Gradient dLoss / d(motorSpeed): %.2f%n", dLoss_dSpeed);
+    }
+}
 ```
 
 ---

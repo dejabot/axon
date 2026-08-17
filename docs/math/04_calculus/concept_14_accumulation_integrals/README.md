@@ -33,63 +33,27 @@ Distance is the **Accumulation of Speed over Time**:
 
 ---
 
-## 2. Solving It in Code: Euler vs. Trapezoid
-### 1. Forward Euler (Naive)
-Assumes speed is constant across the entire 20ms slice:
-```python
-x = x + v * dt
-```
-* Underestimates position whenever the robot is accelerating.
+## 2. Solving It in Code (Java & WPILib)
 
-### 2. Trapezoidal Integration (Smart)
-Averages the speed at the start and end of the slice:
-```python
-x = x + 0.5 * (v_start + v_end) * dt
-```
+### First-Principles Java: Trapezoidal Integration (Dead Reckoning)
+```java
+// Accumulate robot distance over time steps
+double totalPosition = 0.0;
+double dt = 0.020; // 20ms control loop
 
-```python
-def compare_integrators(acceleration=2.0, total_time=1.0, dt=0.05):
-    """
-    Compares Euler vs Trapezoidal integration against exact calculus.
-    """
-    steps = int(total_time / dt)
+double[] velocityStream = {0.0, 1.0, 2.0, 3.0, 3.0, 3.0, 2.0, 1.0, 0.0};
+
+for (int i = 1; i < velocityStream.length; i++) {
+    double vPrev = velocityStream[i - 1];
+    double vCur = velocityStream[i];
     
-    # 1. Exact Calculus: x = 0.5 * a * t²
-    true_x = 0.5 * acceleration * (total_time ** 2)
-    
-    # 2. Forward Euler
-    x_euler, v_euler = 0.0, 0.0
-    for _ in range(steps):
-        x_euler += v_euler * dt
-        v_euler += acceleration * dt
-        
-    # 3. Trapezoidal (Heun's method)
-    x_trap, v_trap = 0.0, 0.0
-    for _ in range(steps):
-        v_next = v_trap + acceleration * dt
-        x_trap += 0.5 * (v_trap + v_next) * dt
-        v_trap = v_next
-        
-    print(f"True Distance (Calculus) : {true_x:.3f} m")
-    print(f"Euler Distance (Naive)   : {x_euler:.3f} m (Error: {abs(true_x - x_euler)*1000:.1f} mm)")
-    print(f"Trapezoid Distance       : {x_trap:.3f} m (Error: {abs(true_x - x_trap)*1000:.1f} mm)")
+    // Trapezoidal rule: Area = 0.5 * (vPrev + vCur) * dt
+    double stepDistance = 0.5 * (vPrev + vCur) * dt;
+    totalPosition += stepDistance;
+}
 
-compare_integrators(acceleration=2.0, total_time=1.0, dt=0.05)
+System.out.printf("Integrated Odometer Distance: %.4f meters%n", totalPosition);
 ```
-
----
-
-> 💡 **Math Sidebar: Definite Integration**
->
-> In calculus, accumulating continuous slices is written with the integral symbol `∫` (a stretched-out "S" for Sum):
->
-> ```
->    x(t) = ∫ v(τ) dτ
-> ```
->
-> **How to read this equation out loud:**
-> *"Distance is the sum of all tiny velocity slices `v(t)·dt` accumulated from time 0 to time t."*
-> Integration and Differentiation are exact inverses (The Fundamental Theorem of Calculus).
 
 ---
 
