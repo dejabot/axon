@@ -96,7 +96,7 @@ Arrives with: Modules 1–2. Leaves with: matrices as transformations, matrix mu
 
 | # | Concept | Scope & key derivations | Language | Status |
 |---|---|---|---|---|
-| 1 | Vectors, Scaling & Basis Spaces | Vector as displacement vs. position; scalar multiplication; linear combinations; basis and span; why `î`, `ĵ` are a choice | **Dual** | `[thin]` |
+| 1 | Vectors, Scaling & Basis Spaces | Vector as displacement vs. position; scalar multiplication; linear combinations; basis and span; why `î`, `ĵ` are a choice. **Norms belong here**, not in geometry: `‖v‖` notation, the Lp family, and why L1 and L2 penalties give Lasso and Ridge their different behaviour. | **Dual** | `[thin]` |
 | 2 | Dot Products, Projections & Alignment | Two definitions (component sum and `‖a‖‖b‖cos θ`) and the proof they agree; projection; orthogonality; cosine similarity | **Dual** | `[thin]` |
 | 3 | Matrices as Coordinate Transformers | A matrix is where the basis vectors land; reading a matrix by its columns. **The payoff concept: Module 2's two rotation equations are revealed as `R(θ)`**, with its columns being exactly the `î` and `ĵ` images derived there. Orthogonality, and inverse = transpose. | Java | `[thin]` |
 | 4 | Matrix Multiplication & Composition | Multiplication derived as "apply one transform then the other"; why it is not commutative; why inner dimensions must match. Rigid transforms and homogeneous coordinates, closing the loop on Module 2's frame chaining. The neural network forward pass as the same operation. | **Dual** | `[new]` |

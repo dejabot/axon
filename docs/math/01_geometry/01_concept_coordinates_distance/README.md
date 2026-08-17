@@ -143,26 +143,7 @@ The reason is that squaring is **monotonic** for non-negative numbers: if `d₁ 
 
 The same trick appears whenever you compare a distance to a fixed threshold. Instead of `if (distance(a, b) < 0.5)`, write `if (squaredDistance(a, b) < 0.25)`. Square the threshold once at compile time instead of taking a square root every loop iteration, 50 times a second.
 
-### Step 6: Not every distance is a straight line
-
-The L2 norm answers "how far as the game piece flies". It is not always the question you have.
-
-Consider a scoring mechanism where an elevator raises the carriage and a separate arm extends horizontally, and the two motors cannot run at the same time. Getting from configuration `(0.4, 0.2)` to `(1.1, 0.5)` costs `0.7 + 0.3 = 1.0` meters of travel, not `√(0.49 + 0.09) ≈ 0.76`. That sum-of-absolute-differences measure is the **L1 norm**, also called Manhattan distance because it is how far you walk on a street grid where you cannot cut through buildings.
-
-Now consider the same mechanism with motors that *do* run simultaneously. The move finishes when the slower axis finishes, so the cost is `max(0.7, 0.3) = 0.7`. That is the **L∞ norm**, or Chebyshev distance.
-
-Three different norms, three different correct answers, one geometry. Choosing among them means asking what the number is physically measuring.
-
-> ### Math!
-> These are all members of one family, the **Lp norms**:
->
-> ```
->    ‖v‖ₚ = ( Σᵢ |vᵢ|^p )^(1/p)
-> ```
->
-> Read as **"the L-p norm of v equals the sum of the absolute values of the components each raised to the p, all raised to the one-over-p."** Setting `p = 1` gives Manhattan, `p = 2` gives ordinary Euclidean distance, and letting `p` grow without bound gives the max, which is why it is written `L∞` and read "L-infinity".
-
-### Step 7: Position is not enough — the pose
+### Step 6: Position is not enough — the pose
 
 Knowing the robot is at `(3.0, 2.0)` still leaves a question unanswered: which way is it pointing? A robot at the perfect scoring position with its shooter aimed at its own driver station scores nothing.
 
@@ -232,7 +213,7 @@ The distance formula you just derived is the workhorse of machine learning, wher
 
 A neural network represents an image, a word, or a sentence as an **embedding**: a list of numbers, often 768 or 1,536 of them, that is a point in a very high-dimensional space. The formula generalizes without modification — the `Σᵢ` in the Math! sidebar simply runs over more coordinates. Two photographs of the same game piece land close together in that space; a photograph of a game piece and one of a referee land far apart. **k-nearest-neighbours** classification does nothing more than compute these distances and take a vote among the closest `k` points.
 
-Two details from this concept turn out to matter enormously at that scale. First, the squared-distance trick: vector databases serving billions of embeddings rank by squared L2 precisely because the ordering is identical and the square root is wasted work. Second, the choice of norm: L1 and L2 penalties on a model's weights during training are the difference between **Lasso** and **Ridge** regression, and they produce visibly different models — L1 drives unneeded weights exactly to zero while L2 merely shrinks them. Same family of norms, same reasoning about what the number measures.
+The squared-distance trick from Step 5 matters enormously at that scale: vector databases serving billions of embeddings rank by squared distance precisely because the ordering is identical and the square root is wasted work, exactly as it was for the six game pieces.
 
 Mean squared error, the loss function that trains a huge fraction of all regression models, is literally the squared L2 distance between what the network predicted and what was true, averaged over the training examples. When the machine learning axon derives gradient descent, the surface it descends is built from this formula.
 

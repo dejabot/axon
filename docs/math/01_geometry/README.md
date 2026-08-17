@@ -10,7 +10,7 @@ Every result here is derived from first principles, and every one of them is rea
 
 * **[Concept 01: Coordinates, Poses & Pythagorean Distance](01_concept_coordinates_distance/)**
   * *The Everyday Problem:* Where is the robot on the field, and how far is it from the scoring target?
-  * *Core Ideas:* Field coordinate conventions, a proof of the Pythagorean theorem, the distance formula, midpoints, squared distance as a cheaper comparison, the L1 and L∞ norms, and the `(x, y, θ)` pose.
+  * *Core Ideas:* Field coordinate conventions, a proof of the Pythagorean theorem, the distance formula, midpoints, squared distance as a cheaper comparison, and the `(x, y, θ)` pose.
 
 * **[Concept 02: Lines, Segments & Intersections](02_concept_lines_intersections/)**
   * *The Everyday Problem:* Does the planned autonomous path cross a field barrier, and if not, by how much does it clear it?

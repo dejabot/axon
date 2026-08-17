@@ -65,7 +65,7 @@
         <input type="range" id="headingSlider" min="-180" max="180" value="45" step="1">
         <span id="headingVal" style="color: var(--accent-purple); font-family: ui-monospace, monospace;">45°</span>
       </label>
-      <label><input type="checkbox" id="showL1"> Show L1 (Manhattan) path</label>
+      <label><input type="checkbox" id="showL1"> Show the L-shaped path</label>
       <label><input type="checkbox" id="showMid"> Show midpoint</label>
     </div>
 
@@ -87,20 +87,12 @@
         <span class="stat-val" id="dyText">+4.00 m</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">L2 distance √(Δx²+Δy²)</span>
+        <span class="stat-label">Distance √(Δx²+Δy²)</span>
         <span class="stat-val" id="distText" style="color: var(--accent-amber); font-size: 1.05rem;">9.85 m</span>
       </div>
       <div class="stat-item">
         <span class="stat-label">Squared d² (no sqrt)</span>
         <span class="stat-val" id="dsqText">97.00</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">L1 |Δx|+|Δy|</span>
-        <span class="stat-val" id="l1Text">13.00 m</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">L∞ max(|Δx|,|Δy|)</span>
-        <span class="stat-val" id="linfText">9.00 m</span>
       </div>
     </div>
   </div>
@@ -293,8 +285,6 @@
       set('dyText', sgn(dy));
       set('distText', d.toFixed(2) + ' m');
       set('dsqText', (dx * dx + dy * dy).toFixed(2));
-      set('l1Text', (Math.abs(dx) + Math.abs(dy)).toFixed(2) + ' m');
-      set('linfText', Math.max(Math.abs(dx), Math.abs(dy)).toFixed(2) + ' m');
       set('headingVal', headingDeg + '°');
     }
 
