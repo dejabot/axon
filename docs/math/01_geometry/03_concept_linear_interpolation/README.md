@@ -82,7 +82,7 @@ Now `a` and `b` can be flywheel speeds, voltages or brightness values, and `t` i
 > ```
 > Read as **"lerp of a, b, t equals a plus t times the quantity b minus a."** Programmers pronounce `lerp` to rhyme with "burp". *Interpolation* is Latin for polishing between: inventing a value between two you know.
 
-### Step 2: One formula, two spellings, two different answers
+### Step 2: The same formula, written two ways
 
 Multiply the definition out:
 
@@ -92,39 +92,18 @@ Multiply the definition out:
 
 Algebraically identical. Read aloud, though, the second says something new: **take `(1 − t)` of `a` and `t` of `b`, and add them** — a weighted average whose weights always sum to 1. That is the reading you meet in graphics and machine learning, where 30% opacity is weights 0.7 and 0.3.
 
-Identical on paper is not identical in a robot. A `double` holds about 15–16 significant digits and *every* operation rounds to the nearest storable value, so expressions that round in different places give different bits.
+Use whichever spelling reads more clearly for what you are doing. There is one caution to carry away, though: identical on paper is not identical once a computer rounds them.
 
-Try `a = 1.01`, `b = 3.02`, `t = 1`. You asked to go all the way to `b`, so you expect exactly `3.02`:
+A `double` rounds after every operation, and these two forms round in different places. The practical consequence is that the first form can land a hair short of `b` when `t = 1` — off by about `0.0000000000000004` — so a check like `if (position == target)` may never fire.
 
-```
-   Form 1:  b − a        →  2.01  (the nearest double to 2.01, which is
-                                   really 2.00999999999999978683717927197)
-            1.01 + 2.01  →  3.0199999999999996   ✗  one step below b
-   Form 2:  (1 − 1)·1.01 + 1·3.02
-            0 + 3.02     →  3.02                 ✓  b returned untouched
-```
+The habit that fixes it is worth having anyway, for any floating-point comparison:
 
-Now the degenerate case `a = b = 0.1`, which must return `0.1` for every `t`:
-
-```
-   Form 1:  0.1 + 0.3·(0.1 − 0.1)  =  0.1 + 0  →  0.1                  ✓
-   Form 2:  0.7·0.1 + 0.3·0.1
-            0.06999999999999999 + 0.03        →  0.09999999999999999   ✗
+```java
+   // Never test floating-point values for exact equality.
+   if (Math.abs(position - target) < 0.01) { /* close enough */ }
 ```
 
-Each form fails the case the other handles. Neither is simply better; each has a guarantee the other lacks:
-
-```
-   a + t·(b − a)     exact at t = 0 · monotonic in t · may miss b at t = 1
-   (1 − t)·a + t·b   exact at t = 0 and t = 1 · may move backwards as t rises
-```
-
-**Monotonic** means the result never goes backwards as `t` rises. Form 1 gets this free: rounding to nearest is itself non-decreasing, and Form 1 is a chain of operations each non-decreasing in `t`. Form 2 adds two *separately rounded* products whose errors can move in opposite directions, so a one-bit rise in `t` can drop the result by one bit.
-
-Both failures cost real bugs: a non-monotonic lerp in a motion profile steps the commanded position backwards by a hair, which a well-tuned derivative term amplifies into an audible buzz, and a lerp that misses its endpoint leaves an `if (position == target)` that never fires. This is why C++ specifies `std::lerp` to guarantee *both* properties, which neither expression delivers alone. WPILib, like most robotics libraries, uses Form 1 and accepts the endpoint wobble — a defensible choice, but a choice.
-
-> ### Math!
-> The gap between one storable `double` and the next is an **ULP**, read "**unit in the last place**". Near 3.02 an ULP is about 4.4 × 10⁻¹⁶ — exactly the error Form 1 made, the smallest non-zero error possible. Hence the rule: never compare floating-point results with `==`; compare `Math.abs(x − y) < tolerance`.
+That is all you need to use interpolation safely. Deep Dive 1 chases the full story, which is genuinely interesting: each form has one guarantee the other lacks, and that is why C++ gives `std::lerp` its own carefully specified implementation instead of just picking one.
 
 ### Step 3: Running it backwards
 

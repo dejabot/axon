@@ -24,6 +24,8 @@ The companion `demo.html` is embedded via `<iframe>` immediately under the title
 
 **Index pages link to concepts, never to demos.** Axon and module README files list concepts and link to the concept directory only. A demo is an implementation detail of the concept that owns it — it may be rewritten, split or replaced — so it is reached by reading the concept, not from a table of contents. Do not add "Interactive Visualizer" links to any index.
 
+**One concept teaches one idea.** The reader should finish able to *use* it. Supporting material earns its place only when the main idea is incomplete without it — and "this is fascinating" is not that test. A passage the reader could skip and still apply the concept correctly belongs in a Deep Dive prompt, which is exactly what those prompts are for. Prefer one example worked all the way through to three sketched. When a section starts teaching a second subject — floating-point representation inside a concept about interpolation, say — that is the signal to cut it down to the one sentence the main idea actually needs and move the rest to a deep dive.
+
 **Length follows the topic.** These six sections are a shape, not a quota. A concept built on a theorem — the Pythagorean theorem, the ray-casting parity argument, the separating axis — earns a long "Building the Math". A concept that is a definition plus its applications, such as linear interpolation, does not, and inflating it with adjacent material produces a worse page than a short honest one. When in doubt, cut. The test for every paragraph is whether it derives something or prevents a real bug; if it does neither, delete it.
 
 ---
@@ -32,13 +34,23 @@ The companion `demo.html` is embedded via `<iframe>` immediately under the title
 
 | # | Checkpoint | Requirement | Pass Criteria |
 |---|---|---|---|
-| **1** | **Strict No-LaTeX & Clean Text Policy** | Zero LaTeX delimiters (`$`, `$$`, `\(`, `\)`, `\begin{matrix}`, `\frac`, etc.) in `README.md`. No decorative emojis in technical text. | Verified zero LaTeX occurrences. Clean Unicode math, text grids, and professional formatting without emoji clutter. |
+| **1** | **Strict No-LaTeX & Clean Text Policy** | Zero LaTeX in `README.md` — delimiters (`$`, `$$`, `\(`, `\)`), commands (`\frac`, `\begin{}`) **and brace subscripts/superscripts (`v_{i+1}`, `x^{2}`)**, which render as literal characters since the site has no math renderer. Applies inside fenced blocks too, which is where they hide. No decorative emojis in technical text. | Verified zero LaTeX occurrences. Clean Unicode math, text grids, professional formatting without emoji clutter. |
 | **2** | **Depth Proportionate to the Topic** | A concept runs as long as its material genuinely requires, and no longer. Most land at 1,800–2,800 words (30–45 min); some legitimately land far shorter. | No hand-waving, no skipped steps — **and no padding**. Judge against the topic, not a target. A concept containing a real derivation that lands under 1,800 words is probably asserting; a concept with no theorem in it that reaches 1,800 words is probably padded. Both failures are equally bad. Past 45 minutes, ask whether it is two concepts. |
 | **3** | **Flattened Taxonomy & 6 Sections** | Follows the two-level hierarchy (Modules & Concepts) and the six standard sections defined above. | Contains 1. Real-World Problem, 2. Building the Math, 3. "Math!" sidebars, 4. Java & WPILib code, 5. ML/Autonomy bridge, 6. Checkpoints & Prompts. |
 | **4** | **No Black Boxes** | Every formula is derived, not asserted. Named prerequisite techniques are taught, not skipped. | Each result traces back to a stated starting assumption. Foundational named methods (e.g. SOH-CAH-TOA, the separating axis idea) appear explicitly rather than being silently assumed. |
 | **5** | **Embedded Visuals & Interactive Demos** | Zero ASCII art. Contains embedded companion visualizer iframe and responsive vector SVGs for geometric figures. | Verified zero ASCII box/line art. Companion `demo.html` is embedded via `<iframe>` alongside crisp inline SVGs that render correctly in both themes. |
 | **6** | **Dual Grounding** | Concrete, detailed connections to both FRC Autonomous Robotics and Modern ML/AI. | Explicit, realistic robotics mechanism/problem (e.g. swerve kinematics, gyro fusion, field-oriented drive) AND a named machine learning architecture/algorithm (e.g. rotary position embeddings, IoU-based detection loss, k-nearest neighbours in embedding space). |
 | **7** | **Interactive Demo & Dual-Theme Quality** | Standalone HTML5/Canvas visualizer in `demo.html`. | Zero external CDN scripts/fonts, loads the shared `assets/theme.js` and `assets/axon.css`, repaints on the `axon-theme-changed` event, touch/mouse drag interactivity, real-time telemetry panel, smooth canvas rendering. |
+
+---
+
+## Notation
+
+There is no math renderer. Everything is Unicode or plain text, so notation has to survive as literal characters.
+
+**Subscripts.** Use Unicode for a bare index that reads cleanly at body-text size — `x₁`, `p₂`, `Σᵢ`. Use bracket notation the moment the index is computed: `v[i+1]`, `v[n−2]`, `x[i]`. Unicode can technically express `vᵢ₊₁` and `vₙ₋₂`, but those are hard to read small, font support for `ᵢ` is patchy, and brackets have the decisive advantage of matching the array indexing in the concept's own code. Never mix both conventions inside one page.
+
+**Everything else.** Unicode operators and Greek (`θ`, `Δ`, `Σ`, `√`, `≥`, `≠`, `⟺`, `‖ ‖`, `≈`, `·`, `⁻¹`, `²`). Multi-line formulas go in a fenced block with box-drawing characters if they need alignment. Prefer a formula a reader can retype over one that only looks typeset.
 
 ---
 

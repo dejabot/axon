@@ -37,8 +37,8 @@ Two questions follow, and both are answered with the cross product from Concept 
 A **polygon** is an ordered list of vertices. The order is the whole substance of the definition — the same five points listed in a different order describe a different shape. Edges run between consecutive vertices, and one final edge closes the loop from the last vertex back to the first.
 
 ```
-   vertices:  v₀, v₁, v₂, …, v_{n−1}
-   edges:     v₀→v₁, v₁→v₂, …, v_{n−2}→v_{n−1}, v_{n−1}→v₀
+   vertices:  v[0], v[1], v[2], …, v[n−1]
+   edges:     v[0]→v[1], v[1]→v[2], …, v[n−2]→v[n−1], v[n−1]→v[0]
 ```
 
 That closing edge is forgotten constantly, and the resulting bug is distinctive: the shape behaves correctly except along one boundary, where points leak in or out. Any loop over the edges of a polygon should be written so the wrap-around is structural rather than a special case appended at the end. The standard idiom uses modular arithmetic on the index: edge `i` runs from `v[i]` to `v[(i + 1) % n]`, which for the last edge wraps back to `v[0]` automatically.
@@ -48,7 +48,7 @@ A polygon is **convex** if it has no dents — every interior angle is at most 1
 Concept 02 already gave us a way to tell the difference. Walk the vertices in order and compute the orientation of each consecutive triple. If every turn goes the same way, the shape is convex; if the sign flips somewhere, you have found a dent.
 
 ```
-   convex  ⟺  cross(v_{i+1} − v_i,  v_{i+2} − v_{i+1})  has the same sign for every i
+   convex  ⟺  cross(v[i+1] − v[i],  v[i+2] − v[i+1])  has the same sign for every i
 ```
 
 ### Step 2: Inside a convex zone — the same side of everything
@@ -60,13 +60,13 @@ That claim is easier to believe than to prove, and the picture carries it. Each 
 Since Concept 02's orientation test reports which side a point is on, the membership test is a loop of cross products:
 
 ```
-   inside  ⟺  orient(v_i, v_{i+1}, P) ≥ 0   for every edge i
+   inside  ⟺  orient(v[i], v[i+1], P) ≥ 0   for every edge i
 ```
 
 One negative result and you can stop immediately — the point is out. No division, no square roots, no trigonometry, and an early exit on most queries. For the convex zones that make up most of a field, this is the test to use.
 
 > ### Math!
-> The region carved out by a set of "stay on this side" constraints is called a **convex polytope**, and each individual constraint is a **half-plane**. Written formally, each edge contributes an inequality of the form `aₓ x + a_y y + b ≥ 0`, and the polygon is the set of points satisfying all of them at once. Read `⋂` as "intersection of": the polygon is `⋂ᵢ Hᵢ`, the intersection of its half-planes. This is exactly the shape of a **linear programming** feasible region, and it will reappear when the machine learning axon looks at what a ReLU network does to its input space.
+> The region carved out by a set of "stay on this side" constraints is called a **convex polytope**, and each individual constraint is a **half-plane**. Written formally, each edge contributes an inequality of the form `aₓ·x + a_y·y + b ≥ 0`, where `aₓ` and `a_y` are two numbers fixed by that edge, and the polygon is the set of points satisfying all of them at once. Read `⋂` as "intersection of": the polygon is `⋂ᵢ Hᵢ`, the intersection of its half-planes. This is exactly the shape of a **linear programming** feasible region, and it will reappear when the machine learning axon looks at what a ReLU network does to its input space.
 
 ### Step 3: Inside any zone — counting crossings
 
@@ -93,9 +93,9 @@ The proof is a parity argument, and it takes one sentence. Start infinitely far 
 
 This is the **crossing number** or **even-odd** rule, and it works for any simple polygon, convex or not, however many dents it has.
 
-To implement it, take each edge from `v_i` to `v_j` and ask whether it crosses the horizontal ray heading in `+X` from `P`:
+To implement it, take each edge from `v[i]` to `v[j]` and ask whether it crosses the horizontal ray heading in `+X` from `P`:
 
-1. **Does the edge span the ray's height at all?** It does when one endpoint is above `P.y` and the other is not. Written as `(v_i.y > P.y) ≠ (v_j.y > P.y)`, using a strict comparison on both sides.
+1. **Does the edge span the ray's height at all?** It does when one endpoint is above `P.y` and the other is not. Written as `(v[i].y > P.y) ≠ (v[j].y > P.y)`, using a strict comparison on both sides.
 2. **Does it cross to the right of P rather than the left?** Find the edge's x at height `P.y` by interpolating, and compare it to `P.x`.
 
 That first condition deserves attention, because it is where naive implementations break. A ray passing exactly through a vertex touches two edges at once, and counting both, or neither, gives the wrong parity — producing a point that reports "outside" while sitting visibly inside the zone. The strict-on-one-side comparison written above is a **half-open rule**: each edge owns its lower endpoint and disowns its upper one. A vertex shared by two edges is then counted exactly once, and the ambiguity disappears rather than being patched.
@@ -106,11 +106,11 @@ Rectangles have area width times height. General polygons need something better,
 
 Start with a triangle with one corner at the origin and the other two at `u` and `v`. From Concept 02, `|cross(u, v)|` is the area of the parallelogram those two vectors span, and a triangle is half a parallelogram. So the triangle's area is `½|cross(u, v)|`.
 
-Now fan the whole polygon into triangles from the origin: origin to `v₀` to `v₁`, then origin to `v₁` to `v₂`, and so on around the loop. Summing the signed cross products gives the **shoelace formula**:
+Now fan the whole polygon into triangles from the origin: origin to `v[0]` to `v[1]`, then origin to `v[1]` to `v[2]`, and so on around the loop. Summing the signed cross products gives the **shoelace formula**:
 
 ```
-   Area = ½ · | Σᵢ cross(vᵢ, v_{i+1}) |
-        = ½ · | Σᵢ ( xᵢ · y_{i+1} − x_{i+1} · yᵢ ) |
+   Area = ½ · | Σᵢ cross(v[i], v[i+1]) |
+        = ½ · | Σᵢ ( x[i] · y[i+1] − x[i+1] · y[i] ) |
 ```
 
 The elegance is in the word *signed*. If the origin sits outside the polygon, some of those triangles stick out beyond the shape and should not be counted. They are not counted — because those triangles are traversed in the opposite rotational direction, their cross products come out negative, and they subtract exactly the excess that the other triangles overcounted. The formula needs no special handling for where you put the origin, and none for concave shapes.
@@ -236,7 +236,7 @@ The autonomy link is more direct still. Ray casting is how an occupancy grid dec
 A zone has vertices `(0, 0)`, `(4, 0)`, `(4, 3)`, `(0, 3)` listed in that order. Compute its area with the shoelace formula and confirm the winding direction.
 
 **Solution:**
-Apply `Σ (xᵢ · y_{i+1} − x_{i+1} · yᵢ)` around the loop, remembering the closing edge from `(0,3)` back to `(0,0)`:
+Apply `Σ (x[i] · y[i+1] − x[i+1] · y[i])` around the loop, remembering the closing edge from `(0,3)` back to `(0,0)`:
 1. `(0,0)→(4,0)`: `0·0 − 4·0 = 0`
 2. `(4,0)→(4,3)`: `4·3 − 4·0 = 12`
 3. `(4,3)→(0,3)`: `4·3 − 0·3 = 12`

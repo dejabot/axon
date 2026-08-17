@@ -48,13 +48,25 @@ def check_liquid(path, text):
 
 
 def check_latex(path, text):
+    """LaTeX renders as literal characters here; there is no math renderer.
+
+    Subscript and superscript braces are checked INSIDE fenced blocks too, since
+    that is exactly where they hide — a plain-text math block full of v_{i+1}
+    looks fine in a diff and renders as garbage on the page.
+    """
     body = re.sub(r'```.*?```', '', text, flags=re.S)
     for pat, name in ((r'\$', 'dollar delimiter'),
-                      (r'\\frac', r'\frac'),
-                      (r'\\begin\{', r'\begin{'),
-                      (r'\\\(', r'\(')):
+                      (r'\\frac', r'\\frac'),
+                      (r'\\begin\{', r'\\begin{'),
+                      (r'\\\(', r'\\(')):
         if re.search(pat, body):
             err(path, f"contains LaTeX ({name}) — the site has no math renderer")
+
+    for m in re.finditer(r'[A-Za-z0-9)\]]([_^])\{[^}]*\}', text):
+        line = text[:m.start()].count('\n') + 1
+        kind = 'subscript' if m.group(1) == '_' else 'superscript'
+        err(path, f"LaTeX {kind} {m.group(0)!r} at line {line} — "
+                  f"renders literally; use v[i+1] or a Unicode subscript")
 
 
 def check_emoji(path, text):
