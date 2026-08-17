@@ -61,17 +61,33 @@ Every number in a figure must match the number in the text, and the figure's geo
 
 ---
 
+## Language & Spelling
+
+**American English throughout** — prose, code comments, identifiers, diagram labels and demo telemetry alike.
+
+The common slips: *meter* not metre, *center* not centre, *behavior* not behaviour, *color* not colour, *neighbor* not neighbour, *labeled* / *labeling* not labelled / labelling, *traveled* / *traveling* not travelled / travelling, *analyze* not analyse, *gray* not grey. Verbs and their nouns take *-ize* / *-ization*: memorize, normalize, optimize, generalize, minimize, maximize, penalize, initialize, vectorize, characterize, parameterize, regularize, discretize.
+
+This matters more than house style: the curriculum's audience writes FRC code against WPILib, whose own API is American (`getCenter`, `Color`), and a page that says "metre" beside code that says `meters` reads as careless.
+
+---
+
 ## Notation
 
 Pages are rendered by KaTeX, loaded in the site layout. Both Unicode and LaTeX are available, and the choice between them is about legibility, not policy.
 
 ### Which to use
 
-**Unicode for inline symbols.** `θ`, `Δ`, `Σ`, `√`, `≥`, `≠`, `⟺`, `‖ ‖`, `≈`, `·`, `⁻¹`, `²`, `x₁`. These read cleanly in running prose, survive copy-paste into code, and need no renderer. Most inline mathematics in this curriculum should stay Unicode.
+**LaTeX by default for display mathematics.** Any standalone, set-apart formula is `$$…$$`. This is the default, not an escape hatch. Plain-text fenced blocks approximate structure with parentheses and stacked characters, and the approximation is always worse:
 
-**LaTeX where Unicode genuinely fails.** Nested or expression superscripts (`10000^{2i/d}`, `2^{L-1}`), real fractions, stacked notation, matrices, and any display equation whose structure carries meaning. Unicode cannot express these — attempting it produces the unreadable strings this rule exists to prevent.
+```
+   distance = √( (cos θ − 0)² + (sin θ − 0)² )  =  √( cos²θ + sin²θ )  =  1
+```
 
-The test: if you find yourself approximating structure with parentheses and carets, use LaTeX.
+versus a real radical with the expression genuinely underneath it, a real fraction with a real bar, a matrix with real brackets. Do not put equations in fenced code blocks.
+
+**Unicode for inline symbols in prose.** `θ`, `Δ`, `Σ`, `≥`, `≠`, `≈`, `·`, `²`, `x₁`. Writing "the angle θ" is better than "the angle $\theta$" — it reads well in the source, needs no renderer, and pastes straight into code. Reach for inline `$…$` only when an inline expression carries structure: a fraction, an expression superscript, a subscripted index.
+
+**Fenced blocks are for code and for genuinely tabular text** — comparison tables, worked numeric traces, pseudo-code, terminal output. If it is an equation, it is `$$…$$`.
 
 ### How to write it
 
