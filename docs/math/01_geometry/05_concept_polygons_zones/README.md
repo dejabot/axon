@@ -10,7 +10,7 @@
 
 ## 1. The Real-World Problem: Zones Are Not Rectangles
 
-FRC games are built around regions of the carpet that mean something. A launching zone that scores you extra points, a protected area you are penalised for entering, a starting box you must be fully inside when autonomous begins, an amplified region that changes what a game piece is worth.
+FRC games are built around regions of the carpet that mean something. A launching zone that scores you extra points, a protected area you are penalized for entering, a starting box you must be fully inside when autonomous begins, an amplified region that changes what a game piece is worth.
 
 Concept 04 could handle these only if they were rectangles. They rarely are. Field regions are marked by tape lines running at angles, they get cut off by the diagonal of an alliance station, and they are often five- or six-sided. Approximating a slanted zone with an axis-aligned box either claims territory you do not have or gives away territory you do.
 
@@ -136,7 +136,7 @@ The standard arrangement uses them together. Precompute each zone's bounding box
 
 ### A caution about the robot's size
 
-Everything above tests a **point** against a zone. Robots are boxes, and game rules are usually written about the robot, not its centre. "Fully inside the starting zone" means all four bumper corners are inside; "has entered the protected area" may mean any part of it has.
+Everything above tests a **point** against a zone. Robots are boxes, and game rules are usually written about the robot, not its center. "Fully inside the starting zone" means all four bumper corners are inside; "has entered the protected area" may mean any part of it has.
 
 The point test is still the primitive. To ask whether the robot is fully inside, test all four corners and require every answer to be yes. To ask whether it has touched the zone at all, test the corners and also check whether any bumper edge crosses any zone edge — because a large robot can straddle a small zone with every corner outside it. That crossing check is precisely the segment intersection from Concept 02, run over each pair of edges.
 
@@ -206,7 +206,7 @@ Zone launchZone = new Zone(List.of(
 System.out.printf("area %.2f m², ccw %b%n", launchZone.area(), launchZone.isCounterClockwise());
 System.out.println(launchZone.contains(new Translation2d(4.0, 3.0)));   // true
 
-// Rules are about the robot, not its centre: require all four bumper corners inside.
+// Rules are about the robot, not its center: require all four bumper corners inside.
 boolean fullyInside = robotCorners.stream().allMatch(launchZone::contains);
 ```
 
@@ -226,7 +226,7 @@ Each ReLU unit computes a weighted sum and clips it at zero. Whether it is activ
 
 The consequence is worth sitting with: inside any one of those regions the network is perfectly linear, because the active units are fixed and the clipped ones contribute nothing. A deep ReLU network is therefore a **piecewise-linear function** — a plane sliced into polytopes, each carrying its own linear map. Training does not smooth this out; it moves the cuts. When the machine learning axon shows a decision boundary bending to separate two clusters, the bend is made of flat pieces, and counting them is a standard way to measure a network's expressive capacity.
 
-The shoelace formula has a direct second life in computer vision. **Instance segmentation** models such as Mask R-CNN and the polygon-output detectors used for aerial and document imagery report objects as vertex lists rather than boxes, precisely because a box overclaims for anything slanted — the same complaint that opened this concept. Scoring those predictions needs polygon area for the intersection-over-union of Concept 04, and that area comes from the shoelace sum. Training-data pipelines lean on the crossing-number test too: deciding which labelled region a click or a pixel belongs to is Step 3, run millions of times.
+The shoelace formula has a direct second life in computer vision. **Instance segmentation** models such as Mask R-CNN and the polygon-output detectors used for aerial and document imagery report objects as vertex lists rather than boxes, precisely because a box overclaims for anything slanted — the same complaint that opened this concept. Scoring those predictions needs polygon area for the intersection-over-union of Concept 04, and that area comes from the shoelace sum. Training-data pipelines lean on the crossing-number test too: deciding which labeled region a click or a pixel belongs to is Step 3, run millions of times.
 
 The autonomy link is more direct still. Ray casting is how an occupancy grid decides which cells a sensor beam passed through, and the even-odd rule is how a planner decides whether a candidate waypoint sits inside a keep-out region before it wastes time expanding it.
 

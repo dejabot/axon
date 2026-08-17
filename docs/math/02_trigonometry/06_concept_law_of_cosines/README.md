@@ -13,7 +13,7 @@
 Bolt a 0.90 m segment to a motor on the robot's frame — the **shoulder**. On its far end bolt a second motor and a 0.60 m segment — the **elbow** — with a gripper on the end. Both segments are rigid steel: only the joint angles change.
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="400" height="270" viewBox="0 0 400 262" style="max-width: 100%; height: auto;" role="img" aria-label="A two-segment arm mounted on a robot chassis. A 0.90 metre shoulder segment rises to an elbow, and a 0.60 metre segment reaches from there to a gripper at the target point, with both joint angles marked unknown.">
+  <svg width="400" height="270" viewBox="0 0 400 262" style="max-width: 100%; height: auto;" role="img" aria-label="A two-segment arm mounted on a robot chassis. A 0.90 meter shoulder segment rises to an elbow, and a 0.60 meter segment reaches from there to a gripper at the target point, with both joint angles marked unknown.">
     <rect x="20" y="230" width="130" height="24" rx="4" fill="currentColor" fill-opacity="0.1" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.5" />
     <circle cx="48" cy="256" r="6" fill="none" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
     <circle cx="122" cy="256" r="6" fill="none" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
@@ -54,7 +54,7 @@ Shoulder, elbow and target form a triangle with sides 0.90, 0.60 and the straigh
 
 ---
 
-## 2. Building the Math: Generalising Pythagoras
+## 2. Building the Math: Generalizing Pythagoras
 
 ### Step 1: What a right angle was buying us
 
@@ -130,7 +130,7 @@ One objection: if C is obtuse the foot falls *outside* segment CA. But beyond 90
 > ```
 >    c² = a² + b² − 2ab·cos C
 > ```
-> Read out loud as **"c squared equals a squared plus b squared, minus two a b cosine C."** `C` is the angle *between* sides `a` and `b`. The pairing is rigid: the side on the left and the angle inside the cosine must be **opposite each other**. Every other version is this one relabelled, so `a² = b² + c² − 2bc·cos A` needs no separate proof.
+> Read out loud as **"c squared equals a squared plus b squared, minus two a b cosine C."** `C` is the angle *between* sides `a` and `b`. The pairing is rigid: the side on the left and the angle inside the cosine must be **opposite each other**. Every other version is this one relabeled, so `a² = b² + c² − 2bc·cos A` needs no separate proof.
 
 ### Step 4: Pythagoras is the special case
 
@@ -239,7 +239,7 @@ Read the elbow formula as software. A cosine can never leave `−1 … +1`, but 
 Nothing farther than the first is reachable, and nothing nearer than the second, because the forearm cannot retract past the shoulder segment. The reachable set is an **annulus** — outer radius `L1 + L2`, dead hole of radius `|L1 − L2|` that equal links would close. Those are the **triangle inequality**, so algebra and geometry agree.
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="380" height="390" viewBox="0 0 360 370" style="max-width: 100%; height: auto;" role="img" aria-label="A shaded ring around the shoulder showing the reachable region between an inner radius of 0.30 metres and an outer radius of 1.50 metres, with an unreachable target outside the ring and the clamped straight-arm solution touching the outer rim on the way to it.">
+  <svg width="380" height="390" viewBox="0 0 360 370" style="max-width: 100%; height: auto;" role="img" aria-label="A shaded ring around the shoulder showing the reachable region between an inner radius of 0.30 meters and an outer radius of 1.50 meters, with an unreachable target outside the ring and the clamped straight-arm solution touching the outer rim on the way to it.">
     <path d="M 20 195 A 150 150 0 1 0 320 195 A 150 150 0 1 0 20 195 Z M 140 195 A 30 30 0 1 0 200 195 A 30 30 0 1 0 140 195 Z" fill="#38bdf8" fill-opacity="0.1" fill-rule="evenodd" stroke="none" />
     <circle cx="170" cy="195" r="150" fill="none" stroke="#38bdf8" stroke-width="2" />
     <circle cx="170" cy="195" r="30" fill="none" stroke="#f43f5e" stroke-width="2" stroke-dasharray="5,4" />
@@ -315,7 +315,7 @@ The fork is a missing sign: `+99.06°` and `−99.06°` share a cosine, so both 
 
 Neither is preferable *mathematically*, which is why a mechanism must choose **deliberately, in code, and stick to it**. Elbow-up here tucks the arm high and close; elbow-down throws the first link nearly flat, putting the elbow 0.90 m past the shoulder — likely outside the frame perimeter, an inspection failure before it is a collision.
 
-And **never let the branch flip mid-motion**: the two poses are far apart in joint space even when their gripper positions are millimetres apart, so a sign flip slams both joints across their full range at speed.
+And **never let the branch flip mid-motion**: the two poses are far apart in joint space even when their gripper positions are millimeters apart, so a sign flip slams both joints across their full range at speed.
 
 ---
 

@@ -18,10 +18,10 @@ Every result here is derived from first principles, and every one of them is rea
 
 * **[Concept 03: Linear Interpolation, Lookup Tables & Blending](03_concept_linear_interpolation/)**
   * *The Everyday Problem:* You measured shooter RPM at five distances. What do you command at a distance in between?
-  * *Core Ideas:* `lerp` named and generalised from Concept 02's parametric form, why one algebraic form is numerically safer than its equal, inverse lerp and remapping, clamping versus extrapolation, interpolating lookup tables, bilinear interpolation, and why angles cannot be lerped naively.
+  * *Core Ideas:* `lerp` named and generalized from Concept 02's parametric form, why one algebraic form is numerically safer than its equal, inverse lerp and remapping, clamping versus extrapolation, interpolating lookup tables, bilinear interpolation, and why angles cannot be lerped naively.
 
 * **[Concept 04: Bounding Boxes, Overlap & Collision](04_concept_bounding_boxes/)**
-  * *The Everyday Problem:* The robot is a 0.9 metre box, not a dot. Will its bumpers hit anything?
+  * *The Everyday Problem:* The robot is a 0.9 meter box, not a dot. Will its bumpers hit anything?
   * *Core Ideas:* Interval overlap via De Morgan's law, the separating axis idea, half-extents, Minkowski inflation and configuration space, penetration depth, Intersection over Union, and swept boxes for tunneling.
 
 * **[Concept 05: Polygons, Areas & Field Zones](05_concept_polygons_zones/)**

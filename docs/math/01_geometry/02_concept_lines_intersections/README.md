@@ -13,7 +13,7 @@
 Autonomous routines are built out of straight runs. "Drive from the starting line to the scoring position" is a segment from one point to another. Before committing to that run, the software has to answer two questions that Concept 01 gave us no tools for:
 
 1. **Does the path cross something it must not cross?** A field barrier, the edge of a protected zone, the line an opponent's robot is currently driving along.
-2. **If it does not cross, how close does it come?** Clearing a wall by two centimetres is not clearing it, once you account for wheel slip.
+2. **If it does not cross, how close does it come?** Clearing a wall by two centimeters is not clearing it, once you account for wheel slip.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="380" height="200" viewBox="0 0 380 200" style="max-width: 100%; height: auto;" role="img" aria-label="A planned robot path crossing one barrier and passing near another.">
@@ -55,7 +55,7 @@ $$
 P(t) = A + t \cdot r \qquad \text{where } r = B - A
 $$
 
-Read it as: "the point you reach after travelling `t` of the way from A toward B." Written out in coordinates it is two ordinary equations:
+Read it as: "the point you reach after traveling `t` of the way from A toward B." Written out in coordinates it is two ordinary equations:
 
 $$
 \begin{aligned}
@@ -287,7 +287,7 @@ A **perceptron**, the ancestor of every neural network in this curriculum, class
 
 The zero case matters there too. Points where the expression equals zero sit exactly on the boundary, and the *distance* to that boundary — computed by the base-times-height argument in Step 6 — is what **support vector machines** maximize. An SVM's entire training objective is "place the line so that the nearest training point is as far from it as possible", which is the clearance calculation applied to data instead of barriers.
 
-On the autonomy side, Step 5 is **ray casting**, the core loop of occupancy-grid mapping and simulated LiDAR. A range sensor is modelled as a ray from the sensor origin, intersected against every wall segment in the map; the smallest positive `t` is the reported distance. Run that a few hundred times per scan and you have synthetic sensor data for testing, or, run in reverse, the visibility check that path planners like RRT and A\* use to decide whether two waypoints can be connected by a straight edge.
+On the autonomy side, Step 5 is **ray casting**, the core loop of occupancy-grid mapping and simulated LiDAR. A range sensor is modeled as a ray from the sensor origin, intersected against every wall segment in the map; the smallest positive `t` is the reported distance. Run that a few hundred times per scan and you have synthetic sensor data for testing, or, run in reverse, the visibility check that path planners like RRT and A\* use to decide whether two waypoints can be connected by a straight edge.
 
 ---
 
@@ -303,12 +303,12 @@ Path `A = (0, 0)` to `B = (4, 4)`. Barrier `C = (0, 4)` to `D = (4, 0)`. Use ori
 4. By symmetry the other pair also gives `+16` and `−16`. Opposite signs ✓ — so they cross.
 5. `cross(r, s) = 4·(−4) − 4·4 = −32`, non-zero, so not parallel.
 6. `t = cross(C − A, s) / cross(r, s) = cross((0,4), (4,−4)) / (−32) = (0·(−4) − 4·4)/(−32) = (−16)/(−32) = 0.5`.
-7. The crossing is at `P(0.5) = (0,0) + 0.5·(4,4) = (2, 2)` — the centre, as the symmetry of the picture demands.
+7. The crossing is at `P(0.5) = (0,0) + 0.5·(4,4) = (2, 2)` — the center, as the symmetry of the picture demands.
 
 ---
 
 ### Checkpoint 2
-A teammate's collision check reports that a path from `(1, 1)` to `(2, 2)` is blocked by a barrier from `(8, 0)` to `(8, 5)`, which is metres away. Their code tests only whether the barrier's endpoints fall on opposite sides of the path. What did they get wrong, and what does the missing test contribute?
+A teammate's collision check reports that a path from `(1, 1)` to `(2, 2)` is blocked by a barrier from `(8, 0)` to `(8, 5)`, which is meters away. Their code tests only whether the barrier's endpoints fall on opposite sides of the path. What did they get wrong, and what does the missing test contribute?
 
 **Solution:**
 They implemented only half of Step 4. The barrier's endpoints `(8, 0)` and `(8, 5)` do sit on opposite sides of the *infinite line* through `(1,1)` and `(2,2)` — that line is `y = x`, and `(8, 0)` is below it while `(8, 5)` is above. The test passes, so they report a collision.
@@ -318,7 +318,7 @@ The missing test is the symmetric one: are the path's endpoints on opposite side
 ---
 
 ### Deep Dive 1
-Step 4's test treats a grazing touch as a collision, and Step 5 warns that floating-point arithmetic rarely yields exactly `0.0`. Investigate what happens when the two segments are very nearly parallel: compute `cross(r, s)` for segments at 0.01 degrees apart with coordinates of realistic field magnitude, and observe how a tiny denominator inflates the error in `t`. Then work out what tolerance your collision check should use, and argue whether it should be an absolute number of metres or scaled relative to the segment lengths.
+Step 4's test treats a grazing touch as a collision, and Step 5 warns that floating-point arithmetic rarely yields exactly `0.0`. Investigate what happens when the two segments are very nearly parallel: compute `cross(r, s)` for segments at 0.01 degrees apart with coordinates of realiztic field magnitude, and observe how a tiny denominator inflates the error in `t`. Then work out what tolerance your collision check should use, and argue whether it should be an absolute number of meters or scaled relative to the segment lengths.
 
 ### Deep Dive 2
 This concept tested a path against barriers one at a time. A real field has dozens, and a match adds moving robots. Research **spatial partitioning** — uniform grids, quadtrees, and bounding-volume hierarchies — and work out how each reduces the number of segment tests from "every barrier, every cycle" to something closer to constant. Then connect this back to Concept 03: why is a cheap bounding-box rejection test the standard first filter before running the exact segment arithmetic derived here?

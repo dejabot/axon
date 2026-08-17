@@ -21,7 +21,7 @@ This concept runs that arrow backwards. A path follower does not think in wheel 
 The angle is the problem, and it is the whole of this concept.
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="360" height="240" viewBox="0 0 340 226" style="max-width: 100%; height: auto;" role="img" aria-label="A wheel seen from above with its two velocity components known — 3.464 metres per second down-field and 2.000 metres per second sideways — and the angle of the resulting arrow marked as unknown.">
+  <svg width="360" height="240" viewBox="0 0 340 226" style="max-width: 100%; height: auto;" role="img" aria-label="A wheel seen from above with its two velocity components known — 3.464 meters per second down-field and 2.000 meters per second sideways — and the angle of the resulting arrow marked as unknown.">
     <circle cx="140" cy="130" r="34" fill="none" stroke="currentColor" stroke-opacity="0.16" stroke-width="1.5" stroke-dasharray="3,4" />
     <line x1="50" y1="130" x2="272" y2="130" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
     <line x1="140" y1="42" x2="140" y2="200" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
@@ -47,7 +47,7 @@ The angle is the problem, and it is the whole of this concept.
   </svg>
 </div>
 
-The same question has a second face you will meet more often. Your robot sits at `(2.0, 1.0)` and a scoring target at `(5.0, 5.0)`; subtracting, as Module 1 does for distance, gives `(3.0, 4.0)` — three metres down-field, four to the left. Which way does the turret point? Again: two components known, one angle wanted.
+The same question has a second face you will meet more often. Your robot sits at `(2.0, 1.0)` and a scoring target at `(5.0, 5.0)`; subtracting, as Module 1 does for distance, gives `(3.0, 4.0)` — three meters down-field, four to the left. Which way does the turret point? Again: two components known, one angle wanted.
 
 That is the inverse of everything Concept 01 did, and the tool for it has a name most people get wrong the first three times.
 
@@ -152,7 +152,7 @@ Form the ratio each time:
 ```
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="380" height="250" viewBox="0 0 380 250" style="max-width: 100%; height: auto;" role="img" aria-label="Two targets five metres from the robot: A at plus three plus four, and B at minus three minus four, in exactly opposite directions. A red dashed arrow shows the inverse tangent aiming toward A even when the target is B.">
+  <svg width="380" height="250" viewBox="0 0 380 250" style="max-width: 100%; height: auto;" role="img" aria-label="Two targets five meters from the robot: A at plus three plus four, and B at minus three minus four, in exactly opposite directions. A red dashed arrow shows the inverse tangent aiming toward A even when the target is B.">
     <line x1="50" y1="125" x2="330" y2="125" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
     <line x1="180" y1="25" x2="180" y2="225" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
     <text x="304" y="140" fill="currentColor" fill-opacity="0.5" font-family="sans-serif" font-size="10">x (down-field)</text>
@@ -237,7 +237,7 @@ This is Concept 01's **reference angle** — the acute angle between the ray and
 Four distinct answers from the same reference angle, all four targets 5 m away, and no two of them confusable.
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="400" height="300" viewBox="0 0 400 300" style="max-width: 100%; height: auto;" role="img" aria-label="Four targets at plus or minus three and plus or minus four, one in each quadrant, all five metres from the robot. Their atan2 angles are 53.13, 126.87, minus 126.87 and minus 53.13 degrees, with arcs drawn at four different radii.">
+  <svg width="400" height="300" viewBox="0 0 400 300" style="max-width: 100%; height: auto;" role="img" aria-label="Four targets at plus or minus three and plus or minus four, one in each quadrant, all five meters from the robot. Their atan2 angles are 53.13, 126.87, minus 126.87 and minus 53.13 degrees, with arcs drawn at four different radii.">
     <line x1="50" y1="140" x2="350" y2="140" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
     <line x1="190" y1="25" x2="190" y2="258" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
     <text x="316" y="155" fill="currentColor" fill-opacity="0.5" font-family="sans-serif" font-size="10">x</text>
@@ -318,7 +318,7 @@ The fix is a magnitude check before the call, not after:
    else                     θ = atan2(y, x)
 ```
 
-Holding the last angle is the right behaviour for a swerve module: a stopped wheel should stay where it is pointed, ready for the next command.
+Holding the last angle is the right behavior for a swerve module: a stopped wheel should stay where it is pointed, ready for the next command.
 
 ### Step 9: The loop closes
 
@@ -389,7 +389,7 @@ The hand-built version agrees with `Math.atan2` on every row, which is the point
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
-// The Rotation2d(x, y) constructor calls atan2 internally and normalises the
+// The Rotation2d(x, y) constructor calls atan2 internally and normalizes the
 // pair to length 1. Note the argument order: (x, y), NOT atan2's (y, x).
 Rotation2d wheelAngle = new Rotation2d(3.4641, 2.0000);
 double deg = wheelAngle.getDegrees();                    // 30.00  <- same as above
@@ -413,7 +413,7 @@ if (delta.getNorm() > 1e-6) {
 turretSubsystem.setSetpoint(lastTurret);
 ```
 
-Both tiers produce the same numbers — `30.00°` for the wheel, `53.13°` and `5.00` m for the target — because `Rotation2d(x, y)` and `Translation2d.getAngle()` are `Math.atan2` with a different argument order and a normalisation bolted on.
+Both tiers produce the same numbers — `30.00°` for the wheel, `53.13°` and `5.00` m for the target — because `Rotation2d(x, y)` and `Translation2d.getAngle()` are `Math.atan2` with a different argument order and a normalization bolted on.
 
 ---
 
@@ -459,7 +459,7 @@ A wheel is commanded to `down-field = 0.0`, `sideways = −2.5` m/s — a pure s
 1. **The naive ratio.** `−2.5 / 0.0` is not an exception for Java `double`s; it evaluates to `−Infinity`. `Math.atan(Double.NEGATIVE_INFINITY)` returns `−π/2`, so `Math.toDegrees` gives `−90.0°` — which is the correct heading, obtained entirely by luck. Change the components to `int`s and the same expression throws `ArithmeticException`.
 2. **atan2.** `Math.atan2(−2.5, 0.0) = −π/2 = −90.0°`. Step 6's axis rule, no division performed, no coincidence involved.
 3. **The stop command.** `0.0 / 0.0` is `NaN`, so the naive path produces `NaN` degrees, and `NaN` fails every comparison — including any `if (angle > limit)` guard — so it reaches the motor controller unchallenged.
-4. **atan2 at the origin.** `Math.atan2(0.0, 0.0)` returns `0.0`, so the wheel would snap from −90° round to 0° the instant the robot stops. Correct behaviour is Step 8's guard: `if (Math.hypot(x, y) < 1e-6) keep the previous angle`, leaving the wheel at −90°.
+4. **atan2 at the origin.** `Math.atan2(0.0, 0.0)` returns `0.0`, so the wheel would snap from −90° round to 0° the instant the robot stops. Correct behavior is Step 8's guard: `if (Math.hypot(x, y) < 1e-6) keep the previous angle`, leaving the wheel at −90°.
 
 ---
 

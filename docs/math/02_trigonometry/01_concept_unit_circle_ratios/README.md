@@ -13,7 +13,7 @@
 A wheel is pointed 30 degrees off straight down-field, spinning fast enough to move at 4.0 m/s. How much of that 4.0 m/s is carrying the robot **down-field**, and how much is carrying it **sideways**?
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="360" height="240" viewBox="0 0 340 226" style="max-width: 100%; height: auto;" role="img" aria-label="A wheel seen from above, turned thirty degrees off the down-field axis, with its 4.0 metres per second velocity arrow resolved by dashed lines into an unknown down-field component and an unknown sideways component.">
+  <svg width="360" height="240" viewBox="0 0 340 226" style="max-width: 100%; height: auto;" role="img" aria-label="A wheel seen from above, turned thirty degrees off the down-field axis, with its 4.0 meters per second velocity arrow resolved by dashed lines into an unknown down-field component and an unknown sideways component.">
     <circle cx="140" cy="130" r="34" fill="none" stroke="currentColor" stroke-opacity="0.16" stroke-width="1.5" stroke-dasharray="3,4" />
     <line x1="50" y1="130" x2="272" y2="130" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
     <line x1="140" y1="42" x2="140" y2="200" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" />
@@ -108,7 +108,7 @@ $$
 \end{aligned}
 $$
 
-Generations have memorised them as **SOH-CAH-TOA** — Sine is Opposite over Hypotenuse, Cosine is Adjacent over Hypotenuse, Tangent is Opposite over Adjacent. A mnemonic, but a good one.
+Generations have memorized them as **SOH-CAH-TOA** — Sine is Opposite over Hypotenuse, Cosine is Adjacent over Hypotenuse, Tangent is Opposite over Adjacent. A mnemonic, but a good one.
 
 Try it on Geometry Concept 01's 3-4-5 triangle, scaled to sides 90, 120 and 150. At the left vertex the opposite is 90, the adjacent 120:
 
@@ -123,7 +123,7 @@ $$
 Stand at the *other* acute vertex, φ, and the two swap: `sin φ = 0.800`, `cos φ = 0.600`. The sine of one acute angle is the cosine of the other — the "co" marks the **co**mplementary angle, the one completing 90°.
 
 > ### Math!
-> `sin θ` is read out loud as **"sine of theta"**, `cos θ` as **"cosine of theta"**, `tan θ` as **"tangent of theta"**. These are *functions*: `sin` eats an angle and returns a number. It is **not** `sin` times `θ`, and cannot be cancelled from both sides. And `sin²θ` means `(sin θ)²` — sine first, then square — not `sin(θ²)`.
+> `sin θ` is read out loud as **"sine of theta"**, `cos θ` as **"cosine of theta"**, `tan θ` as **"tangent of theta"**. These are *functions*: `sin` eats an angle and returns a number. It is **not** `sin` times `θ`, and cannot be canceled from both sides. And `sin²θ` means `(sin θ)²` — sine first, then square — not `sin(θ²)`.
 
 ### Step 4: The hypotenuse-1 collapse
 
@@ -187,7 +187,7 @@ Between 0° and 90° this agrees with SOH-CAH-TOA, where the point sits at a fir
   </svg>
 </div>
 
-To *evaluate* `cos 150°`, drop a perpendicular to the X-axis. It, the axis and the radius form a right triangle whose angle at the origin is `180° − 150° = 30°` — the **reference angle** — with legs `cos 30° = 0.866` and `sin 30° = 0.500`. The signs come off the picture: the point is left of the vertical axis and above the horizontal one, so `cos 150° = −0.866` and `sin 150° = +0.500`. Nothing to memorise beyond which side of which axis:
+To *evaluate* `cos 150°`, drop a perpendicular to the X-axis. It, the axis and the radius form a right triangle whose angle at the origin is `180° − 150° = 30°` — the **reference angle** — with legs `cos 30° = 0.866` and `sin 30° = 0.500`. The signs come off the picture: the point is left of the vertical axis and above the horizontal one, so `cos 150° = −0.866` and `sin 150° = +0.500`. Nothing to memorize beyond which side of which axis:
 
 ```
    Quadrant     angle range      cos      sin      tan
@@ -347,11 +347,11 @@ double deg = wheelAngle.getDegrees();   // 30.0
 Rotation2d measured = Rotation2d.fromDegrees(steerEncoder.getPositionDegrees());
 
 // Or straight from a pair of components, with no trigonometry called at all:
-// this normalises (x, y) to length 1 and keeps the pair.
+// this normalizes (x, y) to length 1 and keeps the pair.
 Rotation2d fromComponents = new Rotation2d(downfieldMps, sidewaysMps);
 ```
 
-Both tiers produce the same numbers, 3.464 and 2.000. WPILib's `SwerveModuleState` stores exactly the polar pair this concept starts from: a speed in meters per second and a `Rotation2d`. And notice that `Rotation2d` **does not store the angle** — it stores the cosine and sine, normalised so `cos² + sin² = 1`, reconstructing the angle only when asked. So `getCos()` and `getSin()` are free in a 20 ms loop, building one from components needs no trig, and the stored pair always lies on the unit circle: Step 7's identity, enforced by a constructor.
+Both tiers produce the same numbers, 3.464 and 2.000. WPILib's `SwerveModuleState` stores exactly the polar pair this concept starts from: a speed in meters per second and a `Rotation2d`. And notice that `Rotation2d` **does not store the angle** — it stores the cosine and sine, normalized so `cos² + sin² = 1`, reconstructing the angle only when asked. So `getCos()` and `getSin()` are free in a 20 ms loop, building one from components needs no trig, and the stored pair always lies on the unit circle: Step 7's identity, enforced by a constructor.
 
 ---
 
@@ -378,7 +378,7 @@ Two properties come straight from this concept. Sine and cosine never leave `[�
 
 ### Fourier features: why coordinate networks need a circle to see detail
 
-Give a small network a coordinate `(x, y)` and ask for the colour there, or the density there in a 3D scene — the NeRF setup. Feed it raw coordinates and the output is a blurry smear. The cause has a name, **spectral bias**: ReLU networks are biased toward smooth, low-frequency functions, and detail is high-frequency.
+Give a small network a coordinate `(x, y)` and ask for the color there, or the density there in a 3D scene — the NeRF setup. Feed it raw coordinates and the output is a blurry smear. The cause has a name, **spectral bias**: ReLU networks are biased toward smooth, low-frequency functions, and detail is high-frequency.
 
 The fix is to feed *angles* instead — replace `x` with a bank of sine and cosine pairs at geometrically spaced frequencies:
 
@@ -386,7 +386,7 @@ $$
 \gamma(x) = \left[\ \sin(2^{0}\pi x),\ \cos(2^{0}\pi x),\ \sin(2^{1}\pi x),\ \cos(2^{1}\pi x),\ \ldots,\ \sin(2^{L-1}\pi x),\ \cos(2^{L-1}\pi x)\ \right]
 $$
 
-This is the hypotenuse-1 collapse applied at many scales at once. Each frequency wraps the coordinate onto its own unit circle, and the fast ones lap across a sliver of the scene, so two nearby points land far apart there. NeRF uses `L = 10`, one lap per 1/512 of the scene at the top. Same layers, same optimiser — only the input changes, and mush becomes geometry. The same trick encodes "hour of day" as `(cos(2π·h/24), sin(2π·h/24))`, so midnight sits beside 11 p.m.
+This is the hypotenuse-1 collapse applied at many scales at once. Each frequency wraps the coordinate onto its own unit circle, and the fast ones lap across a sliver of the scene, so two nearby points land far apart there. NeRF uses `L = 10`, one lap per 1/512 of the scene at the top. Same layers, same optimizer — only the input changes, and mush becomes geometry. The same trick encodes "hour of day" as `(cos(2π·h/24), sin(2π·h/24))`, so midnight sits beside 11 p.m.
 
 ---
 
@@ -409,7 +409,7 @@ A wheel is turned to 220° counter-clockwise from down-field and driven at 2.5 m
 
 ### Checkpoint 2
 
-A camera sits 0.60 m above the carpet, tilted 25° upward, and centres an AprilTag whose middle is 1.45 m up. How far away is the tag along the ground? Then say what happens if the camera is remounted pointing straight up.
+A camera sits 0.60 m above the carpet, tilted 25° upward, and centers an AprilTag whose middle is 1.45 m up. How far away is the tag along the ground? Then say what happens if the camera is remounted pointing straight up.
 
 **Solution:**
 
@@ -427,7 +427,7 @@ A wheel cannot turn instantly. Commanded to a new angle, it spends several loop 
 
 ### Deep Dive 2
 
-Radians earn their keep in `s = rθ`. Take a 4-inch wheel (radius 0.0508 m) behind a 6.75:1 reduction, driven by a motor whose encoder reports rotations. Derive the meters travelled per motor rotation, and state where the `2π` enters. Then test a claim you meet constantly in control code: for small angles **in radians**, `sin θ ≈ θ`. Evaluate both sides at 0.05, 0.10, 0.20 and 0.40 rad, find where the error crosses 1%, and check what happens if it is handed degrees.
+Radians earn their keep in `s = rθ`. Take a 4-inch wheel (radius 0.0508 m) behind a 6.75:1 reduction, driven by a motor whose encoder reports rotations. Derive the meters traveled per motor rotation, and state where the `2π` enters. Then test a claim you meet constantly in control code: for small angles **in radians**, `sin θ ≈ θ`. Evaluate both sides at 0.05, 0.10, 0.20 and 0.40 rad, find where the error crosses 1%, and check what happens if it is handed degrees.
 
 ---
 

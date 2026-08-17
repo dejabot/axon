@@ -160,7 +160,7 @@
     let mode = 'lerp';
     let dragging = null;
 
-    // ---- Mode 1: two draggable points in metres -------------------------------
+    // ---- Mode 1: two draggable points in meters -------------------------------
     // Defaults are the README's worked case: x = 1.01 and x = 3.02, where the two
     // lerp forms disagree by one ULP at t = 1. Drag them and the disagreement
     // usually vanishes, which is exactly the point — it is rare, not impossible.
@@ -198,7 +198,7 @@
     }
 
     // One scale for BOTH axes, so geometric figures are drawn truthfully.
-    // (The table mode is a chart of RPM against metres, not a geometric figure,
+    // (The table mode is a chart of RPM against meters, not a geometric figure,
     //  so it uses its own per-axis mapping further down.)
     function view() {
       const { w, h } = cssSize();
@@ -441,7 +441,7 @@
       else { badge.textContent = 'Outside — untested'; badge.className = 'badge badge-bad'; }
     }
 
-    /** Bracket, inverse-lerp the keys, lerp the values. Returns both end behaviours. */
+    /** Bracket, inverse-lerp the keys, lerp the values. Returns both end behaviors. */
     function lookup(sorted, q) {
       const n = sorted.length;
       if (q <= sorted[0].d) {

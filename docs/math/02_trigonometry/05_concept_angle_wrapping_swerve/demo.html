@@ -78,7 +78,7 @@
         <input type="range" id="spdSlider" min="0" max="5" value="3.5" step="0.1">
         <span id="spdVal" class="mono" style="color: var(--accent-purple);">3.5 m/s</span>
       </label>
-      <label><input type="checkbox" id="optChk"> Swerve 180° optimisation</label>
+      <label><input type="checkbox" id="optChk"> Swerve 180° optimization</label>
       <label>Blend t
         <input type="range" id="tSlider" min="0" max="1" value="0" step="0.01">
         <span id="tVal" class="mono">0.00</span>
@@ -318,7 +318,7 @@
       // The route actually commanded once the flip is allowed
       if (flipped) {
         arcSweep(v.r * 0.81, current, slew, C.purple, 4);
-        // The flip axis: target and target+180 are one line through the centre
+        // The flip axis: target and target+180 are one line through the center
         const a = pointAt(target, v.r), b = pointAt(target + 180, v.r);
         ctx.strokeStyle = C.purple; ctx.lineWidth = 1.5; ctx.setLineDash([6, 5]);
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();

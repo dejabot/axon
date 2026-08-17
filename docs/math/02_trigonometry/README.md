@@ -15,7 +15,7 @@ Welcome to **Module 2: Trigonometry & Angles**. [Module 1](../01_geometry/) buil
   * *Code & Math:* Rotation derived by tracking where `î` and `ĵ` land, proof that rotation preserves length, undoing a rotation by flipping one sign, and composition deriving the angle-addition identities.
 
 * **[Concept 03: Coordinate Frames (Field, Robot & Camera)](03_concept_coordinate_frames/)**
-  * *The Everyday Problem:* The camera sees a game piece 1.5 metres ahead. Where is it on the field?
+  * *The Everyday Problem:* The camera sees a game piece 1.5 meters ahead. Where is it on the field?
   * *Code & Math:* Rigid transforms combining rotation and translation, chaining field to robot to camera, and inverting a transform.
 
 * **[Concept 04: Inverse Trig & 4-Quadrant Heading with atan2](04_concept_atan2_heading/)**

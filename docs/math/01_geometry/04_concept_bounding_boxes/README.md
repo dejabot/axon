@@ -10,9 +10,9 @@
 
 ## 1. The Real-World Problem: The Robot Is Not a Dot
 
-Concept 01 treated the robot as a point at `(x, y)`, and Concept 02 treated its path as an infinitely thin line. Neither is true. A competition robot is a box roughly 0.9 metres on a side once its bumpers are on, and those bumpers are what actually make contact with the world.
+Concept 01 treated the robot as a point at `(x, y)`, and Concept 02 treated its path as an infinitely thin line. Neither is true. A competition robot is a box roughly 0.9 meters on a side once its bumpers are on, and those bumpers are what actually make contact with the world.
 
-This changes the question. A path planner that only checks whether the robot's *centre* clears an obstacle will happily drive 45 centimetres of bumper straight through a field element. What we need is a test between two regions of space, not two points — and we need it to be cheap, because it will run against every obstacle on the field, fifty times a second, for the entire match.
+This changes the question. A path planner that only checks whether the robot's *center* clears an obstacle will happily drive 45 centimeters of bumper straight through a field element. What we need is a test between two regions of space, not two points — and we need it to be cheap, because it will run against every obstacle on the field, fifty times a second, for the entire match.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="380" height="190" viewBox="0 0 380 190" style="max-width: 100%; height: auto;" role="img" aria-label="A robot bounding box approaching an obstacle bounding box, with their X and Y intervals projected onto the axes.">
@@ -81,7 +81,7 @@ Note the shape of this result: to prove the boxes are **disjoint** you only need
 
 ### Step 3: Build the robot's box from its pose
 
-Robot poses are given as a centre. Bumper dimensions are given as a total width and length. Converting between them uses **half-extents** — half the width and half the length:
+Robot poses are given as a center. Bumper dimensions are given as a total width and length. Converting between them uses **half-extents** — half the width and half the length:
 
 $$
 \begin{aligned}
@@ -92,13 +92,13 @@ $$
 \end{aligned}
 $$
 
-A 0.9 by 0.9 metre robot centred at `(3.0, 2.0)` therefore occupies `x ∈ [2.55, 3.45]` and `y ∈ [1.55, 2.45]`. Its centre being 0.5 metres from a wall means its bumper is only 0.05 metres from that wall, which is the entire reason this concept exists.
+A 0.9 by 0.9 meter robot centered at `(3.0, 2.0)` therefore occupies `x ∈ [2.55, 3.45]` and `y ∈ [1.55, 2.45]`. Its center being 0.5 meters from a wall means its bumper is only 0.05 meters from that wall, which is the entire reason this concept exists.
 
 ### Step 4: Inflate the obstacle instead of growing the robot
 
-Here is a reframing that pays for itself many times over. Rather than testing box-against-box, **grow the obstacle by the robot's half-extents and test the robot's centre point against the grown obstacle.**
+Here is a reframing that pays for itself many times over. Rather than testing box-against-box, **grow the obstacle by the robot's half-extents and test the robot's center point against the grown obstacle.**
 
-Why is that the same test? The boxes touch exactly when the gap between their centres has closed to `hx_A + hx_B` on X and `hy_A + hy_B` on Y. Moving those two amounts from the robot onto the obstacle changes neither total, so the moment of contact is identical. The robot has become a point, and the obstacle has absorbed its size:
+Why is that the same test? The boxes touch exactly when the gap between their centers has closed to `hx_A + hx_B` on X and `hy_A + hy_B` on Y. Moving those two amounts from the robot onto the obstacle changes neither total, so the moment of contact is identical. The robot has become a point, and the obstacle has absorbed its size:
 
 ```
    inflated.minX = obstacle.minX − hx_robot        inflated.maxX = obstacle.maxX + hx_robot
@@ -112,17 +112,17 @@ Why is that the same test? The boxes touch exactly when the gap between their ce
     <text x="132" y="103" fill="#f43f5e" font-family="sans-serif" font-size="11" font-weight="bold">obstacle</text>
     <text x="196" y="42" fill="#c084fc" font-family="sans-serif" font-size="11" font-weight="bold">inflated by robot half-extents</text>
     <circle cx="70" cy="140" r="5" fill="#38bdf8" />
-    <text x="20" y="162" fill="#38bdf8" font-family="sans-serif" font-size="11" font-weight="bold">robot centre (a point)</text>
+    <text x="20" y="162" fill="#38bdf8" font-family="sans-serif" font-size="11" font-weight="bold">robot center (a point)</text>
   </svg>
 </div>
 
 This is the two-dimensional case of a **Minkowski sum**, and it is how serious path planners think. Once every obstacle has been inflated once, at the start of planning, the robot is a dimensionless point for the rest of the search — so line-of-sight checks between waypoints become the segment tests from Concept 02, run against inflated rectangles, with no robot geometry to carry around. The space you are planning in stops being the physical field and becomes **configuration space**.
 
-Inflation is also where the safety margin belongs. Add a few extra centimetres beyond the true half-extents and every downstream query inherits the buffer automatically, instead of each call site remembering to apply its own.
+Inflation is also where the safety margin belongs. Add a few extra centimeters beyond the true half-extents and every downstream query inherits the buffer automatically, instead of each call site remembering to apply its own.
 
 ### Step 5: How much are they overlapping?
 
-A boolean is a poor output. "Blocked" gives a planner nothing to work with, while "overlapping by 3 centimetres on Y" tells it which way to nudge.
+A boolean is a poor output. "Blocked" gives a planner nothing to work with, while "overlapping by 3 centimeters on Y" tells it which way to nudge.
 
 The overlap region of two AABBs is itself an AABB, and its bounds come from taking the *inner* edges on each side:
 
@@ -161,7 +161,7 @@ IoU runs from 0 for boxes that do not touch, to 1 for boxes that coincide exactl
 
 Collision tests run at discrete instants, typically once every 20 milliseconds. In between, the robot teleports.
 
-At 4 metres per second, a 20 millisecond tick moves the robot 8 centimetres. Test the box at the start of the tick and again at the end, and you have said nothing about the 8 centimetres in between. If an obstacle is thinner than the step — a bar, a wall edge, another robot's bumper caught at a glancing angle — both tests can report "clear" while the robot passes straight through. This is **tunneling**, and it gets worse exactly when it matters most, at high speed.
+At 4 meters per second, a 20 millisecond tick moves the robot 8 centimeters. Test the box at the start of the tick and again at the end, and you have said nothing about the 8 centimeters in between. If an obstacle is thinner than the step — a bar, a wall edge, another robot's bumper caught at a glancing angle — both tests can report "clear" while the robot passes straight through. This is **tunneling**, and it gets worse exactly when it matters most, at high speed.
 
 The cheap and conservative fix is a **swept bounding box**: build one AABB enclosing both the start pose and the end pose, and test that.
 
@@ -188,7 +188,7 @@ The fix is an **oriented bounding box**, which rotates with the robot, and testi
 /** An axis-aligned bounding box, stored as the two intervals it is made of. */
 public record Box(double minX, double minY, double maxX, double maxY) {
 
-    /** Build a box from a robot centre and its full bumper dimensions. */
+    /** Build a box from a robot center and its full bumper dimensions. */
     public static Box fromCenter(double cx, double cy, double width, double length) {
         return new Box(cx - width / 2, cy - length / 2,
                        cx + width / 2, cy + length / 2);
@@ -244,7 +244,7 @@ System.out.println(robotNow.overlaps(barrier));              // false
 System.out.println(robotNext.overlaps(barrier));             // false
 System.out.println(robotNow.sweptTo(robotNext).overlaps(barrier));   // true
 
-// Planning against a point robot: inflate once, then query centres forever.
+// Planning against a point robot: inflate once, then query centers forever.
 Box inflated = barrier.inflate(0.45, 0.45, 0.10);
 System.out.println(inflated.contains(3.08, 2.00));           // true
 ```
@@ -263,7 +263,7 @@ What no library will decide for you is the policy: how much margin to inflate by
 
 Intersection over Union is not a robotics side-note that happens to resemble a machine learning idea. It is *the* metric of object detection, and Step 6 is the whole of it.
 
-A detector such as YOLO or a Faster R-CNN outputs boxes with confidence scores. Evaluating it means matching predicted boxes against human-labelled ground-truth boxes, and the match rule is IoU against a threshold — a prediction with IoU ≥ 0.5 against a ground-truth box counts as a hit, anything less counts as a miss plus a false alarm. Sweeping that threshold from 0.5 to 0.95 and averaging produces **mean Average Precision**, the number reported in essentially every detection paper.
+A detector such as YOLO or a Faster R-CNN outputs boxes with confidence scores. Evaluating it means matching predicted boxes against human-labeled ground-truth boxes, and the match rule is IoU against a threshold — a prediction with IoU ≥ 0.5 against a ground-truth box counts as a hit, anything less counts as a miss plus a false alarm. Sweeping that threshold from 0.5 to 0.95 and averaging produces **mean Average Precision**, the number reported in essentially every detection paper.
 
 The same arithmetic runs inside the model, twice more. **Non-maximum suppression** cleans up the dozens of overlapping boxes a detector fires at a single object: sort by confidence, keep the best, and delete every remaining box whose IoU with it exceeds a threshold — Step 6 executed thousands of times per frame. And during training, IoU-based losses such as GIoU and DIoU supply the gradient that pulls predicted boxes onto their targets, chosen over naive corner-coordinate error precisely because IoU is invariant to the scale of the object.
 
@@ -278,20 +278,20 @@ Robot box A spans `x ∈ [1.0, 2.0]`, `y ∈ [1.0, 2.0]`. Obstacle B spans `x �
 
 **Solution:**
 1. Y-intervals: `A.maxY (2.0) ≥ B.minY (1.0)` ✓ and `B.maxY (2.0) ≥ A.minY (1.0)` ✓ — they overlap on Y.
-2. X-intervals: `A.maxX (2.0) ≥ B.minX (2.5)`? No — 2.0 < 2.5. The test fails, so X is a **separating axis** and the boxes are disjoint. A 0.5 metre gap remains.
+2. X-intervals: `A.maxX (2.0) ≥ B.minX (2.5)`? No — 2.0 < 2.5. The test fails, so X is a **separating axis** and the boxes are disjoint. A 0.5 meter gap remains.
 3. IoU: the intersection rectangle would be `x ∈ [2.5, 2.0]`, a negative width, clamped to zero area. With `interArea = 0`, `IoU = 0 / (1 + 1 − 0) = 0`.
 Overlap on one axis is never enough — that is exactly what the second half of the test is for.
 
 ---
 
 ### Checkpoint 2
-Your 0.9 by 0.9 metre robot must pass through a gap between two field elements. The gap runs from `x = 4.00` to `x = 5.30`. Using inflation, decide whether the robot's centre has any legal x-values, and say how much lateral tolerance the driver has.
+Your 0.9 by 0.9 meter robot must pass through a gap between two field elements. The gap runs from `x = 4.00` to `x = 5.30`. Using inflation, decide whether the robot's center has any legal x-values, and say how much lateral tolerance the driver has.
 
 **Solution:**
 1. The robot's half-extent is `hx = 0.45`.
-2. Inflate each side of the gap inward by `0.45`. The legal band for the robot's *centre* is `x ∈ [4.00 + 0.45, 5.30 − 0.45] = [4.45, 4.85]`.
-3. The band is non-empty and 0.40 metres wide, so the robot fits with 20 centimetres of slack either side of the gap's centre line at `x = 4.65`.
-4. With a 0.10 metre safety margin the band shrinks to `[4.55, 4.75]`, still 0.20 metres wide. Had the gap been 0.9 metres exactly, the band would have collapsed to a single point — geometrically a fit, practically an impossibility.
+2. Inflate each side of the gap inward by `0.45`. The legal band for the robot's *center* is `x ∈ [4.00 + 0.45, 5.30 − 0.45] = [4.45, 4.85]`.
+3. The band is non-empty and 0.40 meters wide, so the robot fits with 20 centimeters of slack either side of the gap's center line at `x = 4.65`.
+4. With a 0.10 meter safety margin the band shrinks to `[4.55, 4.75]`, still 0.20 meters wide. Had the gap been 0.9 meters exactly, the band would have collapsed to a single point — geometrically a fit, practically an impossibility.
 
 ---
 

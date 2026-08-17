@@ -10,12 +10,12 @@
 
 ## 1. The Real-World Problem: The Camera Only Knows About Itself
 
-A camera on the robot spots a game piece and reports one thing: **1.5 metres ahead of me, 0.4 metres to my right.**
+A camera on the robot spots a game piece and reports one thing: **1.5 meters ahead of me, 0.4 meters to my right.**
 
 That is all a camera can say. It has no gyro and no idea where the field's corner is, while the path planner that must drive there speaks only **field** coordinates. Two frames, used throughout:
 
 * The **field frame**: origin at a corner of the carpet, X down-field, Y to the left as you look down-field, angles counter-clockwise from X. WPILib's convention.
-* The **robot frame**: origin at the centre of the drive base, x out of the front bumper, y out of the left side. Same handedness, carried around by the robot.
+* The **robot frame**: origin at the center of the drive base, x out of the front bumper, y out of the left side. Same handedness, carried around by the robot.
 
 Odometry puts the robot at field `(5.00, 3.00)`. The sighting, in the robot frame, is `(1.5, −0.4)` — 1.5 forward and 0.4 in the *negative* left direction, which is 0.4 right. The obvious move is to add: `(5.00 + 1.5, 3.00 − 0.4) = (6.50, 2.60)`.
 
@@ -31,7 +31,7 @@ Odometry puts the robot at field `(5.00, 3.00)`. The sighting, in the robot fram
 Most of a robot length past the piece, and well off to the side.
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="480" height="240" viewBox="0 0 460 234" style="max-width: 100%; height: auto;" role="img" aria-label="Two field panels. On the left the robot faces down-field at heading zero and the naive sum lands on the true game piece position. On the right the robot is turned ninety degrees, the true piece has moved up and left, and the naive sum is left stranded two point two metres away.">
+  <svg width="480" height="240" viewBox="0 0 460 234" style="max-width: 100%; height: auto;" role="img" aria-label="Two field panels. On the left the robot faces down-field at heading zero and the naive sum lands on the true game piece position. On the right the robot is turned ninety degrees, the true piece has moved up and left, and the naive sum is left stranded two point two meters away.">
     <g>
       <rect x="16" y="70" width="192" height="120" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.3" stroke-width="1.5" />
       <circle cx="16" cy="190" r="3" fill="currentColor" fill-opacity="0.6" />
@@ -77,11 +77,11 @@ The bug never crashes, returns a plausible spot on the carpet, and is *exactly c
 
 ## 2. Building the Math: A Frame Is Just Two Directions and a Point
 
-### Step 1: What "1.5 metres ahead" actually means
+### Step 1: What "1.5 meters ahead" actually means
 
 `(1.5, −0.4)` in the robot frame is a set of walking directions:
 
-> Stand at the robot's origin. Walk 1.5 metres along whatever direction the robot calls **forward**, then 0.4 metres along whatever it calls **right**.
+> Stand at the robot's origin. Walk 1.5 meters along whatever direction the robot calls **forward**, then 0.4 meters along whatever it calls **right**.
 
 Everything there is known in field terms except the two direction words, so the problem reduces to: **in field coordinates, which way is the robot's forward, and which way is its left?**
 
@@ -95,7 +95,7 @@ Concept 02 answered that. The forward axis is a unit vector, and the heading θ 
 These are exactly the images of `î` and `ĵ`: the robot's own axes, seen from the stands, *are* the rotated basis vectors.
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="340" height="250" viewBox="0 0 340 250" style="max-width: 100%; height: auto;" role="img" aria-label="A robot origin with its forward axis drawn at thirty-five degrees above the field X direction and its left axis a quarter turn beyond it, and a dashed path walking one point five metres along forward then zero point four metres along right to reach the game piece.">
+  <svg width="340" height="250" viewBox="0 0 340 250" style="max-width: 100%; height: auto;" role="img" aria-label="A robot origin with its forward axis drawn at thirty-five degrees above the field X direction and its left axis a quarter turn beyond it, and a dashed path walking one point five meters along forward then zero point four meters along right to reach the game piece.">
     <line x1="40" y1="200" x2="310" y2="200" stroke="currentColor" stroke-opacity="0.28" stroke-width="1.5" stroke-dasharray="5,4" />
     <line x1="110" y1="240" x2="110" y2="60" stroke="currentColor" stroke-opacity="0.28" stroke-width="1.5" stroke-dasharray="5,4" />
     <text x="264" y="214" fill="currentColor" fill-opacity="0.5" font-family="sans-serif" font-size="10">field X direction</text>
@@ -165,7 +165,7 @@ Swapping the two operations gives a different answer, and the reversed version i
    y' = 6.50(0.57358) + 2.60(0.81915) = 3.72824 + 2.12979 = 5.858
 ```
 
-`(3.833, 5.858)` instead of `(6.458, 3.533)` — 3.51 m away, on the far side of the field. Look at what got rotated. In the wrong order the robot's *own field position* went through the rotation, so `(5.00, 3.00)` became `(2.375, 5.325)`: the calculation swung the robot around the **field origin**, a corner of the carpet twenty feet away. Both sit the same distance from that corner, `√(5² + 3²) = √(2.375² + 5.325²) = 5.831` — the signature of a rotation about the wrong centre.
+`(3.833, 5.858)` instead of `(6.458, 3.533)` — 3.51 m away, on the far side of the field. Look at what got rotated. In the wrong order the robot's *own field position* went through the rotation, so `(5.00, 3.00)` became `(2.375, 5.325)`: the calculation swung the robot around the **field origin**, a corner of the carpet twenty feet away. Both sit the same distance from that corner, `√(5² + 3²) = √(2.375² + 5.325²) = 5.831` — the signature of a rotation about the wrong center.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="320" height="250" viewBox="0 0 320 250" style="max-width: 100%; height: auto;" role="img" aria-label="A field showing the robot at five three with heading thirty-five degrees, the correct piece position just ahead of it, and a ghost robot swung thirty-five degrees around the field origin with the wrong-order answer beside it.">
@@ -193,7 +193,7 @@ The rule: **the rotation may act only on quantities measured in the robot frame.
 
 ### Step 4: Chaining — field ← robot ← camera
 
-A camera is never at the robot's centre. Ours sits 0.30 m forward and 0.10 m left of it, yawed 20° left to watch the intake lane, so its reading `(1.5, −0.4)` is in *camera* coordinates. Apply the same idea twice. The camera's pose in the robot frame is `(0.30, 0.10, 20°)`, so **robot ← camera** rotates by 20° then translates by `(0.30, 0.10)`:
+A camera is never at the robot's center. Ours sits 0.30 m forward and 0.10 m left of it, yawed 20° left to watch the intake lane, so its reading `(1.5, −0.4)` is in *camera* coordinates. Apply the same idea twice. The camera's pose in the robot frame is `(0.30, 0.10, 20°)`, so **robot ← camera** rotates by 20° then translates by `(0.30, 0.10)`:
 
 ```
    x = 1.5(0.93969) − (−0.4)(0.34202) = 1.40954 + 0.13681 = 1.5463
@@ -212,7 +212,7 @@ Then through **field ← robot** at heading 35°:
 ```
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="340" height="260" viewBox="0 0 340 260" style="max-width: 100%; height: auto;" role="img" aria-label="A zoomed view of the robot at field five three with heading thirty-five degrees, the camera mounted up and to the left of centre pointing at fifty-five degrees, and the sighting line running out to the game piece at six point three seven six comma four point two five three.">
+  <svg width="340" height="260" viewBox="0 0 340 260" style="max-width: 100%; height: auto;" role="img" aria-label="A zoomed view of the robot at field five three with heading thirty-five degrees, the camera mounted up and to the left of center pointing at fifty-five degrees, and the sighting line running out to the game piece at six point three seven six comma four point two five three.">
     <line x1="60" y1="180" x2="78.84" y2="154.6" stroke="#c084fc" stroke-width="2.5" />
     <circle cx="60" cy="180" r="5" fill="currentColor" fill-opacity="0.75" />
     <line x1="60" y1="180" x2="96.86" y2="154.19" stroke="#38bdf8" stroke-width="2.5" />
@@ -227,8 +227,8 @@ Then through **field ← robot** at heading 35°:
     <text x="112" y="140" fill="#fbbf24" font-family="sans-serif" font-size="9" font-weight="bold">in the camera frame</text>
     <circle cx="197.64" cy="54.67" r="6.5" fill="#4ade80" />
     <text x="206" y="52" fill="#4ade80" font-family="sans-serif" font-size="10" font-weight="bold">piece (6.376, 4.253)</text>
-    <text x="16" y="222" fill="currentColor" fill-opacity="0.6" font-family="sans-serif" font-size="10">Purple: the camera mount, 0.30 m forward and 0.10 m left of centre, yawed 20°.</text>
-    <text x="16" y="240" fill="currentColor" fill-opacity="0.6" font-family="sans-serif" font-size="10">Scale: 100 px per metre. All three arrows are drawn at their stated field angles.</text>
+    <text x="16" y="222" fill="currentColor" fill-opacity="0.6" font-family="sans-serif" font-size="10">Purple: the camera mount, 0.30 m forward and 0.10 m left of center, yawed 20°.</text>
+    <text x="16" y="240" fill="currentColor" fill-opacity="0.6" font-family="sans-serif" font-size="10">Scale: 100 px per meter. All three arrows are drawn at their stated field angles.</text>
   </svg>
 </div>
 
@@ -261,7 +261,7 @@ The same answer to every digit. A chain of any length collapses to a single pose
 >    (field ← robot) ∘ (robot ← camera)  =  (field ← camera)
 > ```
 >
-> Read out loud as **"field-from-robot composed with robot-from-camera equals field-from-camera."** The `∘` is read "composed with", or just "after". The two inner `robot` labels cancel, like units in a physics calculation — and that cancellation is a debugging tool. Write `(field ← robot) ∘ (camera ← tag)` and the labels do not meet: the composition is meaningless, and you have found the bug before running anything.
+> Read out loud as **"field-from-robot composed with robot-from-camera equals field-from-camera."** The `∘` is read "composed with", or just "after". The two inner `robot` labels cancel, like units in a physics calculation — and that cancelation is a debugging tool. Write `(field ← robot) ∘ (camera ← tag)` and the labels do not meet: the composition is meaningless, and you have found the bug before running anything.
 
 ### Step 5: Running it backwards, and the trap in doing so
 
@@ -299,7 +299,7 @@ Robot still at `(5.00, 3.00, 35°)`; a tag at field `(8.00, 4.00)`; difference `
 The tag is 3.03 m ahead and 0.90 m to the robot's right, and the length agrees: `√(3² + 1²) = √(3.031² + 0.902²) = 3.162`. A frame change can never alter a distance, so this catches almost every sign error.
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="320" height="240" viewBox="0 0 320 240" style="max-width: 100%; height: auto;" role="img" aria-label="A field with the robot at five three heading thirty-five degrees and a tag at eight four. The difference vector between them is decomposed into three point zero three metres along the robot's forward axis and zero point nine metres along its right axis.">
+  <svg width="320" height="240" viewBox="0 0 320 240" style="max-width: 100%; height: auto;" role="img" aria-label="A field with the robot at five three heading thirty-five degrees and a tag at eight four. The difference vector between them is decomposed into three point zero three meters along the robot's forward axis and zero point nine meters along its right axis.">
     <rect x="20" y="54" width="234" height="156" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.3" stroke-width="1.5" />
     <circle cx="20" cy="210" r="3.5" fill="currentColor" fill-opacity="0.7" />
     <text x="14" y="223" fill="currentColor" fill-opacity="0.55" font-family="sans-serif" font-size="9">field origin</text>
@@ -319,7 +319,7 @@ The tag is 3.03 m ahead and 0.90 m to the robot's right, and the length agrees: 
     <text x="232" y="98" fill="#fbbf24" font-family="sans-serif" font-size="9" font-weight="bold">0.90 m right</text>
     <circle cx="228" cy="106" r="6" fill="#f43f5e" />
     <text x="196" y="126" fill="#f43f5e" font-family="sans-serif" font-size="9" font-weight="bold">tag (8.00, 4.00)</text>
-    <text x="16" y="236" fill="currentColor" fill-opacity="0.6" font-family="sans-serif" font-size="10">Subtract in the field frame, then un-rotate the difference by 35°. Scale: 26 px per metre.</text>
+    <text x="16" y="236" fill="currentColor" fill-opacity="0.6" font-family="sans-serif" font-size="10">Subtract in the field frame, then un-rotate the difference by 35°. Scale: 26 px per meter.</text>
   </svg>
 </div>
 
@@ -336,7 +336,7 @@ Off by 3.51 m, and the length check flags it: `√(3.848² + 4.312²) = 5.78`, n
 
 ### Step 6: The rule for which direction takes −θ
 
-You should not have to memorise where the minus sign goes. **Every transform is written once, in one direction: the child frame's pose as seen from the parent.** The robot's pose `(5.00, 3.00, 35°)` is in field terms; the camera's `(0.30, 0.10, 20°)` is in robot terms. That direction uses θ as written.
+You should not have to memorize where the minus sign goes. **Every transform is written once, in one direction: the child frame's pose as seen from the parent.** The robot's pose `(5.00, 3.00, 35°)` is in field terms; the camera's `(0.30, 0.10, 20°)` is in robot terms. That direction uses θ as written.
 
 ```
    Child → parent  (robot to field):   rotate by +θ,  then  ADD    the child's position
@@ -470,9 +470,9 @@ Two things go wrong in the ways derived above. A camera mount recorded with the 
 
 The same chain is the backbone of modern camera-only driving stacks. Six surround cameras produce six detections per frame, each in the frame of the lens that saw it and none comparable to any other. The nuScenes dataset encodes the fix literally: every sensor sample carries a `calibrated_sensor` record — the fixed sensor-to-ego transform, a mounting pose exactly like our `robotToCamera` — and an `ego_pose` record giving ego-to-global, exactly like our `robotPose`.
 
-Architectures such as Lift-Splat-Shoot and BEVFormer make the transform part of the network. Each camera's image features are lifted into 3D, moved into the shared ego frame using that camera's known extrinsic pose, and splatted onto one bird's-eye-view grid on which the detection head runs. The network therefore never learns where the cameras are bolted: mounting geometry arrives as an exact transform, so the weights go on recognising vehicles rather than memorising a rig.
+Architectures such as Lift-Splat-Shoot and BEVFormer make the transform part of the network. Each camera's image features are lifted into 3D, moved into the shared ego frame using that camera's known extrinsic pose, and splatted onto one bird's-eye-view grid on which the detection head runs. The network therefore never learns where the cameras are bolted: mounting geometry arrives as an exact transform, so the weights go on recognizing vehicles rather than memorizing a rig.
 
-The inverse direction does real work too. Temporal fusion — using the last few frames to stabilise a detection or estimate another car's speed — needs the previous timestep's BEV grid expressed in the *current* ego frame, and the car has moved and turned in between. That is subtract-then-un-rotate applied to every cell: Step 5 at scale. The failure is familiar too: a stale extrinsic calibration, or an ego pose off by a degree of yaw, and detections land metres from the vehicles they describe.
+The inverse direction does real work too. Temporal fusion — using the last few frames to stabilise a detection or estimate another car's speed — needs the previous timestep's BEV grid expressed in the *current* ego frame, and the car has moved and turned in between. That is subtract-then-un-rotate applied to every cell: Step 5 at scale. The failure is familiar too: a stale extrinsic calibration, or an ego pose off by a degree of yaw, and detections land meters from the vehicles they describe.
 
 ---
 
@@ -520,7 +520,7 @@ A robot is at field `(3.00, 1.00)` with heading `−40°`, turned 40° to its ow
 
 ### Deep Dive 1
 
-A camera's optical convention is not WPILib's: vision libraries put +Z out of the lens, +X to the image right and +Y *down*, while the robot frame has +x forward, +y left, +z up. Work out the relabelling connecting them, and confirm it is a pure axis permutation with sign flips rather than a rotation by any angle. Then argue why that is harder to spot than a heading error: what does a swapped-sign Y axis do to a detection directly ahead, versus one off to the side?
+A camera's optical convention is not WPILib's: vision libraries put +Z out of the lens, +X to the image right and +Y *down*, while the robot frame has +x forward, +y left, +z up. Work out the relabeling connecting them, and confirm it is a pure axis permutation with sign flips rather than a rotation by any angle. Then argue why that is harder to spot than a heading error: what does a swapped-sign Y axis do to a detection directly ahead, versus one off to the side?
 
 ### Deep Dive 2
 

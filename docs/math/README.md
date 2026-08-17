@@ -21,9 +21,10 @@ Every result is derived rather than asserted. Code is written in the language of
 * [Concept 01: The Unit Circle & Trigonometric Ratios](02_trigonometry/01_concept_unit_circle_ratios/)
 * [Concept 02: Rotating a Vector](02_trigonometry/02_concept_rotating_vectors/)
 * [Concept 03: Coordinate Frames (Field, Robot & Camera)](02_trigonometry/03_concept_coordinate_frames/)
-* [Concept 04: 4-Quadrant Heading with atan2](02_trigonometry/04_concept_atan2_heading/)
-* [Concept 05: Angle Wrapping & Swerve 180° Speed Flip](02_trigonometry/05_concept_angle_wrapping_swerve/)
-* [Concept 06: 3D Rotations & Quaternions](02_trigonometry/06_concept_3d_rotations_quaternions/)
+* [Concept 04: Inverse Trig & 4-Quadrant Heading with atan2](02_trigonometry/04_concept_atan2_heading/)
+* [Concept 05: Angle Wrapping & Shortest Angular Distance](02_trigonometry/05_concept_angle_wrapping_swerve/)
+* [Concept 06: Law of Sines, Law of Cosines & Two-Link Arms](02_trigonometry/06_concept_law_of_cosines/)
+* [Concept 07: 3D Rotations, Gimbal Lock & Quaternions](02_trigonometry/07_concept_3d_rotations_quaternions/)
 
 ---
 

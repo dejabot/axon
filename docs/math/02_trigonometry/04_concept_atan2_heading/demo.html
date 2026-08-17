@@ -141,13 +141,13 @@
     const tourBtn = document.getElementById('tourBtn');
     const originBtn = document.getElementById('originBtn');
 
-    let tx = 3.0, ty = 4.0;      // target position in metres, robot at the origin
+    let tx = 3.0, ty = 4.0;      // target position in meters, robot at the origin
     let dragging = false;
     let touring = false;
     let rafId = null;
     let tourT = 0;
 
-    const SPAN = 6.5;            // metres visible from the origin to the shorter edge
+    const SPAN = 6.5;            // meters visible from the origin to the shorter edge
 
     function cssSize() {
       const dpr = window.devicePixelRatio || 1;
@@ -163,7 +163,7 @@
       draw();
     }
 
-    /* ONE scale for both axes. Metres must be square: separate x and y scales
+    /* ONE scale for both axes. Meters must be square: separate x and y scales
        would tilt every ray and make the angles read off the picture wrong. */
     function view() {
       const { w, h } = cssSize();
@@ -200,14 +200,14 @@
       return Math.atan2(ty, tx) * 180 / Math.PI;
     }
 
-    function drawArrow(p0, p1, colour, width, dash) {
+    function drawArrow(p0, p1, color, width, dash) {
       ctx.save();
-      ctx.strokeStyle = colour; ctx.lineWidth = width;
+      ctx.strokeStyle = color; ctx.lineWidth = width;
       ctx.setLineDash(dash || []);
       ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
       ctx.setLineDash([]);
       const a = Math.atan2(p1.y - p0.y, p1.x - p0.x);
-      ctx.fillStyle = colour;
+      ctx.fillStyle = color;
       ctx.beginPath();
       ctx.moveTo(p1.x, p1.y);
       ctx.lineTo(p1.x - 11 * Math.cos(a - 0.35), p1.y - 11 * Math.sin(a - 0.35));
@@ -228,7 +228,7 @@
       const aNaive = atanDeg();
       const wrong = !Number.isNaN(aNaive) && Math.abs(aTrue - aNaive) > 0.001;
 
-      // Metre grid
+      // Meter grid
       ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
       for (let m = -6; m <= 6; m++) {
         const a = toScreen(m, -SPAN), b = toScreen(m, SPAN);

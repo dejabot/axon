@@ -2,7 +2,7 @@
 
 > **▶ Interactive Demo: [Shortest Angular Distance & the Swerve Flip](demo.html)**
 >
-> Drag the current angle and the target angle. Both routes are drawn with their lengths in degrees; switch on the swerve optimisation and watch a 165° slew collapse to 15°.
+> Drag the current angle and the target angle. Both routes are drawn with their lengths in degrees; switch on the swerve optimization and watch a 165° slew collapse to 15°.
 
 <iframe src="demo.html" width="100%" height="660" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 
@@ -152,7 +152,7 @@ Two arguments, and they are why this is a derivation and not a recipe.
   </svg>
 </div>
 
-**Anything outside the band has a shorter partner.** Take a candidate with magnitude above 180 — say `−340`. Step one place along the family toward zero and you get `+20`. In general, if `|d| > 180°`, its neighbour on the zero side has magnitude `360° − |d|`, which is below 180°. And notice the sum:
+**Anything outside the band has a shorter partner.** Take a candidate with magnitude above 180 — say `−340`. Step one place along the family toward zero and you get `+20`. In general, if `|d| > 180°`, its neighbor on the zero side has magnitude `360° − |d|`, which is below 180°. And notice the sum:
 
 ```
    |−340°| + |+20°| = 340 + 20 = 360°
@@ -331,7 +331,7 @@ static double shortestDifference(double targetDeg, double currentDeg) {
     return wrapDegrees(targetDeg - currentDeg);
 }
 
-/** Geometry Concept 03's lerp, with the difference wrapped before travelling it. */
+/** Geometry Concept 03's lerp, with the difference wrapped before traveling it. */
 static double lerpAngle(double aDeg, double bDeg, double t) {
     return aDeg + t * shortestDifference(bDeg, aDeg);
 }
@@ -413,7 +413,7 @@ desired.optimize(Rotation2d.fromDegrees(10.0));
 // returned a new state and is now deprecated in favour of this one.
 ```
 
-Both tiers return `+20.0` for the heading difference and `(−3.5 m/s, −5.0°)` for the optimised module — the same numbers, derived and imported.
+Both tiers return `+20.0` for the heading difference and `(−3.5 m/s, −5.0°)` for the optimized module — the same numbers, derived and imported.
 
 **And the same bug at a different layer.** A heading controller computes `error = setpoint − measurement` internally, on a line, exactly as Section 1 did:
 
@@ -433,7 +433,7 @@ double output = headingPid.calculate(350.0, 10.0);   // driven by +20 deg, not -
 
 ## 4. Bridge to Real Systems
 
-**Swerve module optimisation.** `SwerveModuleState.optimize` is Step 7 shipped: called on every module, every 20 ms loop, in essentially every FRC swerve codebase. Its companion is `enableContinuousInput` on the steering and heading controllers — Step 3 shipped. When a team reports that their robot "unwinds" or "takes the long way" after a rotation, the missing line is almost always one of those two.
+**Swerve module optimization.** `SwerveModuleState.optimize` is Step 7 shipped: called on every module, every 20 ms loop, in essentially every FRC swerve codebase. Its companion is `enableContinuousInput` on the steering and heading controllers — Step 3 shipped. When a team reports that their robot "unwinds" or "takes the long way" after a rotation, the missing line is almost always one of those two.
 
 **Anything living on a circle needs this, and not only angles.** A compass bearing rolls over from 359 to 0, a wave's phase at 2π, clock time at midnight — which is why "how long between 23:30 and 00:15" is not `00:15 − 23:30`. `MathUtil.inputModulus` takes an arbitrary range because the period is not always 360: an absolute encoder reporting 0 to 4095 counts wraps at 4096, and the identical fold applies.
 
@@ -459,14 +459,14 @@ The robot's heading is −175° and autonomous commands +175°. Find the shortes
 
 ### Checkpoint 2
 
-A steered wheel sits at 100°. The command is 4.0 m/s at 350°. Optimise it, verify the velocity is unchanged, and state the slew saved.
+A steered wheel sits at 100°. The command is 4.0 m/s at 350°. Optimize it, verify the velocity is unchanged, and state the slew saved.
 
 **Solution:**
 
 1. **Direct route.** `e = wrap(350 − 100) = wrap(250)`. Since `250 > 180`, `250 − 360 = −110°`. `|−110| > 90`, so flipping wins.
 3. **Flipped command.** `wrap(350 + 180) = wrap(530) = 530 − 360 = 170°`, at `−4.0` m/s.
 4. **Flipped route.** `e′ = wrap(170 − 100) = +70°`. Check the split: `110 + 70 = 180` ✓
-5. **Same velocity?** Original: `(4.0·cos 350°, 4.0·sin 350°) = (3.939, −0.695)` m/s. Optimised: `(−4.0·cos 170°, −4.0·sin 170°) = (3.939, −0.695)` m/s ✓
+5. **Same velocity?** Original: `(4.0·cos 350°, 4.0·sin 350°) = (3.939, −0.695)` m/s. Optimized: `(−4.0·cos 170°, −4.0·sin 170°) = (3.939, −0.695)` m/s ✓
 6. **Saving.** 70° of slew instead of 110° — at 700°/s, 0.10 s instead of 0.16 s.
 
 ---

@@ -114,7 +114,7 @@
     const sweepBtn = document.getElementById('sweepBtn');
     const resetBtn = document.getElementById('resetBtn');
 
-    // The field, in metres. X runs down-field, Y runs to the left.
+    // The field, in meters. X runs down-field, Y runs to the left.
     const FIELD_W = 8.0, FIELD_H = 5.0;
 
     const START = { rx: 5.0, ry: 3.0, deg: 35, tx: 6.458159, ty: 3.532704 };
@@ -187,14 +187,14 @@
       return { a: dx * c + dy * s, b: -dx * s + dy * c };
     }
 
-    function arrow(from, to, colour, width) {
+    function arrow(from, to, color, width) {
       const dx = to.x - from.x, dy = to.y - from.y;
       const len = Math.hypot(dx, dy);
       if (len < 1) return;
       const ux = dx / len, uy = dy / len;
-      ctx.strokeStyle = colour; ctx.lineWidth = width;
+      ctx.strokeStyle = color; ctx.lineWidth = width;
       ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
-      ctx.fillStyle = colour;
+      ctx.fillStyle = color;
       ctx.beginPath();
       ctx.moveTo(to.x, to.y);
       ctx.lineTo(to.x - 9 * ux + 4.5 * uy, to.y - 9 * uy - 4.5 * ux);
@@ -212,7 +212,7 @@
       const O  = toScreen(0, 0);
       const TR = toScreen(FIELD_W, FIELD_H);
 
-      // Field carpet and one-metre grid
+      // Field carpet and one-meter grid
       ctx.fillStyle = C.grid;
       ctx.fillRect(O.x, TR.y, TR.x - O.x, O.y - TR.y);
       ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
@@ -242,7 +242,7 @@
       const local = toRobotFrame(target.x, target.y);
 
       const c = Math.cos(theta), s = Math.sin(theta);
-      // Robot axis directions, in screen pixels per metre (y flips)
+      // Robot axis directions, in screen pixels per meter (y flips)
       const fwd  = { x:  c * v.scale, y: -s * v.scale };
       const left = { x: -s * v.scale, y: -c * v.scale };
 
@@ -264,7 +264,7 @@
           R.x + left.x * L + fwd.x * 0.16 + 4, R.y + left.y * L + fwd.y * 0.16 + 4);
       }
 
-      // The decomposition: a metres along forward, then b metres along left.
+      // The decomposition: a meters along forward, then b meters along left.
       const CORNER = { x: R.x + fwd.x * local.a, y: R.y + fwd.y * local.a };
       ctx.setLineDash([6, 4]); ctx.lineWidth = 2;
       ctx.strokeStyle = C.amber;

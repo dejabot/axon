@@ -21,7 +21,7 @@ Your team spends a Saturday calibrating the shooter: park at a measured distance
    7.5             4390
 ```
 
-Then the match starts, the driver stops at 5.0 metres, and the code must produce a number. There is no row for 5.0 metres, and there never will be — the five you have took hours.
+Then the match starts, the driver stops at 5.0 meters, and the code must produce a number. There is no row for 5.0 meters, and there never will be — the five you have took hours.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="420" height="210" viewBox="0 0 420 210" style="max-width: 100%; height: auto;" role="img" aria-label="A robot at an unmeasured distance from the goal, between two calibrated distances.">
@@ -66,7 +66,7 @@ $$
 P(t) = A + t \cdot (B - A)
 $$
 
-read out loud as "the point you reach after travelling `t` of the way from A toward B." That sentence *is* the definition of **linear interpolation** — you have been using it for a whole concept without the word.
+read out loud as "the point you reach after traveling `t` of the way from A toward B." That sentence *is* the definition of **linear interpolation** — you have been using it for a whole concept without the word.
 
 Nothing in the formula cares that `A` and `B` are points; subtract, scale and add work just as well on plain numbers. So drop the geometry:
 
@@ -119,7 +119,7 @@ t &= \frac{v - a}{b - a}
 \end{aligned}
 $$
 
-That is **inverse lerp**, better known as normalization. A sensor reading 3.1 V across a 0.2–4.8 V range sits `(3.1 − 0.2) / (4.8 − 0.2) = 0.630` of the way along; feed that `t` into a `lerp` over a different range and you have **remapped** it onto metres: `lerp(0.3, 5.0, 0.630) = 3.263 m`. The denominator is the only failure mode — if `a = b` there is no answer, so guard it rather than let a `NaN` escape into a control loop.
+That is **inverse lerp**, better known as normalization. A sensor reading 3.1 V across a 0.2–4.8 V range sits `(3.1 − 0.2) / (4.8 − 0.2) = 0.630` of the way along; feed that `t` into a `lerp` over a different range and you have **remapped** it onto meters: `lerp(0.3, 5.0, 0.630) = 3.263 m`. The denominator is the only failure mode — if `a = b` there is no answer, so guard it rather than let a `NaN` escape into a control loop.
 
 > ### Math!
 >
@@ -167,7 +167,7 @@ Nothing stops `t` from leaving `[0, 1]`. Query at 9.0 m and the last two rows gi
 
 **Two inputs at once.** When the table is indexed by two variables — an image, indexed by row and column, is exactly this — lerp along one axis twice, then lerp between those two results. That is **bilinear interpolation**: four corner values blended by weights that multiply an x-weight by a y-weight. Every image resize does it.
 
-**Angles are not numbers on a line.** A turret at 350° blending toward 10° gives `lerp(350, 10, 0.5) = 180°` — pointing exactly backwards, sweeping 340° the wrong way to reach a target 20° away. The bug is not in `lerp`; it is that an angle lives on a circle, where 350 and 10 are adjacent though the numerals differ by 340. The fix is angle wrapping from **Module 2 (Trigonometry & Angles)**, generalised to 3D as **SLERP** in its quaternion concept. Until then: never lerp a raw angle.
+**Angles are not numbers on a line.** A turret at 350° blending toward 10° gives `lerp(350, 10, 0.5) = 180°` — pointing exactly backwards, sweeping 340° the wrong way to reach a target 20° away. The bug is not in `lerp`; it is that an angle lives on a circle, where 350 and 10 are adjacent though the numerals differ by 340. The fix is angle wrapping from **Module 2 (Trigonometry & Angles)**, generalized to 3D as **SLERP** in its quaternion concept. Until then: never lerp a raw angle.
 
 ---
 
@@ -195,7 +195,7 @@ static double clamp(double v, double lo, double hi) {
 
 /** A sorted calibration table. Keys must be strictly increasing. */
 class InterpolatingTable {
-    private final double[] keys;      // distances in metres
+    private final double[] keys;      // distances in meters
     private final double[] values;    // flywheel RPM
 
     InterpolatingTable(double[] keys, double[] values) {
@@ -267,7 +267,7 @@ Insert the rows in any order — the tree map sorts them, which is the whole poi
 
 ## 4. Bridge to Machine Learning & Modern Autonomy
 
-Bilinear interpolation is what made per-pixel object detection accurate. **Mask R-CNN** must pull a fixed-size feature patch out of a region proposal whose coordinates are arbitrary real numbers. Its predecessor, RoI pooling, rounded those coordinates onto integer feature-map cells, twice. On a feature map downsampled by 32, a half-cell rounding error is 16 pixels of misalignment in the original image: invisible for a bounding box, catastrophic for a mask. **RoIAlign** deletes both roundings by sampling at the exact fractional coordinates and blending the four neighbouring feature cells bilinearly — Step 5's formula on learned features instead of colours — and bought a large relative gain in mask accuracy at the strictest threshold. That blend is also differentiable in its sampling coordinates, so gradients flow back through the sampling itself, which is what makes **Spatial Transformer Networks** possible. Even PyTorch's much-cursed `align_corners` flag is only a Step 3 question: does the inverse lerp map pixel *centres* or *edges*?
+Bilinear interpolation is what made per-pixel object detection accurate. **Mask R-CNN** must pull a fixed-size feature patch out of a region proposal whose coordinates are arbitrary real numbers. Its predecessor, RoI pooling, rounded those coordinates onto integer feature-map cells, twice. On a feature map downsampled by 32, a half-cell rounding error is 16 pixels of misalignment in the original image: invisible for a bounding box, catastrophic for a mask. **RoIAlign** deletes both roundings by sampling at the exact fractional coordinates and blending the four neighboring feature cells bilinearly — Step 5's formula on learned features instead of colors — and bought a large relative gain in mask accuracy at the strictest threshold. That blend is also differentiable in its sampling coordinates, so gradients flow back through the sampling itself, which is what makes **Spatial Transformer Networks** possible. Even PyTorch's much-cursed `align_corners` flag is only a Step 3 question: does the inverse lerp map pixel *centers* or *edges*?
 
 ---
 

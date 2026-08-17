@@ -54,7 +54,7 @@ With the convention fixed, put the robot at `(3.0, 2.0)` and a scoring target at
 
 Forget the field for a second and think about an elevator carriage on a vertical rail. Its state is a single number: height in meters. If it sits at `h₁ = 0.4` and you command it to `h₂ = 1.1`, the travel distance is `1.1 − 0.4 = 0.7` meters.
 
-But if you command it back down, the subtraction gives `0.4 − 1.1 = −0.7`. The carriage did not travel negative seven-tenths of a meter; it travelled seven-tenths of a meter downward. Distance is a length, and lengths are never negative. So in one dimension:
+But if you command it back down, the subtraction gives `0.4 − 1.1 = −0.7`. The carriage did not travel negative seven-tenths of a meter; it traveled seven-tenths of a meter downward. Distance is a length, and lengths are never negative. So in one dimension:
 
 $$
 \text{distance} = |h_2 - h_1|
@@ -213,7 +213,7 @@ Translation2d midpoint = robot.plus(target).div(2.0);   // (7.5, 4.0)
 
 The distance formula you just derived is the workhorse of machine learning, where it measures similarity rather than meters.
 
-A neural network represents an image, a word, or a sentence as an **embedding**: a list of numbers, often 768 or 1,536 of them, that is a point in a very high-dimensional space. The formula generalizes without modification — the `Σᵢ` in the Math! sidebar simply runs over more coordinates. Two photographs of the same game piece land close together in that space; a photograph of a game piece and one of a referee land far apart. **k-nearest-neighbours** classification does nothing more than compute these distances and take a vote among the closest `k` points.
+A neural network represents an image, a word, or a sentence as an **embedding**: a list of numbers, often 768 or 1,536 of them, that is a point in a very high-dimensional space. The formula generalizes without modification — the `Σᵢ` in the Math! sidebar simply runs over more coordinates. Two photographs of the same game piece land close together in that space; a photograph of a game piece and one of a referee land far apart. **k-nearest-neighbors** classification does nothing more than compute these distances and take a vote among the closest `k` points.
 
 The squared-distance trick from Step 5 matters enormously at that scale: vector databases serving billions of embeddings rank by squared distance precisely because the ordering is identical and the square root is wasted work, exactly as it was for the six game pieces.
 

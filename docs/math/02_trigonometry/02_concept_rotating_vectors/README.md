@@ -49,7 +49,7 @@ To build that operation we need to answer a smaller question first: **when a vec
 Start with a plain right triangle. Pick one of its non-right angles and call it θ. The three sides get names relative to that choice: the side touching θ that is not the hypotenuse is the **adjacent** side, the side across from θ is the **opposite** side, and the long side facing the right angle is the **hypotenuse**.
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="300" height="170" viewBox="0 0 300 170" style="max-width: 100%; height: auto;" role="img" aria-label="A right triangle labelled with opposite, adjacent and hypotenuse relative to the angle theta.">
+  <svg width="300" height="170" viewBox="0 0 300 170" style="max-width: 100%; height: auto;" role="img" aria-label="A right triangle labeled with opposite, adjacent and hypotenuse relative to the angle theta.">
     <polygon points="40,140 240,140 240,40" fill="rgba(56,189,248,0.12)" stroke="#38bdf8" stroke-width="2" />
     <rect x="222" y="122" width="18" height="18" fill="none" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.5" />
     <path d="M 80 140 A 40 40 0 0 0 71.5 115.5" fill="none" stroke="#4ade80" stroke-width="2" />
@@ -70,7 +70,7 @@ $$
 \end{aligned}
 $$
 
-Now shrink the hypotenuse to exactly 1. Dividing by 1 changes nothing, so the two ratios collapse into something much easier to hold in your head: the adjacent side simply *is* `cos θ`, and the opposite side simply *is* `sin θ`. Drawn on a circle of radius 1 centred at the origin — the **unit circle** — a point at angle θ sits at coordinates `(cos θ, sin θ)`.
+Now shrink the hypotenuse to exactly 1. Dividing by 1 changes nothing, so the two ratios collapse into something much easier to hold in your head: the adjacent side simply *is* `cos θ`, and the opposite side simply *is* `sin θ`. Drawn on a circle of radius 1 centered at the origin — the **unit circle** — a point at angle θ sits at coordinates `(cos θ, sin θ)`.
 
 That last sentence is the entire foundation of what follows. It also extends the definition past the right triangle: a right triangle cannot have a 150-degree angle, but a point on a circle can sit at 150 degrees perfectly well, and its coordinates are still called `(cos 150°, sin 150°)`. The circle is the general definition; the triangle is the special case.
 
@@ -139,7 +139,7 @@ Two lines of arithmetic, and everything else in this concept is a consequence of
 > ### Math!
 > The prime mark in `x'` and `y'` is read **"x-prime"** and **"y-prime"**. It is not a derivative here — it simply means "the new version of", and it is the standard way to name a transformed copy of something without inventing a fresh letter.
 >
-> Notice what the four coefficients in those two equations are. Reading down the columns, `(cos θ, sin θ)` is exactly where `î` landed, and `(−sin θ, cos θ)` is exactly where `ĵ` landed. That is not a coincidence, and it generalises: these four numbers are usually packed into a single object called a **matrix**, and the fact that its columns are the images of the basis vectors turns out to be true of every matrix, not just this one. The linear algebra module derives what that object is and how to multiply by it. For now the two scalar equations are all you need, and computing them by hand is worth doing — it makes the abstraction land properly when it arrives.
+> Notice what the four coefficients in those two equations are. Reading down the columns, `(cos θ, sin θ)` is exactly where `î` landed, and `(−sin θ, cos θ)` is exactly where `ĵ` landed. That is not a coincidence, and it generalizes: these four numbers are usually packed into a single object called a **matrix**, and the fact that its columns are the images of the basis vectors turns out to be true of every matrix, not just this one. The linear algebra module derives what that object is and how to multiply by it. For now the two scalar equations are all you need, and computing them by hand is worth doing — it makes the abstraction land properly when it arrives.
 
 ### Step 4: Rotation preserves length
 
@@ -185,7 +185,7 @@ $$
 
 Compare the coefficients with the forward rotation from Step 3. They are the same four numbers — `cos θ`, `sin θ`, `−sin θ`, `cos θ` — merely rearranged. Undoing a rotation costs you nothing beyond flipping one sign. There is no division, no square root, and nothing that can lose precision.
 
-That is worth appreciating, because "undo this transformation" is usually an expensive and numerically delicate operation. For rotations it is almost free, and the reason will become sharp in the linear algebra module: the rearrangement you just spotted has a name, and rotations belong to a special family of transformations for which reversing is only ever a relabelling.
+That is worth appreciating, because "undo this transformation" is usually an expensive and numerically delicate operation. For rotations it is almost free, and the reason will become sharp in the linear algebra module: the rearrangement you just spotted has a name, and rotations belong to a special family of transformations for which reversing is only ever a relabeling.
 
 ### Step 6: Rotations compose by adding angles
 
@@ -200,7 +200,7 @@ y'' &= \cos\beta \cdot \sin\alpha + \sin\beta \cdot \cos\alpha
 \end{aligned}
 $$
 
-But we already know where a single rotation by `α + β` sends `î`: to `(cos(α + β), sin(α + β))`. Both routes must land on the same point, so the expressions must be equal. You have just derived the angle-addition identities from geometry, rather than memorising them:
+But we already know where a single rotation by `α + β` sends `î`: to `(cos(α + β), sin(α + β))`. Both routes must land on the same point, so the expressions must be equal. You have just derived the angle-addition identities from geometry, rather than memorizing them:
 
 $$
 \begin{aligned}
@@ -213,7 +213,7 @@ One caution: in 2D we get lucky, because `α + β = β + α`, so the order you a
 
 ### Step 7: Rotating about a point that is not the origin
 
-The formula spins everything around `(0, 0)`. To pivot about some other centre `c` — say a swerve module's location, or the robot's centre of mass — use the standard three-step sandwich: subtract `c` to move the pivot to the origin, rotate, then add `c` back.
+The formula spins everything around `(0, 0)`. To pivot about some other center `c` — say a swerve module's location, or the robot's center of mass — use the standard three-step sandwich: subtract `c` to move the pivot to the origin, rotate, then add `c` back.
 
 $$
 v_{\text{rotated}} = R(\theta) \cdot (v - c) + c

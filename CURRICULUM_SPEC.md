@@ -18,7 +18,7 @@ These apply identically to all seven axons.
 
 3. **Open on a concrete problem the reader cannot yet solve.** Ground it in whatever domain the concept genuinely serves — a mechanism, a sensor, a model, a failure. Three tests: the mathematics must do work the reader actually needs, the scenario must cost no vocabulary they do not already have, and it must be real. A contrived scenario is the surest sign that a topic was included to fill space.
 
-4. **Code-first, in the language of the domain**, so the reader recognises it in the wild. Always two tiers: from-scratch code that hides nothing, then the production call a practitioner would write.
+4. **Code-first, in the language of the domain**, so the reader recognizes it in the wild. Always two tiers: from-scratch code that hides nothing, then the production call a practitioner would write.
    * **Robotics concepts → Java & WPILib** (`Translation2d`, `Pose2d`, `Rotation2d`, `MathUtil`, `TrapezoidProfile`).
    * **Machine learning and LLM concepts → plain Python, then PyTorch.**
    * **Mathematical foundations → whichever consumer the concept serves**, and both where it genuinely serves both.

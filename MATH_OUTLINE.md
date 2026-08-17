@@ -38,7 +38,7 @@ Writing the derivation once rather than twice is what makes dual-consumer concep
 | M3.4 Matrix Multiplication | chaining frame transforms | the forward pass |
 | M4.2 The Chain Rule | velocity through a gear ratio | backpropagation |
 | M4.5 Gradients | — | loss landscape descent |
-| M5.1 Normal Distribution | sensor noise | weight initialisation |
+| M5.1 Normal Distribution | sensor noise | weight initialization |
 | M5.3 Bayes' Rule | fusing two range sensors | posterior inference |
 | M5.5 Maximum Likelihood | fitting kS, kV, kA | cross-entropy |
 
@@ -64,7 +64,7 @@ Arrives with: arithmetic, square roots, the Cartesian plane. Leaves with: distan
 |---|---|---|---|
 | 1 | Coordinates, Poses & Pythagorean Distance | Pythagoras by area rearrangement; distance formula; squared-distance ranking; L1/L2/L∞ | `[deep]` |
 | 2 | Lines, Segments & Intersections | Parametric form; 2D cross product; orientation test; segment intersection; clearance | `[deep]`, needs trim |
-| 3 | Linear Interpolation, Lookup Tables & Blending | `lerp` named and generalised from Concept 02's parametric form; why `(1−t)a + tb` beats `a + t(b−a)` numerically; inverse lerp and remapping; clamping vs. extrapolation; interpolating lookup tables for shooter calibration; bilinear interpolation in 2D; **why angles cannot be lerped naively** | `[new]` |
+| 3 | Linear Interpolation, Lookup Tables & Blending | `lerp` named and generalized from Concept 02's parametric form; why `(1−t)a + tb` beats `a + t(b−a)` numerically; inverse lerp and remapping; clamping vs. extrapolation; interpolating lookup tables for shooter calibration; bilinear interpolation in 2D; **why angles cannot be lerped naively** | `[new]` |
 | 4 | Bounding Boxes, Overlap & Collision | Interval overlap via De Morgan; separating axis; Minkowski inflation; IoU; swept boxes | `[deep]` |
 | 5 | Polygons, Areas & Field Zones | Convex half-planes; ray-casting parity proof; half-open vertex rule; shoelace formula | `[deep]` |
 
@@ -76,7 +76,7 @@ Arrives with: Module 1. Leaves with: `cos`/`sin`/`tan`, radians, rotation as two
 
 **Running example: the steerable wheel.** This module uses one mechanism throughout rather than a fresh vignette per concept. A wheel that can be pointed in any direction and driven at any speed is natively *polar* — an angle and a speed, because those are two physical motors — while the chassis and every path follower think in Cartesian components. Converting between the two is what this module is for. Concept 01 resolves one wheel into components, 02 rotates a command into the robot's frame, 04 recovers a wheel angle with `atan2`, and 05 wraps that angle and flips the module through 180°.
 
-Introduce the vocabulary late. Concept 01 says "a wheel pointed 30° off down-field, moving at 4.0 m/s" and only names it a swerve module in a single closing sentence. Never combine four modules anywhere in this axon — chassis kinematics, the `ω × r` term and module optimisation belong to the Kinematics axon and depend on tools this reader does not have.
+Introduce the vocabulary late. Concept 01 says "a wheel pointed 30° off down-field, moving at 4.0 m/s" and only names it a swerve module in a single closing sentence. Never combine four modules anywhere in this axon — chassis kinematics, the `ω × r` term and module optimization belong to the Kinematics axon and depend on tools this reader does not have.
 
 | # | Concept | Scope & key derivations | Language | Status |
 |---|---|---|---|---|
@@ -85,7 +85,7 @@ Introduce the vocabulary late. Concept 01 says "a wheel pointed 30° off down-fi
 | 3 | Coordinate Frames (Field, Robot, Camera) | Rigid transform = rotate then translate, in scalar form. Chaining field→robot→camera. **Inverting a transform** and why it is not simply negating both parts. Which direction needs `−θ`. | Java | `[thin]` |
 | 4 | Inverse Trig & 4-Quadrant Heading with atan2 | `asin`/`acos`/`atan` and their restricted ranges; why `atan(y/x)` loses a quadrant; how `atan2` recovers it; the `(0,0)` case | Java | `[thin]` |
 | 5 | Angle Wrapping & Shortest Angular Distance | Angles as a circle not a line; modular difference into `[−π, π]`; the 340°-instead-of-20° failure; swerve's 180° flip with speed inversion | Java | `[thin]` |
-| 6 | Law of Sines, Law of Cosines & Two-Link Arms | Law of cosines as generalised Pythagoras (derive by dropping a perpendicular); solving a triangle from three sides; two-link arm reach and elbow-up/elbow-down ambiguity | Java | `[new]` |
+| 6 | Law of Sines, Law of Cosines & Two-Link Arms | Law of cosines as generalized Pythagoras (derive by dropping a perpendicular); solving a triangle from three sides; two-link arm reach and elbow-up/elbow-down ambiguity | Java | `[new]` |
 | 7 | 3D Rotations, Gimbal Lock & Quaternions | Euler angles and their order dependence; gimbal lock as a lost degree of freedom; quaternions as an axis-angle encoding; why IMUs report them | Java | `[thin]` |
 
 ---
@@ -96,19 +96,19 @@ Arrives with: Modules 1–2. Leaves with: matrices as transformations, matrix mu
 
 | # | Concept | Scope & key derivations | Language | Status |
 |---|---|---|---|---|
-| 1 | Vectors, Scaling & Basis Spaces | Vector as displacement vs. position; scalar multiplication; linear combinations; basis and span; why `î`, `ĵ` are a choice. **Norms belong here**, not in geometry: `‖v‖` notation, the Lp family, and why L1 and L2 penalties give Lasso and Ridge their different behaviour. | **Dual** | `[thin]` |
+| 1 | Vectors, Scaling & Basis Spaces | Vector as displacement vs. position; scalar multiplication; linear combinations; basis and span; why `î`, `ĵ` are a choice. **Norms belong here**, not in geometry: `‖v‖` notation, the Lp family, and why L1 and L2 penalties give Lasso and Ridge their different behavior. | **Dual** | `[thin]` |
 | 2 | Dot Products, Projections & Alignment | Two definitions (component sum and `‖a‖‖b‖cos θ`) and the proof they agree; projection; orthogonality; cosine similarity | **Dual** | `[thin]` |
 | 3 | Matrices as Coordinate Transformers | A matrix is where the basis vectors land; reading a matrix by its columns. **The payoff concept: Module 2's two rotation equations are revealed as `R(θ)`**, with its columns being exactly the `î` and `ĵ` images derived there. Orthogonality, and inverse = transpose. | Java | `[thin]` |
 | 4 | Matrix Multiplication & Composition | Multiplication derived as "apply one transform then the other"; why it is not commutative; why inner dimensions must match. Rigid transforms and homogeneous coordinates, closing the loop on Module 2's frame chaining. The neural network forward pass as the same operation. | **Dual** | `[new]` |
 | 5 | Determinants, Inverses & Singularity | Determinant as signed area scaling; zero determinant means collapse and no inverse; 2×2 inverse formula; condition number as a practical warning | Java | `[thin]` |
 | 6 | Solving Linear Systems & Least Squares | Systems as `Ax = b`; over-determined systems from noisy sensors; the normal equations; fitting `kS`, `kV`, `kA` from telemetry | Java | `[new]` |
-| 7 | Eigenvectors & Eigenvalues | Vectors a transform only scales; characteristic equation for 2×2; what eigenvalues say about stability; preview of covariance and PCA | Python | `[new]` |
+| 7 | Eigenvectors & Eigenvalues | Vectors a transform only scales; characteriztic equation for 2×2; what eigenvalues say about stability; preview of covariance and PCA | Python | `[new]` |
 
 ---
 
 ## Module 4: Calculus, Motion & Optimization
 
-Arrives with: Modules 1–3. Leaves with: derivatives, the chain rule, integrals, gradients, and what makes optimisation hard.
+Arrives with: Modules 1–3. Leaves with: derivatives, the chain rule, integrals, gradients, and what makes optimization hard.
 
 | # | Concept | Scope & key derivations | Language | Status |
 |---|---|---|---|---|
@@ -130,7 +130,7 @@ Arrives with: Modules 1–4. Leaves with: distributions, covariance, Bayes, soft
 | 1 | Random Variables, Sensor Noise & the Normal Distribution | Randomness as a distribution not a number; mean and variance; the shape of the Gaussian and why noise tends toward it; the 68/95/99.7 rule | **Dual** | `[thin]` |
 | 2 | Variance, Covariance & Correlation | Variance as expected squared deviation; covariance as joint variation; the covariance matrix; correlation vs. causation; the uncertainty ellipse | Java | `[new]` |
 | 3 | Bayes' Rule & 1D Sensor Fusion | Conditional probability; Bayes derived from the joint; prior/likelihood/posterior; fusing two Gaussians and why the result is more confident than either | **Dual** | `[thin]` |
-| 4 | Discrete Distributions & Softmax | Probability mass; why logits are not probabilities; softmax derived from exponentiate-and-normalise; temperature; the max-subtraction stability trick | Python | `[thin]` |
+| 4 | Discrete Distributions & Softmax | Probability mass; why logits are not probabilities; softmax derived from exponentiate-and-normalize; temperature; the max-subtraction stability trick | Python | `[thin]` |
 | 5 | Maximum Likelihood Estimation | Likelihood as `P(data \| θ)` read as a function of `θ`, not of the data — the conceptual flip the whole concept turns on. Independence gives a product; **why we take the log** (underflow, sums differentiate cleanly, and monotonicity leaves the argmax untouched — the same argument that dropped the square root in Geometry Concept 01). Derive the MLE of a Gaussian mean and get the sample mean. **The two payoffs: Gaussian noise ⟹ least squares, and categorical ⟹ cross-entropy.** MAP as MLE plus a prior, and an L2 penalty as a Gaussian prior. | **Dual** | `[new]` |
 | 6 | Expected Value & Decision Making | Expectation as a probability-weighted average; expected value of a strategy; variance as risk; when the higher-expected-value choice is still wrong | Java | `[thin]` |
 

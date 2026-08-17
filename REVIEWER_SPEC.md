@@ -63,7 +63,7 @@ Where a concept genuinely serves both robotics and machine learning, ground it i
 
 ### Diagrams must agree with the prose
 
-Every number in a figure must match the number in the text, and the figure's geometry must match its own labels. A diagram labelled 30° whose arc actually sweeps 40° teaches the wrong thing to any reader who measures it, and no automated check will catch it. Verify angles, lengths and ratios in figures numerically before accepting them.
+Every number in a figure must match the number in the text, and the figure's geometry must match its own labels. A diagram labeled 30° whose arc actually sweeps 40° teaches the wrong thing to any reader who measures it, and no automated check will catch it. Verify angles, lengths and ratios in figures numerically before accepting them.
 
 ---
 
@@ -71,9 +71,11 @@ Every number in a figure must match the number in the text, and the figure's geo
 
 **American English throughout** — prose, code comments, identifiers, diagram labels and demo telemetry alike.
 
-The common slips: *meter* not metre, *center* not centre, *behavior* not behaviour, *color* not colour, *neighbor* not neighbour, *labeled* / *labeling* not labelled / labelling, *traveled* / *traveling* not travelled / travelling, *analyze* not analyse, *gray* not grey. Verbs and their nouns take *-ize* / *-ization*: memorize, normalize, optimize, generalize, minimize, maximize, penalize, initialize, vectorize, characterize, parameterize, regularize, discretize.
+Write `meter`, `center`, `behavior`, `color`, `neighbor`, `labeled`, `labeling`, `traveled`, `traveling`, `canceled`, `modeling`, `analyze`, `gray`. Verbs and their nouns take *-ize* / *-ization*: memorize, normalize, optimize, generalize, minimize, maximize, penalize, initialize, vectorize, characterize, parameterize, regularize, discretize.
 
-This matters more than house style: the curriculum's audience writes FRC code against WPILib, whose own API is American (`getCenter`, `Color`), and a page that says "metre" beside code that says `meters` reads as careless.
+This matters more than house style: the audience writes FRC code against WPILib, whose API is American (`getCenter`, `Color`), and prose that disagrees with the code beside it reads as careless.
+
+> A note for whoever automates this. An earlier sweep replaced the British forms everywhere, including in *this section*, which had listed them as counter-examples — leaving the nonsensical instruction "meter not meter, analyze not analyze". A find-and-replace over a document that discusses the very strings being replaced will eat its own documentation. Spell the rule as a positive list, as above, so there is nothing here to corrupt.
 
 ---
 
@@ -102,7 +104,7 @@ versus a real radical with the expression genuinely underneath it, a real fracti
 | Inline math | `$…$` | Passes through kramdown verbatim |
 | Display math | `$$…$$` | kramdown rewrites it to `\[…\]`, which KaTeX renders |
 
-**Never author `\(…\)` or `\[…\]`.** kramdown strips the backslashes before KaTeX ever sees them, and the math renders as bare parentheses. This is verified behaviour, not a guess.
+**Never author `\(…\)` or `\[…\]`.** kramdown strips the backslashes before KaTeX ever sees them, and the math renders as bare parentheses. This is verified behavior, not a guess.
 
 **Never leave an unpaired `$`.** An odd delimiter swallows the rest of the paragraph into a math span.
 
@@ -128,7 +130,7 @@ By axon: Geometry, Trigonometry, Physics, Kinematics and Localization are roboti
 
 * **"Where appropriate" has teeth.** A dual concept does not mechanically emit three code blocks. Dot products earn both tiers (projection onto a heading, cosine similarity between embeddings); eigenvectors earn only PyTorch.
 * **Signpost every block with its language** as a subheading — "First Principles (Python)", "In a Robot Project (Java & WPILib)", "In a Model (PyTorch)". A two-language page is unreadable without it.
-* **No NumPy in the from-scratch tier.** Lists and loops keep the arithmetic visible; a vectorised one-liner teaches nothing about what is being vectorised. NumPy may appear in a production tier as a stepping stone to PyTorch.
+* **No NumPy in the from-scratch tier.** Lists and loops keep the arithmetic visible; a vectorized one-liner teaches nothing about what is being vectorized. NumPy may appear in a production tier as a stepping stone to PyTorch.
 * **Tiers must agree numerically.** The production tier must produce the same numbers as the from-scratch tier on the same input, and the concept should say so. A reader who cannot connect the tiers has learned an API, not an idea.
 * **Libraries are not prerequisites.** The prerequisite chain governs *ideas*, not tooling. The from-scratch tier is load-bearing; the production tier is illustrative. A Math concept may show PyTorch long before the frameworks module exists, exactly as Geometry Concept 01 shows `Translation2d` with no WPILib primer anywhere. Never withhold a production example on prerequisite grounds.
 * TensorFlow and Keras appear only in the frameworks module's comparison appendix.
