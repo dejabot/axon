@@ -4,8 +4,11 @@
 
 title: Axon Curriculum
 description: A first-principles curriculum for applied math, physical dynamics, control theory, machine learning, and robotics.
-url: "https://dejabot.github.io"
-baseurl: "/axon"
+# Served from the custom domain in docs/CNAME, which puts the site at the root.
+# baseurl must therefore be empty: with baseurl "/axon" every relative_url in the
+# layout renders as /axon/... and 404s, taking the stylesheet down with it.
+url: "https://axons.dejabotz.com"
+baseurl: ""
 
 # Apply our layout to every page. GitHub Pages' jekyll-optional-front-matter turns the
 # front-matter-less Markdown files into pages, and this default gives them our chrome —
