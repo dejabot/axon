@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 24: Non-Linear Activation Functions</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Non-Linear Activation Curves & Function Bending</div>
+      <div class="demo-badge">Concept 24 Demo</div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="actCanvas" width="800" height="420"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Select Activation Function:</label>
+        <div style="display: flex; gap: 8px; margin-top: 4px;">
+          <button class="btn btn-secondary active-class" id="btnRelu" style="flex: 1;">ReLU</button>
+          <button class="btn btn-secondary" id="btnGelu" style="flex: 1;">GELU</button>
+          <button class="btn btn-secondary" id="btnSigmoid" style="flex: 1;">Sigmoid</button>
+          <button class="btn btn-secondary" id="btnBender" style="flex: 1;">2-Neuron Bender</button>
+        </div>
+      </div>
+      <div class="control-group" id="inputGroup">
+        <label>Neuron Input (z): <span id="zLabel" class="value-display">1.50</span></label>
+        <input type="range" id="zSlider" min="-4.0" max="4.0" step="0.1" value="1.50">
+      </div>
+      <div class="control-group" id="benderGroup" style="display: none;">
+        <label>Neuron 2 Weight (w₂): <span id="w2Label" class="value-display">-1.00</span></label>
+        <input type="range" id="w2Slider" min="-2.0" max="2.0" step="0.1" value="-1.0">
+      </div>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Input Value (z)</div>
+        <div class="telemetry-value" id="zText">1.500</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Activated Output f(z)</div>
+        <div class="telemetry-value" id="outText" style="color: #38bdf8;">1.500</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Derivative Slope f'(z)</div>
+        <div class="telemetry-value" id="derivText" style="color: #4ade80;">1.000</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('actCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let currentMode = 'relu'; // 'relu', 'gelu', 'sigmoid', 'bender'
+      let zVal = 1.5;
+      let w2Val = -1.0;
+
+      function relu(x) { return Math.max(0, x); }
+      function dRelu(x) { return x > 0 ? 1.0 : 0.0; }
+
+      function sigmoid(x) { return 1.0 / (1.0 + Math.exp(-x)); }
+      function dSigmoid(x) { const s = sigmoid(x); return s * (1.0 - s); }
+
+      function gelu(x) {
+        return 0.5 * x * (1.0 + Math.tanh(Math.sqrt(2.0 / Math.PI) * (x + 0.044715 * Math.pow(x, 3))));
+      }
+      function dGelu(x) {
+        // Numerical derivative approximation
+        const eps = 1e-4;
+        return (gelu(x + eps) - gelu(x - eps)) / (2 * eps);
+      }
+
+      function benderFn(x) {
+        const h1 = Math.max(0, x - (-1.0)); // turns on at x = -1
+        const h2 = Math.max(0, x - 1.5);    // turns on at x = 1.5
+        return 1.0 * h1 + w2Val * h2;
+      }
+
+      function toScreen(x, y) {
+        // x from -4.5 to 4.5
+        // y from -2.0 to 4.5
+        const sx = 80 + ((x - (-4.5)) / (4.5 - (-4.5))) * (canvas.width - 160);
+        const sy = (canvas.height - 70) - ((y - (-2.0)) / (4.5 - (-2.0))) * (canvas.height - 120);
+        return { sx, sy };
+      }
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Axes & Grid
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 1;
+
+        // X Ticks
+        for (let x = -4; x <= 4; x += 1) {
+          const pt = toScreen(x, 0);
+          ctx.beginPath();
+          ctx.moveTo(pt.sx, 40);
+          ctx.lineTo(pt.sx, canvas.height - 60);
+          ctx.stroke();
+
+          ctx.fillStyle = mutedColor;
+          ctx.font = '11px sans-serif';
+          ctx.fillText(x.toString(), pt.sx - 4, canvas.height - 44);
+        }
+
+        // Y Ticks
+        for (let y = -1; y <= 4; y += 1) {
+          const pt = toScreen(0, y);
+          ctx.beginPath();
+          ctx.moveTo(80, pt.sy);
+          ctx.lineTo(canvas.width - 80, pt.sy);
+          ctx.stroke();
+
+          ctx.fillStyle = mutedColor;
+          ctx.font = '11px sans-serif';
+          ctx.fillText(y.toString(), 54, pt.sy + 4);
+        }
+
+        // Main Axis Cross (x=0, y=0)
+        const origin = toScreen(0, 0);
+        ctx.strokeStyle = isDark ? '#334155' : '#cbd5e1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(80, origin.sy);
+        ctx.lineTo(canvas.width - 80, origin.sy);
+        ctx.moveTo(origin.sx, 40);
+        ctx.lineTo(origin.sx, canvas.height - 60);
+        ctx.stroke();
+
+        // Plot Function Curve
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        let fn = relu;
+        let dFn = dRelu;
+        let curveColor = '#38bdf8';
+
+        if (currentMode === 'relu') {
+          fn = relu; dFn = dRelu; curveColor = '#38bdf8';
+        } else if (currentMode === 'gelu') {
+          fn = gelu; dFn = dGelu; curveColor = '#c084fc';
+        } else if (currentMode === 'sigmoid') {
+          fn = sigmoid; dFn = dSigmoid; curveColor = '#4ade80';
+        } else if (currentMode === 'bender') {
+          fn = benderFn; dFn = (x) => 0; curveColor = '#fb923c';
+        }
+
+        ctx.strokeStyle = curveColor;
+        let first = true;
+        for (let x = -4.5; x <= 4.5; x += 0.05) {
+          const y = fn(x);
+          const pt = toScreen(x, y);
+          if (first) {
+            ctx.moveTo(pt.sx, pt.sy);
+            first = false;
+          } else {
+            ctx.lineTo(pt.sx, pt.sy);
+          }
+        }
+        ctx.stroke();
+
+        // Draw Active Evaluation Dot
+        const curY = fn(zVal);
+        const curPt = toScreen(zVal, curY);
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(curPt.sx, curPt.sy, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Telemetry Update
+        const deriv = dFn(zVal);
+        document.getElementById('zLabel').textContent = zVal.toFixed(2);
+        document.getElementById('w2Label').textContent = w2Val.toFixed(2);
+        document.getElementById('zText').textContent = zVal.toFixed(3);
+        document.getElementById('outText').textContent = curY.toFixed(3);
+        document.getElementById('derivText').textContent = currentMode === 'bender' ? 'N/A (Piecewise)' : deriv.toFixed(3);
+      }
+
+      function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('btnRelu').style.borderColor = mode === 'relu' ? '#38bdf8' : 'var(--line)';
+        document.getElementById('btnGelu').style.borderColor = mode === 'gelu' ? '#c084fc' : 'var(--line)';
+        document.getElementById('btnSigmoid').style.borderColor = mode === 'sigmoid' ? '#4ade80' : 'var(--line)';
+        document.getElementById('btnBender').style.borderColor = mode === 'bender' ? '#fb923c' : 'var(--line)';
+
+        document.getElementById('benderGroup').style.display = mode === 'bender' ? 'flex' : 'none';
+        render();
+      }
+
+      document.getElementById('btnRelu').addEventListener('click', () => setMode('relu'));
+      document.getElementById('btnGelu').addEventListener('click', () => setMode('gelu'));
+      document.getElementById('btnSigmoid').addEventListener('click', () => setMode('sigmoid'));
+      document.getElementById('btnBender').addEventListener('click', () => setMode('bender'));
+
+      document.getElementById('zSlider').addEventListener('input', (e) => {
+        zVal = parseFloat(e.target.value);
+        render();
+      });
+
+      document.getElementById('w2Slider').addEventListener('input', (e) => {
+        w2Val = parseFloat(e.target.value);
+        render();
+      });
+
+      setMode('relu');
+    })();
+  </script>
+</body>
+</html>

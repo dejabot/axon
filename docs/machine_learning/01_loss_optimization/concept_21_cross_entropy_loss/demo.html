@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 21: Cross-Entropy Classification Loss</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Cross-Entropy Loss & Confidence Penalty Visualizer</div>
+      <div class="demo-badge">Concept 21 Demo</div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="ceCanvas" width="800" height="400"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>True Object Class:</label>
+        <div style="display: flex; gap: 8px; margin-top: 4px;">
+          <button class="btn btn-secondary active-class" id="btnNote" style="flex: 1;">Note (Orange)</button>
+          <button class="btn btn-secondary" id="btnCoral" style="flex: 1;">Coral (Cyan)</button>
+          <button class="btn btn-secondary" id="btnAlgae" style="flex: 1;">Algae (Green)</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label>Confidence in True Class: <span id="confLabel" class="value-display">85%</span></label>
+        <input type="range" id="confSlider" min="1" max="99" value="85">
+      </div>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">True Class Probability (p_true)</div>
+        <div class="telemetry-value" id="pTrueText" style="color: #38bdf8;">0.850</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Cross-Entropy Loss (-ln(p))</div>
+        <div class="telemetry-value" id="lossText" style="color: #f43f5e;">0.1625</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Model Penalty Status</div>
+        <div class="telemetry-value" id="statusText" style="color: #4ade80;">Low Loss (Confident & Correct)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('ceCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let trueClassIndex = 0; // 0: Note, 1: Coral, 2: Algae
+      const classNames = ["Note", "Coral", "Algae"];
+      const classColors = ["#fb923c", "#38bdf8", "#4ade80"];
+      let pTrue = 0.85;
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Split canvas:
+        // Left pane (x: 20 to 380): Probability distribution bars
+        // Right pane (x: 420 to 770): Negative Log Loss curve -ln(p)
+
+        // 1. Left Pane: Class Probabilities
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText('Model Output Probabilities (Softmax)', 40, 30);
+
+        const leftX = 40;
+        const leftY = 60;
+        const barH = 40;
+        const barGap = 30;
+        const maxBarW = 280;
+
+        // Distribute remaining probability among the other 2 classes
+        const otherP = (1.0 - pTrue) / 2.0;
+        const probs = [otherP, otherP, otherP];
+        probs[trueClassIndex] = pTrue;
+
+        for (let i = 0; i < 3; i++) {
+          const py = leftY + i * (barH + barGap);
+          const isTarget = (i === trueClassIndex);
+
+          // Class Label & Target Badge
+          ctx.fillStyle = isTarget ? textColor : mutedColor;
+          ctx.font = isTarget ? 'bold 12px sans-serif' : '12px sans-serif';
+          ctx.fillText(`${classNames[i]} ${isTarget ? '(TRUE LABEL ★)' : ''}`, leftX, py - 6);
+
+          // Bar Background Track
+          ctx.fillStyle = gridColor;
+          ctx.beginPath();
+          ctx.roundRect(leftX, py, maxBarW, barH, 8);
+          ctx.fill();
+
+          // Bar Fill
+          const curW = Math.max(probs[i] * maxBarW, 4);
+          ctx.fillStyle = classColors[i];
+          ctx.beginPath();
+          ctx.roundRect(leftX, py, curW, barH, 8);
+          ctx.fill();
+
+          // Bar Percentage Text
+          ctx.fillStyle = isDark ? '#0f172a' : '#ffffff';
+          ctx.font = 'bold 12px monospace';
+          if (curW > 50) {
+            ctx.fillText(`${(probs[i] * 100).toFixed(1)}%`, leftX + 12, py + 24);
+          } else {
+            ctx.fillStyle = textColor;
+            ctx.fillText(`${(probs[i] * 100).toFixed(1)}%`, leftX + curW + 8, py + 24);
+          }
+        }
+
+        // 2. Right Pane: -ln(p) Loss Curve
+        const rightX = 420;
+        const rightY = 340;
+        const rightW = 340;
+        const rightH = 280;
+
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText('Cross-Entropy Loss Curve: L = -ln(p_true)', rightX, 30);
+
+        // Draw Axes
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(rightX, rightY);
+        ctx.lineTo(rightX + rightW, rightY);
+        ctx.moveTo(rightX, rightY);
+        ctx.lineTo(rightX, rightY - rightH);
+        ctx.stroke();
+
+        // X-axis ticks (0.0 to 1.0)
+        for (let p = 0.2; p <= 1.0; p += 0.2) {
+          const px = rightX + p * rightW;
+          ctx.fillStyle = mutedColor;
+          ctx.font = '11px sans-serif';
+          ctx.fillText(p.toFixed(1), px - 10, rightY + 16);
+        }
+
+        // Y-axis ticks (0 to 5)
+        for (let l = 1; l <= 4; l++) {
+          const py = rightY - (l / 4.6) * rightH;
+          ctx.fillStyle = mutedColor;
+          ctx.font = '11px sans-serif';
+          ctx.fillText(l.toString(), rightX - 16, py + 4);
+        }
+
+        // Plot -ln(p) curve from p = 0.01 to 1.0
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        let first = true;
+        for (let p = 0.01; p <= 1.0; p += 0.01) {
+          const l = -Math.log(p);
+          const cx = rightX + p * rightW;
+          const cy = rightY - Math.min(l / 4.6, 1.0) * rightH;
+          if (first) {
+            ctx.moveTo(cx, cy);
+            first = false;
+          } else {
+            ctx.lineTo(cx, cy);
+          }
+        }
+        ctx.stroke();
+
+        // Current loss point on curve
+        const curLoss = -Math.log(Math.max(pTrue, 1e-15));
+        const curX = rightX + pTrue * rightW;
+        const curY = rightY - Math.min(curLoss / 4.6, 1.0) * rightH;
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(curX, curY, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Telemetry updates
+        document.getElementById('confLabel').textContent = `${(pTrue * 100).toFixed(0)}%`;
+        document.getElementById('pTrueText').textContent = pTrue.toFixed(3);
+        document.getElementById('lossText').textContent = curLoss.toFixed(4);
+
+        const statusEl = document.getElementById('statusText');
+        if (pTrue >= 0.8) {
+          statusEl.textContent = 'Low Loss (Confident & Correct)';
+          statusEl.style.color = '#4ade80';
+        } else if (pTrue >= 0.4) {
+          statusEl.textContent = 'Moderate Loss (Uncertain)';
+          statusEl.style.color = '#fbbf24';
+        } else {
+          statusEl.textContent = 'High Loss (Confidently Wrong!)';
+          statusEl.style.color = '#f43f5e';
+        }
+      }
+
+      function selectClass(index) {
+        trueClassIndex = index;
+        document.getElementById('btnNote').style.borderColor = index === 0 ? '#fb923c' : 'var(--line)';
+        document.getElementById('btnCoral').style.borderColor = index === 1 ? '#38bdf8' : 'var(--line)';
+        document.getElementById('btnAlgae').style.borderColor = index === 2 ? '#4ade80' : 'var(--line)';
+        render();
+      }
+
+      document.getElementById('btnNote').addEventListener('click', () => selectClass(0));
+      document.getElementById('btnCoral').addEventListener('click', () => selectClass(1));
+      document.getElementById('btnAlgae').addEventListener('click', () => selectClass(2));
+
+      document.getElementById('confSlider').addEventListener('input', (e) => {
+        pTrue = parseInt(e.target.value) / 100;
+        render();
+      });
+
+      selectClass(0);
+    })();
+  </script>
+</body>
+</html>

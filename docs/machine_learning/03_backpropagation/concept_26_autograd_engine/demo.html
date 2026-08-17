@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 26: Micro-Autograd Engine</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Micro-Autograd Engine & Live Parameter Optimizer</div>
+      <div class="demo-badge">Concept 26 Demo</div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="autogradCanvas" width="800" height="420"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Input Feature (x): <span id="xLabel" class="value-display">2.0</span></label>
+        <input type="range" id="xSlider" min="-3.0" max="5.0" step="0.5" value="2.0">
+      </div>
+      <div class="control-group">
+        <label>Learnable Weight (w): <span id="wLabel" class="value-display">1.50</span></label>
+        <input type="range" id="wSlider" min="-3.0" max="5.0" step="0.1" value="1.5">
+      </div>
+      <div class="control-group">
+        <label>Learnable Bias (b): <span id="bLabel" class="value-display">0.50</span></label>
+        <input type="range" id="bSlider" min="-3.0" max="5.0" step="0.1" value="0.5">
+      </div>
+      <div class="control-group" style="display: flex; gap: 8px;">
+        <button class="btn btn-primary" id="tuneBtn" style="flex: 1;">⚡ Auto-Tune 1 Step (w, b)</button>
+        <button class="btn btn-secondary" id="resetBtn" style="flex: 1;">Reset</button>
+      </div>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Predicted y = w·x + b</div>
+        <div class="telemetry-value" id="predText" style="color: #38bdf8;">3.500</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Target y_true</div>
+        <div class="telemetry-value" id="targetText">8.000</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Loss L = (y - 8.0)²</div>
+        <div class="telemetry-value" id="lossText" style="color: #f43f5e;">20.250</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('autogradCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let xVal = 2.0;
+      let wVal = 1.5;
+      let bVal = 0.5;
+      const targetVal = 8.0;
+      const lr = 0.08;
+
+      // Micro-Autograd class in JavaScript
+      class Value {
+        constructor(data, label = '', children = []) {
+          this.data = data;
+          this.grad = 0.0;
+          this.label = label;
+          this._prev = children;
+          this._backward = () => {};
+        }
+
+        add(other, label = '') {
+          const out = new Value(this.data + other.data, label, [this, other]);
+          out._backward = () => {
+            this.grad += 1.0 * out.grad;
+            other.grad += 1.0 * out.grad;
+          };
+          return out;
+        }
+
+        mul(other, label = '') {
+          const out = new Value(this.data * other.data, label, [this, other]);
+          out._backward = () => {
+            this.grad += other.data * out.grad;
+            other.grad += this.data * out.grad;
+          };
+          return out;
+        }
+
+        backward() {
+          const topo = [];
+          const visited = new Set();
+          function buildTopo(v) {
+            if (!visited.has(v)) {
+              visited.add(v);
+              for (const child of v._prev) {
+                buildTopo(child);
+              }
+              topo.push(v);
+            }
+          }
+          buildTopo(this);
+
+          this.grad = 1.0;
+          for (let i = topo.length - 1; i >= 0; i--) {
+            topo[i]._backward();
+          }
+        }
+      }
+
+      function evaluate() {
+        const x = new Value(xVal, 'x');
+        const w = new Value(wVal, 'w');
+        const b = new Value(bVal, 'b');
+
+        const wx = w.mul(x, 'w*x');
+        const y = wx.add(b, 'y');
+
+        const target = new Value(targetVal, 'y*');
+        const negOne = new Value(-1.0, '-1');
+        const negTarget = target.mul(negOne, '-y*');
+        const diff = y.add(negTarget, 'diff');
+        const loss = diff.mul(diff, 'Loss');
+
+        loss.backward();
+
+        return { x, w, b, wx, y, diff, loss };
+      }
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const nodeBg = isDark ? '#141923' : '#ffffff';
+        const nodeBorder = isDark ? '#334155' : '#cbd5e1';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const graph = evaluate();
+
+        // Node screen layouts
+        const pos = {
+          w: { x: 100, y: 110, node: graph.w, color: '#fbbf24' },
+          x: { x: 100, y: 230, node: graph.x, color: '#38bdf8' },
+          wx: { x: 260, y: 170, node: graph.wx },
+          b: { x: 260, y: 310, node: graph.b, color: '#fbbf24' },
+          y: { x: 430, y: 220, node: graph.y, color: '#38bdf8' },
+          diff: { x: 590, y: 220, node: graph.diff },
+          loss: { x: 720, y: 220, node: graph.loss, color: '#f43f5e' }
+        };
+
+        function drawLink(p1, p2) {
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+
+        drawLink(pos.w, pos.wx);
+        drawLink(pos.x, pos.wx);
+        drawLink(pos.wx, pos.y);
+        drawLink(pos.b, pos.y);
+        drawLink(pos.y, pos.diff);
+        drawLink(pos.diff, pos.loss);
+
+        function drawNodeBox(p) {
+          const wBox = 84;
+          const hBox = 54;
+          ctx.fillStyle = nodeBg;
+          ctx.strokeStyle = p.color || nodeBorder;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(p.x - wBox / 2, p.y - hBox / 2, wBox, hBox, 8);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = textColor;
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(p.node.label, p.x, p.y - 12);
+
+          ctx.fillStyle = '#38bdf8';
+          ctx.font = 'bold 11px monospace';
+          ctx.fillText(`d:${p.node.data.toFixed(2)}`, p.x, p.y + 4);
+
+          ctx.fillStyle = '#f43f5e';
+          ctx.font = 'bold 10px monospace';
+          ctx.fillText(`g:${p.node.grad >= 0 ? '+' : ''}${p.node.grad.toFixed(2)}`, p.x, p.y + 18);
+          ctx.textAlign = 'start';
+        }
+
+        Object.values(pos).forEach(drawNodeBox);
+
+        // Header legend
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('d: Node Data (Forward Value)', 30, 30);
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillText('g: Node Grad (dLoss / dNode via Autograd)', 30, 48);
+
+        // Telemetry Update
+        document.getElementById('xLabel').textContent = xVal.toFixed(1);
+        document.getElementById('wLabel').textContent = wVal.toFixed(2);
+        document.getElementById('bLabel').textContent = bVal.toFixed(2);
+
+        document.getElementById('predText').textContent = graph.y.data.toFixed(3);
+        document.getElementById('lossText').textContent = graph.loss.data.toFixed(3);
+      }
+
+      function tuneWeights() {
+        const graph = evaluate();
+        // Gradient descent step on w and b
+        wVal = wVal - lr * graph.w.grad;
+        bVal = bVal - lr * graph.b.grad;
+
+        document.getElementById('wSlider').value = wVal;
+        document.getElementById('bSlider').value = bVal;
+        render();
+      }
+
+      function reset() {
+        wVal = 1.5;
+        bVal = 0.5;
+        document.getElementById('wSlider').value = wVal;
+        document.getElementById('bSlider').value = bVal;
+        render();
+      }
+
+      document.getElementById('tuneBtn').addEventListener('click', tuneWeights);
+      document.getElementById('resetBtn').addEventListener('click', reset);
+
+      document.getElementById('xSlider').addEventListener('input', (e) => {
+        xVal = parseFloat(e.target.value);
+        render();
+      });
+      document.getElementById('wSlider').addEventListener('input', (e) => {
+        wVal = parseFloat(e.target.value);
+        render();
+      });
+      document.getElementById('bSlider').addEventListener('input', (e) => {
+        bVal = parseFloat(e.target.value);
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

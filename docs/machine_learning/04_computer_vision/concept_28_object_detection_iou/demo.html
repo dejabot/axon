@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 28: Object Detection, IoU & NMS</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">YOLO Object Detection & Non-Maximum Suppression</div>
+      <div class="demo-badge">Concept 28 Demo</div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="yoloCanvas" width="800" height="420"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Confidence Threshold: <span id="confLabel" class="value-display">0.50</span></label>
+        <input type="range" id="confSlider" min="0.10" max="0.95" step="0.05" value="0.50">
+      </div>
+      <div class="control-group">
+        <label>NMS IoU Overlap Threshold: <span id="iouLabel" class="value-display">0.45</span></label>
+        <input type="range" id="iouSlider" min="0.10" max="0.90" step="0.05" value="0.45">
+      </div>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Raw Candidate Boxes</div>
+        <div class="telemetry-value" id="rawCountText">6 Boxes</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Final Unique Detections (Kept)</div>
+        <div class="telemetry-value" id="keptCountText" style="color: #4ade80;">2 Objects</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Suppressed Duplicates (NMS)</div>
+        <div class="telemetry-value" id="suppCountText" style="color: #f43f5e;">3 Filtered</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('yoloCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let minConf = 0.50;
+      let iouThresh = 0.45;
+
+      // Candidate bounding boxes: [x1, y1, x2, y2, conf, label, color]
+      const candidates = [
+        { id: 1, coords: [140, 110, 290, 260], conf: 0.94, label: 'Note', color: '#fb923c' },
+        { id: 2, coords: [160, 100, 305, 250], conf: 0.82, label: 'Note', color: '#fb923c' },
+        { id: 3, coords: [130, 125, 275, 270], conf: 0.65, label: 'Note', color: '#fb923c' },
+        { id: 4, coords: [490, 130, 640, 290], conf: 0.91, label: 'Coral', color: '#38bdf8' },
+        { id: 5, coords: [510, 120, 655, 280], conf: 0.74, label: 'Coral', color: '#38bdf8' },
+        { id: 6, coords: [340, 240, 430, 330], conf: 0.35, label: 'Floor Glitch', color: '#94a3b8' }
+      ];
+
+      function computeIoU(b1, b2) {
+        const xA = Math.max(b1[0], b2[0]);
+        const yA = Math.max(b1[1], b2[1]);
+        const xB = Math.min(b1[2], b2[2]);
+        const yB = Math.min(b1[3], b2[3]);
+
+        const interArea = Math.max(0, xB - xA) * Math.max(0, yB - yA);
+        const area1 = (b1[2] - b1[0]) * (b1[3] - b1[1]);
+        const area2 = (b2[2] - b2[0]) * (b2[3] - b2[1]);
+
+        const unionArea = area1 + area2 - interArea;
+        return unionArea > 0 ? interArea / unionArea : 0.0;
+      }
+
+      function runNMS() {
+        // 1. Filter by minimum confidence
+        const passingConf = candidates.filter(b => b.conf >= minConf);
+        // 2. Sort descending
+        const sorted = [...passingConf].sort((a, b) => b.conf - a.conf);
+
+        const kept = [];
+        const suppressed = [];
+
+        while (sorted.length > 0) {
+          const current = sorted.shift();
+          kept.push(current);
+
+          const remaining = [];
+          for (const other of sorted) {
+            const iou = computeIoU(current.coords, other.coords);
+            if (iou >= iouThresh && current.label === other.label) {
+              suppressed.push({ box: other, suppressedBy: current.id, iou: iou });
+            } else {
+              remaining.push(other);
+            }
+          }
+          sorted.length = 0;
+          sorted.push(...remaining);
+        }
+
+        return { kept, suppressed, belowConf: candidates.filter(b => b.conf < minConf) };
+      }
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const carpetBg = isDark ? '#0f172a' : '#f1f5f9';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Simulated Camera Field Floor
+        ctx.fillStyle = carpetBg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Physical Game Pieces
+        // 1. Note (Orange Torus at x=215, y=185)
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath();
+        ctx.arc(215, 185, 55, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = carpetBg;
+        ctx.beginPath();
+        ctx.arc(215, 185, 25, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Coral (Cyan Cylinder at x=565, y=210)
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.roundRect(520, 150, 90, 120, 16);
+        ctx.fill();
+
+        const nmsResults = runNMS();
+        const keptIds = new Set(nmsResults.kept.map(b => b.id));
+        const suppIds = new Set(nmsResults.suppressed.map(s => s.box.id));
+
+        // Draw Suppressed / Low Conf Boxes first
+        candidates.forEach(b => {
+          const [x1, y1, x2, y2] = b.coords;
+          const bw = x2 - x1;
+          const bh = y2 - y1;
+
+          if (!keptIds.has(b.id)) {
+            // Dimmed box
+            ctx.strokeStyle = 'rgba(244, 63, 94, 0.35)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.strokeRect(x1, y1, bw, bh);
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = 'rgba(244, 63, 94, 0.7)';
+            ctx.font = '10px monospace';
+            const reason = b.conf < minConf ? 'Low Conf' : 'NMS Duplicate';
+            ctx.fillText(`[X] ${b.label} (${(b.conf * 100).toFixed(0)}%) - ${reason}`, x1 + 4, y1 - 4);
+          }
+        });
+
+        // Draw Kept Winning Detections
+        nmsResults.kept.forEach(b => {
+          const [x1, y1, x2, y2] = b.coords;
+          const bw = x2 - x1;
+          const bh = y2 - y1;
+
+          ctx.strokeStyle = b.color;
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x1, y1, bw, bh);
+
+          // Badge background
+          ctx.fillStyle = b.color;
+          ctx.beginPath();
+          ctx.roundRect(x1, y1 - 22, 140, 22, [4, 4, 0, 0]);
+          ctx.fill();
+
+          ctx.fillStyle = '#0f172a';
+          ctx.font = 'bold 11px sans-serif';
+          ctx.fillText(`✓ ${b.label} ${(b.conf * 100).toFixed(0)}%`, x1 + 6, y1 - 7);
+        });
+
+        // Telemetry Update
+        document.getElementById('confLabel').textContent = minConf.toFixed(2);
+        document.getElementById('iouLabel').textContent = iouThresh.toFixed(2);
+        document.getElementById('rawCountText').textContent = `${candidates.length} Candidate Boxes`;
+        document.getElementById('keptCountText').textContent = `${nmsResults.kept.length} Unique Objects`;
+        document.getElementById('suppCountText').textContent = `${nmsResults.suppressed.length + nmsResults.belowConf.length} Filtered`;
+      }
+
+      document.getElementById('confSlider').addEventListener('input', (e) => {
+        minConf = parseFloat(e.target.value);
+        render();
+      });
+
+      document.getElementById('iouSlider').addEventListener('input', (e) => {
+        iouThresh = parseFloat(e.target.value);
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

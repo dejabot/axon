@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 23: Linear Layers (Weights & Biases)</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Linear Neuron: Battery Voltage Predictor</div>
+      <div class="demo-badge">Concept 23 Demo</div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="denseCanvas" width="800" height="420"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Weight 1 - Current Sensitivity (w₁): <span id="w1Label" class="value-display">-0.018</span></label>
+        <input type="range" id="w1Slider" min="-0.040" max="0.010" step="0.002" value="-0.018">
+      </div>
+      <div class="control-group">
+        <label>Weight 2 - Temp Sensitivity (w₂): <span id="w2Label" class="value-display">-0.025</span></label>
+        <input type="range" id="w2Slider" min="-0.050" max="0.010" step="0.002" value="-0.025">
+      </div>
+      <div class="control-group">
+        <label>Bias - Resting Voltage (b): <span id="bLabel" class="value-display">12.60 V</span></label>
+        <input type="range" id="bSlider" min="10.0" max="14.0" step="0.1" value="12.6">
+      </div>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Robot State (Inputs x₁, x₂)</div>
+        <div class="telemetry-value" id="stateText">120 A, 35 °C</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Neuron Output (y = w·x + b)</div>
+        <div class="telemetry-value" id="outText" style="color: #38bdf8;">9.56 V</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Predicted Battery Status</div>
+        <div class="telemetry-value" id="statusText" style="color: #fbbf24;">Caution (Near Brownout)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('denseCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let w1 = -0.018;
+      let w2 = -0.025;
+      let b = 12.60;
+
+      // Draggable robot test point: { current: 120A, temp: 35C }
+      let robotState = { current: 120, temp: 35 };
+      let isDragging = false;
+
+      function toScreen(curr, temp) {
+        // current: 0 to 200 A -> screen x: 70 to 730
+        // temp: 10 to 60 °C -> screen y: 350 to 50
+        const sx = 70 + (curr / 200) * (canvas.width - 140);
+        const sy = (canvas.height - 70) - ((temp - 10) / 50) * (canvas.height - 120);
+        return { sx, sy };
+      }
+
+      function fromScreen(sx, sy) {
+        const curr = Math.max(0, Math.min(200, ((sx - 70) / (canvas.width - 140)) * 200));
+        const temp = Math.max(10, Math.min(60, 10 + ((canvas.height - 70 - sy) / (canvas.height - 120)) * 50));
+        return { curr, temp };
+      }
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Voltage Heat Map Background (Coarse 20x15 grid)
+        const cellW = (canvas.width - 140) / 20;
+        const cellH = (canvas.height - 120) / 15;
+        for (let i = 0; i < 20; i++) {
+          for (let j = 0; j < 15; j++) {
+            const curr = (i / 20) * 200;
+            const temp = 10 + (j / 15) * 50;
+            const v = w1 * curr + w2 * temp + b;
+
+            const px = 70 + i * cellW;
+            const py = (canvas.height - 70) - (j + 1) * cellH;
+
+            if (v >= 10.5) {
+              ctx.fillStyle = isDark ? 'rgba(74, 222, 128, 0.15)' : 'rgba(74, 222, 128, 0.25)';
+            } else if (v >= 9.0) {
+              ctx.fillStyle = isDark ? 'rgba(251, 191, 36, 0.15)' : 'rgba(251, 191, 36, 0.25)';
+            } else {
+              ctx.fillStyle = isDark ? 'rgba(244, 63, 94, 0.20)' : 'rgba(244, 63, 94, 0.25)';
+            }
+            ctx.fillRect(px, py, cellW + 1, cellH + 1);
+          }
+        }
+
+        // Draw Decision Boundary Lines (v = 10.5V and v = 9.0V)
+        function drawContour(targetV, strokeColor, label) {
+          // targetV = w1*curr + w2*temp + b -> temp = (targetV - b - w1*curr) / w2
+          ctx.strokeStyle = strokeColor;
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          let p1 = toScreen(0, (targetV - b) / w2);
+          let p2 = toScreen(200, (targetV - b - w1 * 200) / w2);
+          ctx.moveTo(p1.sx, p1.sy);
+          ctx.lineTo(p2.sx, p2.sy);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        drawContour(10.5, '#4ade80', '10.5V Safe Line');
+        drawContour(9.0, '#f43f5e', '9.0V Brownout Line');
+
+        // Draw Axes & Grid
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 1;
+
+        // Current ticks (0 to 200 A)
+        for (let c = 0; c <= 200; c += 40) {
+          const pt = toScreen(c, 10);
+          ctx.beginPath();
+          ctx.moveTo(pt.sx, 50);
+          ctx.lineTo(pt.sx, canvas.height - 70);
+          ctx.stroke();
+
+          ctx.fillStyle = mutedColor;
+          ctx.font = '11px sans-serif';
+          ctx.fillText(c + 'A', pt.sx - 8, canvas.height - 50);
+        }
+
+        // Temp ticks (10 to 60 °C)
+        for (let t = 10; t <= 60; t += 10) {
+          const pt = toScreen(0, t);
+          ctx.beginPath();
+          ctx.moveTo(70, pt.sy);
+          ctx.lineTo(canvas.width - 70, pt.sy);
+          ctx.stroke();
+
+          ctx.fillStyle = mutedColor;
+          ctx.font = '11px sans-serif';
+          ctx.fillText(t + '°C', 36, pt.sy + 4);
+        }
+
+        // Axis Titles
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText('Input x₁: Total Motor Current (Amps)', canvas.width / 2 - 100, canvas.height - 24);
+        ctx.save();
+        ctx.translate(18, canvas.height / 2 + 50);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText('Input x₂: Battery Temp (°C)', 0, 0);
+        ctx.restore();
+
+        // Draw Draggable Robot Point
+        const curV = w1 * robotState.current + w2 * robotState.temp + b;
+        const rPt = toScreen(robotState.current, robotState.temp);
+
+        ctx.fillStyle = curV >= 10.5 ? '#4ade80' : (curV >= 9.0 ? '#fbbf24' : '#f43f5e');
+        ctx.beginPath();
+        ctx.arc(rPt.sx, rPt.sy, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText('Robot State (Drag Me)', rPt.sx + 14, rPt.sy + 4);
+
+        // Update telemetry
+        document.getElementById('w1Label').textContent = w1.toFixed(3);
+        document.getElementById('w2Label').textContent = w2.toFixed(3);
+        document.getElementById('bLabel').textContent = b.toFixed(2) + ' V';
+        document.getElementById('stateText').textContent = `${robotState.current.toFixed(0)} A, ${robotState.temp.toFixed(0)} °C`;
+        document.getElementById('outText').textContent = curV.toFixed(2) + ' V';
+
+        const statusEl = document.getElementById('statusText');
+        if (curV >= 10.5) {
+          statusEl.textContent = 'Safe (> 10.5 V)';
+          statusEl.style.color = '#4ade80';
+        } else if (curV >= 9.0) {
+          statusEl.textContent = 'Caution (Near Brownout 9.0–10.5 V)';
+          statusEl.style.color = '#fbbf24';
+        } else {
+          statusEl.textContent = 'CRITICAL BROWNOUT (< 9.0 V)';
+          statusEl.style.color = '#f43f5e';
+        }
+      }
+
+      canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const rPt = toScreen(robotState.current, robotState.temp);
+        const dist = Math.hypot(mouseX - rPt.sx, mouseY - rPt.sy);
+        if (dist <= 25) {
+          isDragging = true;
+        }
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const pos = fromScreen(mouseX, mouseY);
+        robotState.current = pos.curr;
+        robotState.temp = pos.temp;
+        render();
+      });
+
+      window.addEventListener('mouseup', () => { isDragging = false; });
+
+      document.getElementById('w1Slider').addEventListener('input', (e) => {
+        w1 = parseFloat(e.target.value);
+        render();
+      });
+      document.getElementById('w2Slider').addEventListener('input', (e) => {
+        w2 = parseFloat(e.target.value);
+        render();
+      });
+      document.getElementById('bSlider').addEventListener('input', (e) => {
+        b = parseFloat(e.target.value);
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

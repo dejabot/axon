@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 25: Computational Graphs & Vector Chain Rule</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Computational Graph: Forward & Backward Passes</div>
+      <div class="demo-badge">Concept 25 Demo</div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="graphCanvas" width="800" height="420"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Input (x): <span id="xLabel" class="value-display">2.0</span></label>
+        <input type="range" id="xSlider" min="-3.0" max="5.0" step="0.5" value="2.0">
+      </div>
+      <div class="control-group">
+        <label>Weight (w): <span id="wLabel" class="value-display">3.0</span></label>
+        <input type="range" id="wSlider" min="-3.0" max="5.0" step="0.5" value="3.0">
+      </div>
+      <div class="control-group">
+        <label>Target Value (y_true): <span id="yTrueLabel" class="value-display">10.0</span></label>
+        <input type="range" id="yTrueSlider" min="0.0" max="15.0" step="1.0" value="10.0">
+      </div>
+      <div class="control-group" style="display: flex; gap: 8px;">
+        <button class="btn btn-primary" id="fwdBtn" style="flex: 1;">1. Forward Pass ▶</button>
+        <button class="btn btn-secondary" id="bwdBtn" style="flex: 1;">2. Backward Pass ◀</button>
+      </div>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Forward Prediction (y = w·x + b)</div>
+        <div class="telemetry-value" id="predText" style="color: #38bdf8;">7.000</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Output Loss L = (y - y_true)²</div>
+        <div class="telemetry-value" id="lossText" style="color: #f43f5e;">9.000</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Backprop Gradient (dL / dw)</div>
+        <div class="telemetry-value" id="gradWText" style="color: #fbbf24;">-12.000</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('graphCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let xVal = 2.0;
+      let wVal = 3.0;
+      let bVal = 1.0;
+      let yTrue = 10.0;
+
+      let showBackward = true;
+
+      // Graph node positions
+      const nodes = {
+        x: { x: 90, y: 130, label: 'x (Input)', name: 'x' },
+        w: { x: 90, y: 270, label: 'w (Weight)', name: 'w' },
+        b: { x: 260, y: 310, label: 'b (Bias = 1)', name: 'b' },
+        mul: { x: 260, y: 180, label: '* (Multiply)', name: 'p' },
+        add: { x: 440, y: 220, label: '+ (Linear Sum)', name: 'y' },
+        loss: { x: 670, y: 220, label: 'Loss = (y - y*)²', name: 'Loss' }
+      };
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const nodeBg = isDark ? '#141923' : '#ffffff';
+        const nodeBorder = isDark ? '#334155' : '#cbd5e1';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Forward computations
+        const pVal = xVal * wVal;
+        const yVal = pVal + bVal;
+        const lossVal = (yVal - yTrue) ** 2;
+
+        // Backward computations
+        const dL_dy = 2.0 * (yVal - yTrue);
+        const dL_dp = dL_dy * 1.0;
+        const dL_db = dL_dy * 1.0;
+        const dL_dw = dL_dp * xVal;
+        const dL_dx = dL_dp * wVal;
+
+        // Helper to draw connecting edge arrows
+        function drawEdge(from, to, textForward, textBackward) {
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(from.x, from.y);
+          ctx.lineTo(to.x, to.y);
+          ctx.stroke();
+
+          // Midpoint forward value
+          const midX = (from.x + to.x) / 2;
+          const midY = (from.y + to.y) / 2;
+
+          ctx.fillStyle = '#38bdf8';
+          ctx.font = 'bold 12px monospace';
+          ctx.fillText(textForward, midX - 16, midY - 8);
+
+          if (showBackward && textBackward) {
+            ctx.fillStyle = '#f43f5e';
+            ctx.font = 'bold 11px monospace';
+            ctx.fillText(textBackward, midX - 16, midY + 18);
+          }
+        }
+
+        // Draw edges
+        drawEdge(nodes.x, nodes.mul, `x = ${xVal.toFixed(1)}`, `dL/dx = ${dL_dx.toFixed(1)}`);
+        drawEdge(nodes.w, nodes.mul, `w = ${wVal.toFixed(1)}`, `dL/dw = ${dL_dw.toFixed(1)}`);
+        drawEdge(nodes.mul, nodes.add, `p = ${pVal.toFixed(1)}`, `dL/dp = ${dL_dp.toFixed(1)}`);
+        drawEdge(nodes.b, nodes.add, `b = ${bVal.toFixed(1)}`, `dL/db = ${dL_db.toFixed(1)}`);
+        drawEdge(nodes.add, nodes.loss, `y = ${yVal.toFixed(1)}`, `dL/dy = ${dL_dy.toFixed(1)}`);
+
+        // Helper to draw graph nodes
+        function drawNode(node, mainVal, gradVal, color) {
+          ctx.fillStyle = nodeBg;
+          ctx.strokeStyle = color || nodeBorder;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.roundRect(node.x - 55, node.y - 35, 110, 70, 10);
+          ctx.fill();
+          ctx.stroke();
+
+          // Title
+          ctx.fillStyle = textColor;
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(node.label, node.x, node.y - 14);
+
+          // Forward Value
+          ctx.fillStyle = '#38bdf8';
+          ctx.font = 'bold 13px monospace';
+          ctx.fillText(`val: ${mainVal}`, node.x, node.y + 6);
+
+          // Backward Gradient
+          if (showBackward) {
+            ctx.fillStyle = '#f43f5e';
+            ctx.font = 'bold 11px monospace';
+            ctx.fillText(`grad: ${gradVal}`, node.x, node.y + 24);
+          }
+          ctx.textAlign = 'start';
+        }
+
+        drawNode(nodes.x, xVal.toFixed(2), dL_dx.toFixed(2), '#38bdf8');
+        drawNode(nodes.w, wVal.toFixed(2), dL_dw.toFixed(2), '#fbbf24');
+        drawNode(nodes.b, bVal.toFixed(2), dL_db.toFixed(2));
+        drawNode(nodes.mul, pVal.toFixed(2), dL_dp.toFixed(2));
+        drawNode(nodes.add, yVal.toFixed(2), dL_dy.toFixed(2));
+        drawNode(nodes.loss, lossVal.toFixed(2), '1.00', '#f43f5e');
+
+        // Legend
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText('▶ Blue: Forward Pass Values', 30, 30);
+        if (showBackward) {
+          ctx.fillStyle = '#f43f5e';
+          ctx.fillText('◀ Red: Backward Pass Gradients (dLoss / dNode)', 30, 50);
+        }
+
+        // Telemetry Update
+        document.getElementById('xLabel').textContent = xVal.toFixed(1);
+        document.getElementById('wLabel').textContent = wVal.toFixed(1);
+        document.getElementById('yTrueLabel').textContent = yTrue.toFixed(1);
+
+        document.getElementById('predText').textContent = yVal.toFixed(3);
+        document.getElementById('lossText').textContent = lossVal.toFixed(3);
+        document.getElementById('gradWText').textContent = (dL_dw >= 0 ? '+' : '') + dL_dw.toFixed(3);
+      }
+
+      document.getElementById('xSlider').addEventListener('input', (e) => {
+        xVal = parseFloat(e.target.value);
+        render();
+      });
+      document.getElementById('wSlider').addEventListener('input', (e) => {
+        wVal = parseFloat(e.target.value);
+        render();
+      });
+      document.getElementById('yTrueSlider').addEventListener('input', (e) => {
+        yTrue = parseFloat(e.target.value);
+        render();
+      });
+
+      document.getElementById('fwdBtn').addEventListener('click', () => {
+        showBackward = false;
+        render();
+      });
+      document.getElementById('bwdBtn').addEventListener('click', () => {
+        showBackward = true;
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

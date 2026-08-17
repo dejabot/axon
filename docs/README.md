@@ -56,10 +56,10 @@ Axon is an educational curriculum designed from first principles to bridge high-
 ---
 
 ### [Axon 02: Machine Learning & Vision](machine_learning/)
-* **Loss Functions & Optimization**: MSE, Cross-Entropy, Gradient Descent, Learning Rates, Adam Optimizer.
-* **Neural Layers & Activation Functions**: Dense weights, biases, non-linear activations (ReLU, GELU, Sigmoid).
-* **Vector Backpropagation Engine**: Computational DAG graphs, multivariate Chain Rule, autograd.
-* **Computer Vision & Object Detection**: 2D Spatial Convolutions, YOLO single-shot architectures, bounding box IoU.
+* **[Loss Functions & Optimization](machine_learning/01_loss_optimization/)**: MSE, MAE, Cross-Entropy, Gradient Descent, Learning Rates.
+* **[Neural Layers & Activation Functions](machine_learning/02_neural_layers/)**: Dense weights `y = W @ x + b`, non-linear activations (ReLU, GELU, Sigmoid).
+* **[Vector Backpropagation Engine](machine_learning/03_backpropagation/)**: Computational DAG graphs, multivariate Chain Rule, micro-autograd engine.
+* **[Computer Vision & Object Detection](machine_learning/04_computer_vision/)**: 2D Spatial Convolutions, Sobel edge filters, YOLO bounding boxes, IoU, Non-Maximum Suppression (NMS).
 
 ---
 

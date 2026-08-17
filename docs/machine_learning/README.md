@@ -6,27 +6,28 @@ Welcome to the **Machine Learning & Vision Axon**. This track develops deep lear
 
 ## Modules in this Axon
 
-### 1. Loss Functions & Optimization
-* *The Real-World Problem:* How does an autonomous model measure its own mistakes and adjust its weights to improve?
-* *Key Concepts:* Mean Squared Error (MSE), Binary & Categorical Cross-Entropy, Gradient Descent, Learning Rates, and Adam Optimizer.
+### [1. Loss Functions & Optimization](01_loss_optimization/)
+* [Concept 20: Measuring Errors with Loss Functions (MSE & MAE)](01_loss_optimization/concept_20_loss_mse_mae/) — [Interactive Visualizer](01_loss_optimization/concept_20_loss_mse_mae/demo.html)
+* [Concept 21: Cross-Entropy & Classification Loss](01_loss_optimization/concept_21_cross_entropy_loss/) — [Interactive Visualizer](01_loss_optimization/concept_21_cross_entropy_loss/demo.html)
+* [Concept 22: Gradient Descent & Learning Rates](01_loss_optimization/concept_22_gradient_descent/) — [Interactive Visualizer](01_loss_optimization/concept_22_gradient_descent/demo.html)
 
 ---
 
-### 2. Neural Layers & Activation Functions
-* *The Real-World Problem:* Why can't linear equations learn curved decision boundaries, and how do neurons fire?
-* *Key Concepts:* Dense weight matrices, biases, non-linear activation functions (ReLU, GELU, Sigmoid, Tanh), and Universal Approximation.
+### [2. Neural Layers & Activation Functions](02_neural_layers/)
+* [Concept 23: Linear Layers (Weights, Biases & Dot Products)](02_neural_layers/concept_23_dense_layers/) — [Interactive Visualizer](02_neural_layers/concept_23_dense_layers/demo.html)
+* [Concept 24: Non-Linear Activation Functions (ReLU, GELU, Sigmoid)](02_neural_layers/concept_24_activation_functions/) — [Interactive Visualizer](02_neural_layers/concept_24_activation_functions/demo.html)
 
 ---
 
-### 3. Vector Backpropagation Engine
-* *The Real-World Problem:* How does a network with 10 million parameters calculate the exact slope for every single weight simultaneously?
-* *Key Concepts:* Computational DAG graphs, the multivariate Chain Rule, vector gradients, and building an autograd engine in pure Python.
+### [3. Vector Backpropagation Engine](03_backpropagation/)
+* [Concept 25: Computational Graphs & Vector Chain Rule](03_backpropagation/concept_25_computational_graphs/) — [Interactive Visualizer](03_backpropagation/concept_25_computational_graphs/demo.html)
+* [Concept 26: Building an Autograd Engine in Pure Python](03_backpropagation/concept_26_autograd_engine/) — [Interactive Visualizer](03_backpropagation/concept_26_autograd_engine/demo.html)
 
 ---
 
-### 4. Computer Vision & Object Detection
-* *The Real-World Problem:* How does a robot detect, classify, and track game pieces or field targets from raw camera pixel streams at 60 FPS?
-* *Key Concepts:* 2D Spatial Convolutions, Feature Maps, YOLO single-shot architectures, bounding box regression, and Non-Maximum Suppression (NMS).
+### [4. Computer Vision & Object Detection](04_computer_vision/)
+* [Concept 27: 2D Spatial Convolutions & Feature Maps](04_computer_vision/concept_27_spatial_convolutions/) — [Interactive Visualizer](04_computer_vision/concept_27_spatial_convolutions/demo.html)
+* [Concept 28: Object Detection, Anchor Boxes & IoU](04_computer_vision/concept_28_object_detection_iou/) — [Interactive Visualizer](04_computer_vision/concept_28_object_detection_iou/demo.html)
 
 ---
 
