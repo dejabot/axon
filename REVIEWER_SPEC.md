@@ -1,103 +1,143 @@
-# Axon Reviewer Specification & 7-Point Audit Rubric
+# Axon Reviewer Specification & Audit Rubric
 
-## Purpose
-The Reviewer Sub-Agent enforces rigorous standards across all Axon curriculum modules. Every concept must be audited against the 7-point rubric below before receiving approval (`[PASS]`) and being committed.
+## Purpose & Scope
+
+This is the single standard for **every concept in every axon** — Math, Machine Learning, Large Language Models, Physics, Kinematics, Localization and Reinforcement Learning. A concept is audited against the 8-point rubric below before it is committed.
+
+Nothing here is subject-specific. Where a rule mentions an example from one axon, it is illustrating the rule, not narrowing it.
 
 ---
 
 ## The Standard Concept Structure
 
-Every concept `README.md` follows this six-section shape, in this order:
+Every concept `README.md` follows this six-section shape, in this order. The companion `demo.html` is embedded via `<iframe>` immediately under the title.
 
-1. **The Real-World Problem** — an FRC or everyday scenario, stated in plain language with a diagram, that the reader cannot solve yet.
-
-   The opening should cost the reader **no vocabulary they do not already have**. A scenario that must first explain a mechanism has made them learn two things to learn one, and the mechanism is the one they did not come for. Prefer "a wheel pointed 30° off down-field at 4.0 m/s" over "a swerve module at a 30° azimuth"; name the jargon in a closing sentence once the mathematics has landed.
-
-   Pick a scenario the mathematics genuinely serves. A gamepad stick already reports x and y, so decomposing one into components solves a problem that does not exist; a steered wheel's state is genuinely an angle and a speed, so converting it to components is real work. Where a module can run one mechanism across all its concepts, do that rather than inventing a fresh vignette each time.
-2. **Building the Math** — the result derived step by step from something the reader already believes. No formula appears before its justification.
-3. **"Math!" Sidebars** — formal notation introduced as a translation of the prose, with an explicit "how to read this out loud" line. These are interleaved into section 2 rather than gathered at the end.
-4. **Code (Java & WPILib)** — first-principles Java that mirrors the derivation line for line, followed by the production WPILib class that replaces it.
-5. **Bridge to Machine Learning & Modern Autonomy** — a concrete architecture or algorithm, not a vague gesture at "AI uses this too".
+1. **The Real-World Problem** — a concrete scenario, in plain language with a diagram, that the reader cannot yet solve.
+2. **Building It From First Principles** — the result derived step by step from something the reader already believes. No formula, algorithm or claim appears before its justification.
+3. **"Math!" Sidebars** — formal notation introduced as a translation of the prose, each with an explicit "read this out loud as…" line. Interleaved into section 2, never gathered at the end.
+4. **Code** — a from-scratch tier that hides nothing, then the production tier a practitioner would actually write. See Language Policy.
+5. **Bridge to Real Systems** — where this is actually used, named specifically.
 6. **Checkpoints & Exploration Prompts** — 2 review questions with fully worked solutions, then 2 open-ended deep-dive prompts.
-
-The companion `demo.html` is embedded via `<iframe>` immediately under the title.
-
-**Index pages link to concepts, never to demos.** Axon and module README files list concepts and link to the concept directory only. A demo is an implementation detail of the concept that owns it — it may be rewritten, split or replaced — so it is reached by reading the concept, not from a table of contents. Do not add "Interactive Visualizer" links to any index.
-
-**One concept teaches one idea.** The reader should finish able to *use* it. Supporting material earns its place only when the main idea is incomplete without it — and "this is fascinating" is not that test. A passage the reader could skip and still apply the concept correctly belongs in a Deep Dive prompt, which is exactly what those prompts are for. Prefer one example worked all the way through to three sketched. When a section starts teaching a second subject — floating-point representation inside a concept about interpolation, say — that is the signal to cut it down to the one sentence the main idea actually needs and move the rest to a deep dive.
-
-**Length follows the topic.** These six sections are a shape, not a quota. A concept built on a theorem — the Pythagorean theorem, the ray-casting parity argument, the separating axis — earns a long "Building the Math". A concept that is a definition plus its applications, such as linear interpolation, does not, and inflating it with adjacent material produces a worse page than a short honest one. When in doubt, cut. The test for every paragraph is whether it derives something or prevents a real bug; if it does neither, delete it.
 
 ---
 
-## 7-Point Quality Audit Rubric
+## Design Principles
 
-| # | Checkpoint | Requirement | Pass Criteria |
-|---|---|---|---|
-| **1** | **Strict No-LaTeX & Clean Text Policy** | Zero LaTeX in `README.md` — delimiters (`$`, `$$`, `\(`, `\)`), commands (`\frac`, `\begin{}`) **and brace subscripts/superscripts (`v_{i+1}`, `x^{2}`)**, which render as literal characters since the site has no math renderer. Applies inside fenced blocks too, which is where they hide. No decorative emojis in technical text. | Verified zero LaTeX occurrences. Clean Unicode math, text grids, professional formatting without emoji clutter. |
-| **2** | **Depth Proportionate to the Topic** | A concept runs as long as its material genuinely requires, and no longer. Most land at 1,800–2,800 words (30–45 min); some legitimately land far shorter. | No hand-waving, no skipped steps — **and no padding**. Judge against the topic, not a target. A concept containing a real derivation that lands under 1,800 words is probably asserting; a concept with no theorem in it that reaches 1,800 words is probably padded. Both failures are equally bad. Past 45 minutes, ask whether it is two concepts. |
-| **3** | **Flattened Taxonomy & 6 Sections** | Follows the two-level hierarchy (Modules & Concepts) and the six standard sections defined above. | Contains 1. Real-World Problem, 2. Building the Math, 3. "Math!" sidebars, 4. Java & WPILib code, 5. ML/Autonomy bridge, 6. Checkpoints & Prompts. |
-| **4** | **No Black Boxes** | Every formula is derived, not asserted. Named prerequisite techniques are taught, not skipped. | Each result traces back to a stated starting assumption. Foundational named methods (e.g. SOH-CAH-TOA, the separating axis idea) appear explicitly rather than being silently assumed. |
-| **5** | **Embedded Visuals & Interactive Demos** | Zero ASCII art. Contains embedded companion visualizer iframe and responsive vector SVGs for geometric figures. | Verified zero ASCII box/line art. Companion `demo.html` is embedded via `<iframe>` alongside crisp inline SVGs that render correctly in both themes. |
-| **6** | **Dual Grounding** | Concrete, detailed connections to both FRC Autonomous Robotics and Modern ML/AI. | Explicit, realistic robotics mechanism/problem (e.g. swerve kinematics, gyro fusion, field-oriented drive) AND a named machine learning architecture/algorithm (e.g. rotary position embeddings, IoU-based detection loss, k-nearest neighbours in embedding space). |
-| **7** | **Interactive Demo & Dual-Theme Quality** | Standalone HTML5/Canvas visualizer in `demo.html`. | Zero external CDN scripts/fonts, loads the shared `assets/theme.js` and `assets/axon.css`, repaints on the `axon-theme-changed` event, touch/mouse drag interactivity, real-time telemetry panel, smooth canvas rendering. |
+These are the rules that decide what goes in and what stays out. Most were learned by getting them wrong.
+
+### One concept teaches one idea
+
+The reader should finish able to **use** it. Supporting material earns its place only when the main idea is incomplete without it, and *"this is fascinating"* is not that test. A passage the reader could skip while still applying the concept correctly belongs in a Deep Dive prompt — that is what those prompts are for.
+
+When a section starts teaching a second subject, cut it to the one sentence the main idea needs and move the rest to a deep dive. Prefer one example worked all the way through to three sketched.
+
+### Length follows the topic
+
+The six sections are a shape, not a quota. A concept built on a real derivation earns a long section 2. A concept that is a definition plus its applications does not, and padding it with adjacent material produces a worse page than a short honest one.
+
+Most concepts land at 1,800–2,800 words, or 30–45 minutes including code, demo and checkpoints. Some legitimately land far shorter. Judge against the topic, never against a target. **Under-length and over-length are equally serious failures**: the first usually means results are being asserted rather than derived, the second usually means padding.
+
+The test for every paragraph: does it derive something, or prevent a real bug? If neither, delete it.
+
+### Examples must be honest
+
+Three tests, all of which real drafts have failed:
+
+* **Does the mathematics do work the reader needs?** A gamepad stick already reports x and y, so decomposing one into components solves a problem that does not exist. A steered wheel's state genuinely is an angle and a speed, so converting it is real work.
+* **Does it cost vocabulary?** An opening that must first explain a mechanism makes the reader learn two things to learn one, and the mechanism is the one they did not come for. Prefer "a wheel pointed 30° off down-field at 4.0 m/s" to "a swerve module at a 30° azimuth"; name the jargon after the idea has landed.
+* **Is it real?** A contrived example is the most reliable signal that a topic was included to fill space. If you had to invent an implausible mechanism to justify a section, delete the section rather than the mechanism.
+
+Where a module can run one mechanism across all its concepts, do that rather than inventing a fresh vignette each time.
+
+### Ground in real systems, but never force it
+
+Every concept must connect to something real and **named** — a specific architecture, algorithm, mechanism or failure. "AI uses this too" is not a grounding.
+
+Where a concept genuinely serves both robotics and machine learning, ground it in both; that dual grounding is a large part of this curriculum's value. **But do not manufacture a connection that is not there.** A strained robotics tie-in on a KV-cache concept, or a forced ML angle on gearbox inertia, is the contrived-example failure wearing a different hat. One honest grounding beats two, one of which is invented.
+
+### Diagrams must agree with the prose
+
+Every number in a figure must match the number in the text, and the figure's geometry must match its own labels. A diagram labelled 30° whose arc actually sweeps 40° teaches the wrong thing to any reader who measures it, and no automated check will catch it. Verify angles, lengths and ratios in figures numerically before accepting them.
 
 ---
 
 ## Notation
 
-There is no math renderer. Everything is Unicode or plain text, so notation has to survive as literal characters.
+There is no math renderer. Everything is Unicode or plain text and must survive as literal characters.
 
-**Subscripts.** Use Unicode for a bare index that reads cleanly at body-text size — `x₁`, `p₂`, `Σᵢ`. Use bracket notation the moment the index is computed: `v[i+1]`, `v[n−2]`, `x[i]`. Unicode can technically express `vᵢ₊₁` and `vₙ₋₂`, but those are hard to read small, font support for `ᵢ` is patchy, and brackets have the decisive advantage of matching the array indexing in the concept's own code. Never mix both conventions inside one page.
+**Subscripts.** Unicode for a bare index that reads cleanly at body size — `x₁`, `p₂`, `Σᵢ`. Bracket notation the moment the index is computed — `v[i+1]`, `v[n−2]`, `x[i]`. Unicode *can* express `vᵢ₊₁` and `vₙ₋₂`, but they are hard to read small, font support for `ᵢ` is patchy, and brackets match the array indexing in the concept's own code. Never mix conventions within a page.
 
-**Everything else.** Unicode operators and Greek (`θ`, `Δ`, `Σ`, `√`, `≥`, `≠`, `⟺`, `‖ ‖`, `≈`, `·`, `⁻¹`, `²`). Multi-line formulas go in a fenced block with box-drawing characters if they need alignment. Prefer a formula a reader can retype over one that only looks typeset.
+**Everything else.** Unicode operators and Greek: `θ`, `Δ`, `Σ`, `√`, `≥`, `≠`, `⟺`, `‖ ‖`, `≈`, `·`, `⁻¹`, `²`. Multi-line formulas go in fenced blocks, using box-drawing characters where alignment helps. Prefer a formula the reader can retype over one that merely looks typeset.
 
 ---
 
 ## Language Policy
 
-Teaching code follows the domain, matching CURRICULUM_SPEC rule 3. Every code section leads with a **from-scratch tier** that hides nothing, followed by the **production tier** — the library call a practitioner would actually write.
-
-Which consumer a concept serves determines the shape:
+Every code section leads with a **from-scratch tier** that hides nothing, then a **production tier** — the library call a practitioner would write.
 
 | Concept serves | From-scratch tier | Production tier(s) |
 |---|---|---|
 | Robotics only | Plain Java | WPILib |
 | Machine learning only | Plain Python | PyTorch |
-| **Both** | **Plain Python** — it reads closest to the notation, so the derivation stays visible | **WPILib (Java) and PyTorch**, where each is genuinely illuminating |
+| **Both** | **Plain Python** — closest to the notation, so the derivation stays visible | **WPILib (Java) and PyTorch**, where each genuinely illuminates |
 
-By axon: Geometry, Trigonometry, Physics, Kinematics and Localization are robotics. Machine Learning, LLMs and Reinforcement Learning are ML. Linear Algebra, Calculus and Probability are mixed, concept by concept — the dual-consumer concepts are vectors, dot products, matrix multiplication, the chain rule, gradients, the normal distribution, Bayes' rule, and maximum likelihood.
+By axon: Geometry, Trigonometry, Physics, Kinematics and Localization are robotics. Machine Learning, LLMs and Reinforcement Learning are ML. Linear Algebra, Calculus and Probability are mixed concept by concept — the dual-consumer concepts are vectors, dot products, matrix multiplication, the chain rule, gradients, the normal distribution, Bayes' rule and maximum likelihood.
 
-**"Where appropriate" has teeth.** A dual concept does not mechanically emit three code blocks. Include a production tier only where it teaches something: dot products earn both (projection onto a swerve axis, cosine similarity between embeddings), while eigenvectors earn only PyTorch. Judge per concept.
-
-**Signpost every code block with its language** as an explicit subheading — "First Principles (Python)", "In a Robot Project (Java & WPILib)", "In a Model (PyTorch)". A page carrying two languages is unreadable without it.
-
-Rules for the from-scratch tier in Python: **no NumPy**. Lists and loops make the arithmetic visible, which is the entire point of that tier — a vectorised one-liner teaches nothing about what is being vectorised. NumPy may appear in the production tier as a stepping stone to PyTorch where it clarifies the leap.
-
-Rules for the production tiers: they must produce the **same numbers** as the from-scratch tier on the same input, and the concept should say so explicitly. A reader who cannot connect the tiers has learned an API, not an idea.
-
-**Libraries are not prerequisites.** The prerequisite chain governs mathematical tools, not tooling. The from-scratch tier is load-bearing — remove it and the derivation collapses. The production tier is illustrative — remove it and the reader loses a signpost, not an argument. So a Math concept may show PyTorch long before the frameworks module teaches PyTorch, exactly as Geometry Concept 01 already shows `Translation2d` with no WPILib primer anywhere in the curriculum. Introduce the call, say plainly what it does, and move on. Do not withhold a production example on prerequisite grounds.
-
-Rules for the from-scratch tier in Python: **no NumPy**. Lists and loops make the arithmetic visible, which is the entire point of that tier — a vectorised one-liner teaches nothing about what is being vectorised. NumPy may appear in the production tier as a stepping stone to PyTorch where it clarifies the leap.
-
-Rules for the PyTorch tier: it must produce the **same numbers** as the from-scratch tier on the same input, and the concept should say so explicitly. A reader who cannot connect the two tiers has learned an API, not an idea.
-
-TensorFlow and Keras are not used in concept pages. They appear only in the frameworks module's comparison appendix, so that a reader who meets Keras elsewhere can map it onto what they already know.
-
-### Out of scope: team-specific frameworks
-
-**WPILib is the only production tier for robotics concepts.** It covers every concept in this curriculum, and Axon is a curriculum about the underlying mathematics, not a tutorial for any particular team's framework.
-
-Do not reference Maroon Framework or any other team-specific framework, and do not read from team robot repositories. If a concept seems to need a framework primitive, it does not — express it in WPILib or in plain Java.
+* **"Where appropriate" has teeth.** A dual concept does not mechanically emit three code blocks. Dot products earn both tiers (projection onto a heading, cosine similarity between embeddings); eigenvectors earn only PyTorch.
+* **Signpost every block with its language** as a subheading — "First Principles (Python)", "In a Robot Project (Java & WPILib)", "In a Model (PyTorch)". A two-language page is unreadable without it.
+* **No NumPy in the from-scratch tier.** Lists and loops keep the arithmetic visible; a vectorised one-liner teaches nothing about what is being vectorised. NumPy may appear in a production tier as a stepping stone to PyTorch.
+* **Tiers must agree numerically.** The production tier must produce the same numbers as the from-scratch tier on the same input, and the concept should say so. A reader who cannot connect the tiers has learned an API, not an idea.
+* **Libraries are not prerequisites.** The prerequisite chain governs *ideas*, not tooling. The from-scratch tier is load-bearing; the production tier is illustrative. A Math concept may show PyTorch long before the frameworks module exists, exactly as Geometry Concept 01 shows `Translation2d` with no WPILib primer anywhere. Never withhold a production example on prerequisite grounds.
+* TensorFlow and Keras appear only in the frameworks module's comparison appendix.
+* **WPILib is the only production tier for robotics.** Do not reference team-specific frameworks or read from team robot repositories. Axon teaches the underlying ideas, not any one team's framework.
 
 ---
 
-## Review Process & Verdict Output
+## Prerequisite Discipline
 
-The Reviewer sub-agent must execute a structured review with:
-1. Checklist evaluation against each of the 7 checkpoints.
-2. Exact word count, LaTeX scan, SVG/visual verification, and theme toggle confirmation.
-3. Link check: every relative link in the concept and its module index resolves to a file that exists.
-4. Final Verdict:
-   - **`[PASS]`**: All 7 points met with exceptional quality. Ready to commit.
-   - **`[REVISE]`**: List specific deficiencies and required fixes.
+A concept may use only what the reader has already been given. This applies across axons, not just within one: Localization needs frames from Math Module 2, matrices from Module 3 and covariance from Module 5, and must not be written as though it can assume them early.
+
+When a concept needs an unavailable tool, **move the concept or move the tool** — never forward-reference and hope. Each axon outline states the prerequisite chain explicitly, and that statement is the contract handed to an authoring agent.
+
+Cross-module restructuring is proposed to a human, never executed by a concept author.
+
+---
+
+## 8-Point Audit Rubric
+
+| # | Checkpoint | Pass criteria |
+|---|---|---|
+| **1** | **No LaTeX, clean text** | Zero LaTeX: delimiters (`$`, `\(`), commands (`\frac`, `\begin{}`), and brace sub/superscripts (`v_{i+1}`, `x^{2}`) — all render as literal characters. Checked inside fenced blocks too, which is where they hide. No decorative emoji. |
+| **2** | **Depth proportionate to the topic** | No hand-waving, no skipped steps, **and no padding**. Judged against the topic, not a word target. Past 45 minutes, ask whether it is two concepts. |
+| **3** | **Six-section structure** | All six sections present and in order, with "Math!" sidebars interleaved rather than appended. |
+| **4** | **No black boxes** | Every result traces to a stated starting assumption. Named prerequisite techniques are taught, not assumed — SOH-CAH-TOA, the separating axis, the chain rule. |
+| **5** | **Correct, consistent visuals** | Zero ASCII art. Inline SVGs render in both themes. **Figures agree numerically with the prose** — angles, lengths and ratios verified, not eyeballed. |
+| **6** | **Honest grounding** | Connected to at least one named real system. Dual robotics/ML grounding where genuine; no manufactured connections. |
+| **7** | **Working demo** | `demo.html` loads `assets/theme.js` and `assets/axon.css`, repaints on `axon-theme-changed`, supports mouse and touch, shows live telemetry, uses no external CDN. **Verified by loading it in a browser** — a demo can pass code review and render blank. |
+| **8** | **Prerequisite compliance** | Uses nothing from a later module. Forward references are named as pointers, never used. |
+
+---
+
+## Common Failure Modes
+
+Empirical — every one of these shipped at least once in this repository.
+
+1. **Asserting instead of deriving.** The formula appears with no account of where it came from. Symptom: a concept well under length.
+2. **Padding instead of deriving.** Adjacent topics absorbed to reach a word count. Symptoms: a concept well over length, a contrived example, or a section teaching a second subject.
+3. **The unearned prerequisite.** Teaching frames with a rotation the reader has not met, or a matrix before matrices exist. Usually invisible to the author, who knows the tool.
+4. **Correct code, wrong lesson.** Naive addition presented as equivalent to a library call that actually rotates — right for heading 0°, wrong everywhere else, and it survives testing.
+5. **The blank demo.** A canvas sized from a container that is sized from the canvas grows without bound on resize until allocation fails. Passes code review; renders nothing.
+6. **The lying diagram.** A figure whose geometry contradicts its labels.
+7. **Stale prose about structure.** Text describing an ordering that has since changed. Link checkers miss it because the links still resolve. Sweep for it after every restructuring.
+
+---
+
+## Review Process & Verdict
+
+1. Evaluate all 8 checkpoints.
+2. Run `python3 tools/audit.py <path>` for the mechanical checks: LaTeX, Liquid tags that break the Jekyll build, word count, broken links, demo canvas sizing.
+3. Load the demo in a browser. Confirm it renders, that canvas height is stable across repeated resize events, and that the telemetry is numerically correct.
+4. Verify the arithmetic in every worked example and every figure.
+5. Verdict:
+   * **`[PASS]`** — ready to commit.
+   * **`[REVISE]`** — list specific deficiencies and required fixes.

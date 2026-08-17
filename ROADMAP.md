@@ -10,9 +10,12 @@ The living plan: seven axons, each a stack of modules, each module a sequence of
 
 Three rules govern the whole map. Every structural decision below follows from them.
 
-1. **Strict prerequisite ordering.** A concept may only use tools already taught. This is the rule that reshaped Module 1 — geometry could not teach coordinate frames because frames need rotation, and rotation needs trigonometry, which comes later. When a concept needs an unavailable tool, either move the concept or move the tool. Never forward-reference and hope.
-2. **Language follows the domain.** Robotics concepts are Java plus WPILib. Machine learning and LLM concepts are from-scratch Python plus PyTorch. Math concepts take the language of whichever consumer they serve. See CURRICULUM_SPEC rule 3.
-3. **Derive, never assert.** 1,800–2,800 words, every formula traced back to something the reader already believes, "Math!" sidebars for notation, two checkpoints and two deep dives. See REVIEWER_SPEC.
+1. **Strict prerequisite ordering.** A concept may only use tools already taught. This is the rule that reshaped Math Module 1 — geometry could not teach coordinate frames, because frames need rotation and rotation needs trigonometry, which comes later. It binds across axons too: Localization needs frames from Math Module 2, matrices from Module 3 and covariance from Module 5. When a concept needs an unavailable tool, move the concept or move the tool. Never forward-reference and hope.
+2. **Language follows the domain.** Robotics concepts are Java plus WPILib. Machine learning and LLM concepts are from-scratch Python plus PyTorch. Math concepts take the language of whichever consumer they serve, and both where they genuinely serve both.
+3. **Derive, never assert — and never pad.** Every result traced to something the reader already believes, "Math!" sidebars for notation, two checkpoints and two deep dives. Length follows the topic rather than a quota: most concepts run 30–45 minutes, some honestly run shorter, and inflating a small topic is as serious a failure as hand-waving a large one.
+4. **Ground honestly.** Every concept connects to a named real system. Dual robotics/ML grounding wherever it is genuine — and nowhere it is not, since a manufactured connection is worse than a single honest one.
+
+The full standard is **REVIEWER_SPEC.md**, which applies identically to all seven axons.
 
 ---
 
