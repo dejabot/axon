@@ -18,17 +18,21 @@ Welcome to **Module 2: Trigonometry & Angles**. [Module 1](../01_geometry/) buil
   * *The Everyday Problem:* The camera sees a game piece 1.5 metres ahead. Where is it on the field?
   * *Code & Math:* Rigid transforms combining rotation and translation, chaining field to robot to camera, and inverting a transform.
 
-* **[Concept 04: 4-Quadrant Heading with atan2](04_concept_atan2_heading/)**
-  * *The Everyday Problem:* Why does standard `tan⁻¹(y/x)` confuse aiming North-East with South-West?
-  * *Code & Math:* The 4 quadrants, negative sign cancellations, and the robust `atan2(y, x)` function.
+* **[Concept 04: Inverse Trig & 4-Quadrant Heading with atan2](04_concept_atan2_heading/)**
+  * *The Everyday Problem:* You know the two components. How do you get the angle back — without confusing North-East for South-West?
+  * *Code & Math:* Why each inverse trig function needs a restricted range, how `tan⁻¹(y/x)` collapses two quadrants into one, and how `atan2(y, x)` recovers the sign information that the division destroyed.
 
-* **[Concept 05: Angle Wrapping & Swerve 180° Speed Flip](05_concept_angle_wrapping_swerve/)**
-  * *The Everyday Problem:* Why does a naive angle subtraction make a robot spin 340° instead of turning 20°?
-  * *Code & Math:* Modular angle difference on a circle, shortest path wrapping, and swerve drive direction inversion.
+* **[Concept 05: Angle Wrapping & Shortest Angular Distance](05_concept_angle_wrapping_swerve/)**
+  * *The Everyday Problem:* A wheel at 350° is told to go to 10°. Why does it spin 340° the wrong way for a 20° move?
+  * *Code & Math:* Angles live on a circle rather than a line, folding a difference into ±180°, why interpolating angles needs the wrap first, and the 90° threshold behind the swerve 180° flip.
 
-* **[Concept 06: 3D Rotations & Quaternions](06_concept_3d_rotations_quaternions/)**
-  * *The Everyday Problem:* Why do 3-axis Euler angles lock up and crash IMU gyros when pitching straight up (Gimbal Lock)?
-  * *Code & Math:* Roll/Pitch/Yaw limitations and unit Quaternions `(w, x, y, z)` on the 4D sphere.
+* **[Concept 06: Law of Sines, Law of Cosines & Two-Link Arms](06_concept_law_of_cosines/)**
+  * *The Everyday Problem:* A jointed arm forms a triangle with no right angle in it. Everything so far assumed one.
+  * *Code & Math:* The law of cosines derived as a generalization of Pythagoras, solving a triangle from three sides, two-link inverse kinematics, reachability limits, and the elbow-up/elbow-down ambiguity.
+
+* **[Concept 07: 3D Rotations, Gimbal Lock & Quaternions](07_concept_3d_rotations_quaternions/)**
+  * *The Everyday Problem:* Yaw alone describes a robot on flat carpet. A robot on a ramp, or an arm on two axes, needs more.
+  * *Code & Math:* Why 3D rotations depend on order, gimbal lock as a lost degree of freedom, Euler's rotation theorem, and quaternions as an axis-angle encoding.
 
 ---
 
