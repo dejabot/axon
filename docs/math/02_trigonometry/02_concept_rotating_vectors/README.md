@@ -1,4 +1,4 @@
-# Concept 02: Rotating a Vector & the 2D Rotation Matrix
+# Concept 02: Rotating a Vector
 
 > **▶ Interactive Demo: [Rotation & Field-Oriented Drive Visualizer](demo.html)**
 >
@@ -131,15 +131,9 @@ Two lines of arithmetic, and everything else in this concept is a consequence of
 **Sanity check it.** Set θ = 0: `cos 0 = 1`, `sin 0 = 0`, so `x' = x` and `y' = y`. Rotating by nothing changes nothing. Now set θ = 90°: `cos 90° = 0`, `sin 90° = 1`, giving `x' = −y` and `y' = x`. Feed in `(1, 0)` and you get `(0, 1)` — X really did swing round to Y. The formula behaves.
 
 > ### Math!
-> Those two lines are usually packed into a **matrix**, a rectangular grid of numbers that stands for a transformation:
+> The prime mark in `x'` and `y'` is read **"x-prime"** and **"y-prime"**. It is not a derivative here — it simply means "the new version of", and it is the standard way to name a transformed copy of something without inventing a fresh letter.
 >
-> ```
->            ⎡ cos θ   −sin θ ⎤        ⎡ x' ⎤   ⎡ cos θ   −sin θ ⎤ ⎡ x ⎤
->    R(θ) =  ⎢                ⎥        ⎢    ⎥ = ⎢                ⎥ ⎢   ⎥
->            ⎣ sin θ    cos θ ⎦        ⎣ y' ⎦   ⎣ sin θ    cos θ ⎦ ⎣ y ⎦
-> ```
->
-> Read `R(θ)` out loud as **"R of theta"**, or "the rotation matrix for theta". Read the second expression as **"x-prime y-prime equals R of theta times x y"**. The prime mark `'` is not a derivative here — it just means "the new version of". To multiply, take each row of the matrix, pair it term by term with the column vector, and add: row one gives `cos θ · x + (−sin θ) · y`, which is exactly our `x'`. Notice the columns of the matrix are precisely where `î` and `ĵ` landed. That is true of every matrix, not just this one, and the linear algebra module builds on it.
+> Notice what the four coefficients in those two equations are. Reading down the columns, `(cos θ, sin θ)` is exactly where `î` landed, and `(−sin θ, cos θ)` is exactly where `ĵ` landed. That is not a coincidence, and it generalises: these four numbers are usually packed into a single object called a **matrix**, and the fact that its columns are the images of the basis vectors turns out to be true of every matrix, not just this one. The linear algebra module derives what that object is and how to multiply by it. For now the two scalar equations are all you need, and computing them by hand is worth doing — it makes the abstraction land properly when it arrives.
 
 ### Step 4: Rotation preserves length
 
@@ -172,32 +166,36 @@ Length out equals length in, for every angle and every vector. A transformation 
 
 ### Step 5: Undoing a rotation is free
 
-To rotate back, rotate by `−θ`. Two facts about the unit circle make this cheap: `cos(−θ) = cos θ` (a point and its mirror image below the X-axis share the same x-coordinate) while `sin(−θ) = −sin θ` (their y-coordinates are opposite). Substituting:
+To rotate back, rotate by `−θ`. Two facts about the unit circle make this cheap: `cos(−θ) = cos θ` (a point and its mirror image below the X-axis share the same x-coordinate) while `sin(−θ) = −sin θ` (their y-coordinates are opposite). Substituting those into our two equations:
 
 ```
-            ⎡  cos θ   sin θ ⎤
-   R(−θ) =  ⎢                ⎥
-            ⎣ −sin θ   cos θ ⎦
+   x' =  x·cos θ + y·sin θ
+   y' = −x·sin θ + y·cos θ
 ```
 
-Compare that to `R(θ)`. It is the same four numbers with the grid flipped across its diagonal — the rows have become the columns. That operation is called the **transpose**, written `Rᵀ` and read "R transpose".
+Compare the coefficients with the forward rotation from Step 3. They are the same four numbers — `cos θ`, `sin θ`, `−sin θ`, `cos θ` — merely rearranged. Undoing a rotation costs you nothing beyond flipping one sign. There is no division, no square root, and nothing that can lose precision.
 
-> ### Math!
-> ```
->    R(θ)⁻¹ = R(−θ) = R(θ)ᵀ
-> ```
-> Read as **"the inverse of R equals R of minus theta equals R transpose."** A matrix whose inverse is its transpose is called **orthogonal**. Practically, this means you should never run a general matrix-inversion routine on a rotation — inverting a 2×2 matrix numerically costs a division that can lose precision, while transposing is just reading the same four numbers in a different order and is exact.
+That is worth appreciating, because "undo this transformation" is usually an expensive and numerically delicate operation. For rotations it is almost free, and the reason will become sharp in the linear algebra module: the rearrangement you just spotted has a name, and rotations belong to a special family of transformations for which reversing is only ever a relabelling.
 
 ### Step 6: Rotations compose by adding angles
 
-Rotate by β, then by α. Physically the result must be a single rotation by `α + β`. Written as matrices, `R(α)·R(β) = R(α + β)`. If you carry out that matrix multiplication by hand, the top-left entry comes out as `cos α cos β − sin α sin β`, and it must equal the top-left entry of `R(α + β)`, namely `cos(α + β)`. You have just derived the angle-addition identity from geometry:
+Rotate by β, then by α. Physically the result must be a single rotation by `α + β` — there is no other outcome a turn followed by a turn could have.
+
+Now do it algebraically. Take `î = (1, 0)`, rotate it by β to get `(cos β, sin β)`, then feed that result back through the Step 3 equations with angle α:
+
+```
+   x'' = cos β·cos α − sin β·sin α
+   y'' = cos β·sin α + sin β·cos α
+```
+
+But we already know where a single rotation by `α + β` sends `î`: to `(cos(α + β), sin(α + β))`. Both routes must land on the same point, so the expressions must be equal. You have just derived the angle-addition identities from geometry, rather than memorising them:
 
 ```
    cos(α + β) = cos α cos β − sin α sin β
    sin(α + β) = sin α cos β + cos α sin β
 ```
 
-One caution: matrix multiplication generally does not commute, and in 3D rotations genuinely do not — turn a book right then forward, and you end up somewhere different than forward then right. In 2D we get lucky, because `α + β = β + α`. The trigonometry axon returns to this when 3D rotations and quaternions arrive.
+One caution: in 2D we get lucky, because `α + β = β + α`, so the order you apply two rotations in cannot matter. That luck runs out in three dimensions. Turn a book 90 degrees to the right and then 90 degrees forward, then reset and do it in the opposite order — the book ends up in two visibly different orientations. Concept 07 returns to this when 3D rotations and quaternions arrive, and it is the root of gimbal lock.
 
 ### Step 7: Rotating about a point that is not the origin
 
@@ -269,13 +267,13 @@ ChassisSpeeds speeds =
 
 ## 4. Bridge to Machine Learning & Modern Autonomy
 
-The 2×2 rotation matrix is, unmodified, the mechanism behind **Rotary Position Embeddings (RoPE)** — the position-encoding scheme used in Llama, Mistral, Qwen and most other current large language models.
+The two equations you just derived are, unmodified, the mechanism behind **Rotary Position Embeddings (RoPE)** — the position-encoding scheme used in Llama, Mistral, Qwen and most other current large language models.
 
 A transformer processes all tokens in parallel, so on its own it cannot tell "the robot hit the wall" from "the wall hit the robot". It needs position information injected. RoPE does this by taking each token's embedding vector, chopping its hundreds of dimensions into consecutive pairs, and treating every pair as a little 2D vector — then rotating pair number `k` of the token at position `m` by the angle `m · θₖ`. That is precisely `R(θ)` from Step 3, applied a few hundred times per token.
 
 Two properties derived above are exactly why this works rather than wrecking the model. **Length preservation (Step 4)** means the rotation cannot inflate or shrink any embedding, so attention scores stay numerically well behaved no matter how long the context grows. **Composition by angle addition (Step 6)** is the deeper one: when attention compares a token at position `m` with a token at position `n`, the two rotations combine into a single rotation by `(m − n)·θₖ`. The absolute positions cancel and only the *relative* distance survives. A model trained on short documents can therefore generalize to longer ones, because it only ever learned about gaps between tokens, never about absolute slots.
 
-The same orthogonality property from Step 5 shows up in network initialization: orthogonal weight matrices are a standard initialization scheme for deep and recurrent networks precisely because they neither amplify nor attenuate the signal passing through them, which keeps gradients from exploding or vanishing across many layers.
+The length-preserving property from Step 4 shows up again in how networks are initialized. Transformations that neither amplify nor attenuate the signal passing through them are a standard choice for initializing deep and recurrent networks, precisely because a transformation that stretches even slightly, applied across fifty layers, compounds into gradients that explode or vanish. Rotations are the archetype of a transformation that does neither, and the linear algebra module gives this family its proper name.
 
 ---
 
@@ -302,7 +300,7 @@ A teammate writes field-oriented drive as `rotate(fieldVx, fieldVy, +heading)` i
 ---
 
 ### Deep Dive 1
-Step 4 proved rotation preserves length. Investigate what else it preserves: take two vectors, rotate both by the same θ, and work out whether the angle *between* them changes. Then connect this to the determinant — compute the determinant of `R(θ)` for several angles and explain what the constant value you find says about area and about whether a rotation can turn a shape into its mirror image. Concept 04 of the linear algebra module formalizes what you will discover.
+Step 4 proved rotation preserves length. Investigate what else it preserves: take two vectors, rotate both by the same θ, and work out whether the angle *between* them changes. Then take a triangle with known area, rotate all three of its corners, and compute the new area using the shoelace formula from Geometry Concept 05. Does rotation change area? Does it change the *sign* of the shoelace sum — that is, can a rotation turn a shape into its mirror image? Argue why not from the geometry alone. The linear algebra module formalises what you will discover under the name "determinant".
 
 ### Deep Dive 2
 Step 6 noted that 2D rotations commute but 3D rotations do not. Test this physically: take a book, rotate it 90 degrees about the vertical axis and then 90 degrees about the horizontal axis, and note the final orientation. Reset and perform the two rotations in the opposite order. Then research why this non-commutativity leads to **gimbal lock** in Euler-angle systems, and why quaternions are the standard fix in robot IMUs and 3D graphics.

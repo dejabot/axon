@@ -93,9 +93,9 @@
         <span class="stat-val" id="errVal">0.0°</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">R(θ)</span>
-        <span class="matrix" id="matVal">[ 0.766  −0.643 ]
-[ 0.643   0.766 ]</span>
+        <span class="stat-label">where î and ĵ land</span>
+        <span class="matrix" id="matVal">î → ( 0.766,  0.643)
+ĵ → (−0.643,  0.766)</span>
       </div>
     </div>
   </div>
@@ -281,8 +281,11 @@
       errEl.textContent = (Math.abs(err) < 0.05 ? '0.0' : err.toFixed(1)) + '°';
       errEl.className = 'stat-val' + (Math.abs(err) > 0.5 ? ' warn' : '');
 
+      // The two images the derivation is built from, rather than a matrix —
+      // matrices are Module 3's to introduce.
       set('matVal',
-        '[ ' + fmt(c) + '  ' + fmt(-s) + ' ]\n[ ' + fmt(s) + '   ' + fmt(c) + ' ]');
+        'î → (' + fmt(c) + ', ' + fmt(s) + ')\n' +
+        'ĵ → (' + fmt(-s) + ', ' + fmt(c) + ')');
       set('thetaVal', thetaDeg + '°');
     }
 
