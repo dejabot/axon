@@ -43,7 +43,10 @@ def prose_words(text):
     t = re.sub(r'\$\$.*?\$\$', '', t, flags=re.S)
     t = re.sub(r'\$[^$\n]+\$', '', t)
     t = re.sub(r'<svg.*?</svg>', '', t, flags=re.S)
-    t = re.sub(r'<[^>]+>', '', t)
+    # Require a letter or slash after '<' so that prose like `C < 90°` is not
+    # mistaken for a tag. The naive pattern swallowed everything up to the next
+    # '>', silently eating whole sections and under-reporting the count.
+    t = re.sub(r'</?[a-zA-Z][^>]*>', '', t)
     return len(t.split())
 
 
