@@ -9,8 +9,9 @@ Welcome to the **Mathematical Foundations Axon**. This track bridges high-school
 ### [1. Geometry for Robotics](01_geometry/)
 * [Concept 01: Coordinates, Poses & Pythagorean Distance](01_geometry/01_concept_coordinates_distance/) — [Interactive Visualizer](01_geometry/01_concept_coordinates_distance/demo.html)
 * [Concept 02: Lines, Segments & Intersections](01_geometry/02_concept_lines_intersections/) — [Interactive Visualizer](01_geometry/02_concept_lines_intersections/demo.html)
-* [Concept 03: Bounding Boxes, Overlap & Collision](01_geometry/03_concept_bounding_boxes/) — [Interactive Visualizer](01_geometry/03_concept_bounding_boxes/demo.html)
-* [Concept 04: Polygons, Areas & Field Zones](01_geometry/04_concept_polygons_zones/) — [Interactive Visualizer](01_geometry/04_concept_polygons_zones/demo.html)
+* [Concept 03: Linear Interpolation, Lookup Tables & Blending](01_geometry/03_concept_linear_interpolation/) — [Interactive Visualizer](01_geometry/03_concept_linear_interpolation/demo.html)
+* [Concept 04: Bounding Boxes, Overlap & Collision](01_geometry/04_concept_bounding_boxes/) — [Interactive Visualizer](01_geometry/04_concept_bounding_boxes/demo.html)
+* [Concept 05: Polygons, Areas & Field Zones](01_geometry/05_concept_polygons_zones/) — [Interactive Visualizer](01_geometry/05_concept_polygons_zones/demo.html)
 
 ---
 

@@ -320,5 +320,5 @@ This concept tested a path against barriers one at a time. A real field has doze
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
   <div><a href="../01_concept_coordinates_distance/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 01: Coordinates & Distance</a></div>
   <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 1 Overview</a></div>
-  <div><a href="../03_concept_bounding_boxes/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 03: Bounding Boxes →</a></div>
+  <div><a href="../03_concept_linear_interpolation/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 03: Linear Interpolation →</a></div>
 </div>

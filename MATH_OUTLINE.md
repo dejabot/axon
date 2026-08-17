@@ -4,7 +4,7 @@ This is the agreement document for the Math axon, and the **toolkit manifest** h
 
 **Status:** `[deep]` meets the bar · `[thin]` needs a pass · `[new]` not yet written
 
-**Time target:** ~30 minutes per concept. Prose 1,800–2,400 words (2,800 hard ceiling), plus code, demo and two worked checkpoints.
+**Time target:** see the Time target section below.
 
 ---
 
@@ -27,14 +27,24 @@ Two consequences worth stating plainly, because both were violated in the origin
 
 ### Language frugality
 
-Dual-language concepts cost roughly double the code and push toward the time ceiling, so they are reserved for concepts that genuinely serve both consumers. **Exactly four concepts are dual-language:**
+A concept serving only robotics is Java plus WPILib. A concept serving only machine learning is Python plus PyTorch. A concept serving **both** derives from scratch **once, in Python** — it reads closest to the notation — and then grounds it in WPILib and in PyTorch wherever each is genuinely illuminating.
 
-* Module 3 Concept 2 — dot products (projection for robotics, cosine similarity for embeddings)
-* Module 3 Concept 4 — matrix multiplication (transform composition, and the neural network forward pass)
-* Module 4 Concept 2 — the chain rule (motion derivatives, and backpropagation)
-* Module 5 Concept 5 — maximum likelihood (least squares for system identification, and cross-entropy for classifiers)
+Writing the derivation once rather than twice is what makes dual-consumer concepts affordable. The dual set is:
 
-Every other concept picks its dominant consumer and cross-references the other.
+| Concept | Robotics face | ML face |
+|---|---|---|
+| M3.1 Vectors & Basis | swerve module vectors | embedding dimensions |
+| M3.2 Dot Products | projection onto a heading | cosine similarity |
+| M3.4 Matrix Multiplication | chaining frame transforms | the forward pass |
+| M4.2 The Chain Rule | velocity through a gear ratio | backpropagation |
+| M4.5 Gradients | — | loss landscape descent |
+| M5.1 Normal Distribution | sensor noise | weight initialisation |
+| M5.3 Bayes' Rule | fusing two range sensors | posterior inference |
+| M5.5 Maximum Likelihood | fitting kS, kV, kA | cross-entropy |
+
+Not every row earns all three code blocks. Emit a production tier only where it teaches something — M4.5 has no robotics face worth the space, so it gets PyTorch alone. Signpost every block with its language as a subheading.
+
+Everything in Modules 1 and 2 is robotics-only: Java plus WPILib throughout.
 
 ### Time target
 
@@ -78,10 +88,10 @@ Arrives with: Modules 1–2. Leaves with: matrices as transformations, matrix mu
 
 | # | Concept | Scope & key derivations | Language | Status |
 |---|---|---|---|---|
-| 1 | Vectors, Scaling & Basis Spaces | Vector as displacement vs. position; scalar multiplication; linear combinations; basis and span; why `î`, `ĵ` are a choice | Java | `[thin]` |
-| 2 | Dot Products, Projections & Alignment | Two definitions (component sum and `‖a‖‖b‖cos θ`) and the proof they agree; projection; orthogonality; cosine similarity | **Both** | `[thin]` |
+| 1 | Vectors, Scaling & Basis Spaces | Vector as displacement vs. position; scalar multiplication; linear combinations; basis and span; why `î`, `ĵ` are a choice | **Dual** | `[thin]` |
+| 2 | Dot Products, Projections & Alignment | Two definitions (component sum and `‖a‖‖b‖cos θ`) and the proof they agree; projection; orthogonality; cosine similarity | **Dual** | `[thin]` |
 | 3 | Matrices as Coordinate Transformers | A matrix is where the basis vectors land; reading a matrix by its columns. **The payoff concept: Module 2's two rotation equations are revealed as `R(θ)`**, with its columns being exactly the `î` and `ĵ` images derived there. Orthogonality, and inverse = transpose. | Java | `[thin]` |
-| 4 | Matrix Multiplication & Composition | Multiplication derived as "apply one transform then the other"; why it is not commutative; why inner dimensions must match. Rigid transforms and homogeneous coordinates, closing the loop on Module 2's frame chaining. The neural network forward pass as the same operation. | **Both** | `[new]` |
+| 4 | Matrix Multiplication & Composition | Multiplication derived as "apply one transform then the other"; why it is not commutative; why inner dimensions must match. Rigid transforms and homogeneous coordinates, closing the loop on Module 2's frame chaining. The neural network forward pass as the same operation. | **Dual** | `[new]` |
 | 5 | Determinants, Inverses & Singularity | Determinant as signed area scaling; zero determinant means collapse and no inverse; 2×2 inverse formula; condition number as a practical warning | Java | `[thin]` |
 | 6 | Solving Linear Systems & Least Squares | Systems as `Ax = b`; over-determined systems from noisy sensors; the normal equations; fitting `kS`, `kV`, `kA` from telemetry | Java | `[new]` |
 | 7 | Eigenvectors & Eigenvalues | Vectors a transform only scales; characteristic equation for 2×2; what eigenvalues say about stability; preview of covariance and PCA | Python | `[new]` |
@@ -95,7 +105,7 @@ Arrives with: Modules 1–3. Leaves with: derivatives, the chain rule, integrals
 | # | Concept | Scope & key derivations | Language | Status |
 |---|---|---|---|---|
 | 1 | Rates of Change & Derivatives | Average vs. instantaneous rate; the limit; derivative of `x²` from first principles; position→velocity | Java | `[thin]` |
-| 2 | Derivative Rules & the Chain Rule | Power, sum and product rules; **the chain rule derived and drilled**, since backpropagation is nothing else; composing three or more functions | **Both** | `[new]` |
+| 2 | Derivative Rules & the Chain Rule | Power, sum and product rules; **the chain rule derived and drilled**, since backpropagation is nothing else; composing three or more functions | **Dual** | `[new]` |
 | 3 | Acceleration, Jerk & S-Curves | Second and third derivatives; why unbounded jerk damages mechanisms; trapezoidal vs. S-curve profiles | Java | `[thin]` |
 | 4 | Accumulation, Area & Numerical Integration | Integral as accumulated area; the fundamental theorem stated and motivated; Riemann vs. trapezoidal at a 20 ms loop rate; integrator drift | Java | `[thin]` |
 | 5 | Partial Derivatives & Gradients | Holding variables fixed; the gradient vector; steepest ascent proved; level curves are orthogonal to the gradient | Python | `[thin]` |
@@ -109,11 +119,11 @@ Arrives with: Modules 1–4. Leaves with: distributions, covariance, Bayes, soft
 
 | # | Concept | Scope & key derivations | Language | Status |
 |---|---|---|---|---|
-| 1 | Random Variables, Sensor Noise & the Normal Distribution | Randomness as a distribution not a number; mean and variance; the shape of the Gaussian and why noise tends toward it; the 68/95/99.7 rule | Java | `[thin]` |
+| 1 | Random Variables, Sensor Noise & the Normal Distribution | Randomness as a distribution not a number; mean and variance; the shape of the Gaussian and why noise tends toward it; the 68/95/99.7 rule | **Dual** | `[thin]` |
 | 2 | Variance, Covariance & Correlation | Variance as expected squared deviation; covariance as joint variation; the covariance matrix; correlation vs. causation; the uncertainty ellipse | Java | `[new]` |
-| 3 | Bayes' Rule & 1D Sensor Fusion | Conditional probability; Bayes derived from the joint; prior/likelihood/posterior; fusing two Gaussians and why the result is more confident than either | Java | `[thin]` |
+| 3 | Bayes' Rule & 1D Sensor Fusion | Conditional probability; Bayes derived from the joint; prior/likelihood/posterior; fusing two Gaussians and why the result is more confident than either | **Dual** | `[thin]` |
 | 4 | Discrete Distributions & Softmax | Probability mass; why logits are not probabilities; softmax derived from exponentiate-and-normalise; temperature; the max-subtraction stability trick | Python | `[thin]` |
-| 5 | Maximum Likelihood Estimation | Likelihood as `P(data \| θ)` read as a function of `θ`, not of the data — the conceptual flip the whole concept turns on. Independence gives a product; **why we take the log** (underflow, sums differentiate cleanly, and monotonicity leaves the argmax untouched — the same argument that dropped the square root in Geometry Concept 01). Derive the MLE of a Gaussian mean and get the sample mean. **The two payoffs: Gaussian noise ⟹ least squares, and categorical ⟹ cross-entropy.** MAP as MLE plus a prior, and an L2 penalty as a Gaussian prior. | **Both** | `[new]` |
+| 5 | Maximum Likelihood Estimation | Likelihood as `P(data \| θ)` read as a function of `θ`, not of the data — the conceptual flip the whole concept turns on. Independence gives a product; **why we take the log** (underflow, sums differentiate cleanly, and monotonicity leaves the argmax untouched — the same argument that dropped the square root in Geometry Concept 01). Derive the MLE of a Gaussian mean and get the sample mean. **The two payoffs: Gaussian noise ⟹ least squares, and categorical ⟹ cross-entropy.** MAP as MLE plus a prior, and an L2 penalty as a Gaussian prior. | **Dual** | `[new]` |
 | 6 | Expected Value & Decision Making | Expectation as a probability-weighted average; expected value of a strategy; variance as risk; when the higher-expected-value choice is still wrong | Java | `[thin]` |
 
 ---

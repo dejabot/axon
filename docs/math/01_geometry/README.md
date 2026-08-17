@@ -18,15 +18,20 @@ Every result here is derived from first principles, and every one of them is rea
   * *Core Ideas:* Why slope fails on vertical lines, parametric form, the 2D cross product, the orientation test, segment intersection, and point-to-segment clearance.
   * *Visualizer:* [Path crossing & clearance](02_concept_lines_intersections/demo.html)
 
-* **[Concept 03: Bounding Boxes, Overlap & Collision](03_concept_bounding_boxes/)**
+* **[Concept 03: Linear Interpolation, Lookup Tables & Blending](03_concept_linear_interpolation/)**
+  * *The Everyday Problem:* You measured shooter RPM at five distances. What do you command at a distance in between?
+  * *Core Ideas:* `lerp` named and generalised from Concept 02's parametric form, why one algebraic form is numerically safer than its equal, inverse lerp and remapping, clamping versus extrapolation, interpolating lookup tables, bilinear interpolation, and why angles cannot be lerped naively.
+  * *Visualizer:* [Interpolation & lookup tables](03_concept_linear_interpolation/demo.html)
+
+* **[Concept 04: Bounding Boxes, Overlap & Collision](04_concept_bounding_boxes/)**
   * *The Everyday Problem:* The robot is a 0.9 metre box, not a dot. Will its bumpers hit anything?
   * *Core Ideas:* Interval overlap via De Morgan's law, the separating axis idea, half-extents, Minkowski inflation and configuration space, penetration depth, Intersection over Union, and swept boxes for tunneling.
-  * *Visualizer:* [Collision & IoU sandbox](03_concept_bounding_boxes/demo.html)
+  * *Visualizer:* [Collision & IoU sandbox](04_concept_bounding_boxes/demo.html)
 
-* **[Concept 04: Polygons, Areas & Field Zones](04_concept_polygons_zones/)**
+* **[Concept 05: Polygons, Areas & Field Zones](05_concept_polygons_zones/)**
   * *The Everyday Problem:* Scoring zones are slanted five-sided regions, not rectangles. Is the robot inside one?
   * *Core Ideas:* Convex versus concave, half-plane membership tests, ray casting and the even-odd rule, the half-open rule for vertex crossings, and the shoelace area formula.
-  * *Visualizer:* [Zone membership & shoelace area](04_concept_polygons_zones/demo.html)
+  * *Visualizer:* [Zone membership & shoelace area](05_concept_polygons_zones/demo.html)
 
 ---
 

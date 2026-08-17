@@ -125,7 +125,7 @@ Python throughout. Currently all Java — every concept needs relanguaging as we
 
 ## Axon 4: Physics, Dynamics & Actuation
 
-Java and WPILib. Maroon Framework may appear as a third tier where a concept maps onto a framework primitive — library classes only, never Team 766 mechanisms or robot code.
+Java and WPILib.
 
 ### Module 1: Motors & Electromechanics
 1. Motor Curves & Back-EMF `[thin]`

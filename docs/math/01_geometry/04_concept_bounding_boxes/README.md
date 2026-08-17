@@ -301,7 +301,7 @@ This concept closed by noting that an AABB around a robot rotated 45 degrees ove
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../02_concept_lines_intersections/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 02: Lines & Intersections</a></div>
+  <div><a href="../03_concept_linear_interpolation/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 03: Linear Interpolation</a></div>
   <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 1 Overview</a></div>
-  <div><a href="../04_concept_polygons_zones/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 04: Polygons & Zones →</a></div>
+  <div><a href="../05_concept_polygons_zones/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 05: Polygons & Zones →</a></div>
 </div>

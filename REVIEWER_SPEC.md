@@ -36,16 +36,27 @@ The companion `demo.html` is embedded via `<iframe>` immediately under the title
 
 ## Language Policy
 
-Teaching code follows the domain, matching CURRICULUM_SPEC rule 3. Every code section is two tiers: a from-scratch implementation that hides nothing, then the production library call that replaces it.
+Teaching code follows the domain, matching CURRICULUM_SPEC rule 3. Every code section leads with a **from-scratch tier** that hides nothing, followed by the **production tier** — the library call a practitioner would actually write.
 
-| Axon | From-scratch tier | Production tier |
+Which consumer a concept serves determines the shape:
+
+| Concept serves | From-scratch tier | Production tier(s) |
 |---|---|---|
-| Math (geometry, trig, linear algebra) | Plain Java | WPILib |
-| Math (calculus, probability) | Whichever consumer the concept serves; both when it genuinely serves both | WPILib or PyTorch to match |
-| Machine Learning & Vision | Plain Python, standard library only | PyTorch |
-| Large Language Models | Plain Python, standard library only | PyTorch |
-| Physics, Kinematics, Localization | Plain Java | WPILib |
-| Reinforcement Learning | Plain Python | PyTorch |
+| Robotics only | Plain Java | WPILib |
+| Machine learning only | Plain Python | PyTorch |
+| **Both** | **Plain Python** — it reads closest to the notation, so the derivation stays visible | **WPILib (Java) and PyTorch**, where each is genuinely illuminating |
+
+By axon: Geometry, Trigonometry, Physics, Kinematics and Localization are robotics. Machine Learning, LLMs and Reinforcement Learning are ML. Linear Algebra, Calculus and Probability are mixed, concept by concept — the dual-consumer concepts are vectors, dot products, matrix multiplication, the chain rule, gradients, the normal distribution, Bayes' rule, and maximum likelihood.
+
+**"Where appropriate" has teeth.** A dual concept does not mechanically emit three code blocks. Include a production tier only where it teaches something: dot products earn both (projection onto a swerve axis, cosine similarity between embeddings), while eigenvectors earn only PyTorch. Judge per concept.
+
+**Signpost every code block with its language** as an explicit subheading — "First Principles (Python)", "In a Robot Project (Java & WPILib)", "In a Model (PyTorch)". A page carrying two languages is unreadable without it.
+
+Rules for the from-scratch tier in Python: **no NumPy**. Lists and loops make the arithmetic visible, which is the entire point of that tier — a vectorised one-liner teaches nothing about what is being vectorised. NumPy may appear in the production tier as a stepping stone to PyTorch where it clarifies the leap.
+
+Rules for the production tiers: they must produce the **same numbers** as the from-scratch tier on the same input, and the concept should say so explicitly. A reader who cannot connect the tiers has learned an API, not an idea.
+
+**Libraries are not prerequisites.** The prerequisite chain governs mathematical tools, not tooling. The from-scratch tier is load-bearing — remove it and the derivation collapses. The production tier is illustrative — remove it and the reader loses a signpost, not an argument. So a Math concept may show PyTorch long before the frameworks module teaches PyTorch, exactly as Geometry Concept 01 already shows `Translation2d` with no WPILib primer anywhere in the curriculum. Introduce the call, say plainly what it does, and move on. Do not withhold a production example on prerequisite grounds.
 
 Rules for the from-scratch tier in Python: **no NumPy**. Lists and loops make the arithmetic visible, which is the entire point of that tier — a vectorised one-liner teaches nothing about what is being vectorised. NumPy may appear in the production tier as a stepping stone to PyTorch where it clarifies the leap.
 
@@ -53,16 +64,11 @@ Rules for the PyTorch tier: it must produce the **same numbers** as the from-scr
 
 TensorFlow and Keras are not used in concept pages. They appear only in the frameworks module's comparison appendix, so that a reader who meets Keras elsewhere can map it onto what they already know.
 
-### Maroon Framework
+### Out of scope: team-specific frameworks
 
-Maroon Framework (`com.team766.framework`) **may** be referenced in robotics concepts as a third code tier, after first-principles Java and WPILib, where a concept genuinely maps onto a framework primitive (`Mechanism`, `Procedure`, `Context`, `AutonomousMode`).
+**WPILib is the only production tier for robotics concepts.** It covers every concept in this curriculum, and Axon is a curriculum about the underlying mathematics, not a tutorial for any particular team's framework.
 
-The boundary is between the framework and the robots built with it:
-
-* **Publishable** — framework library classes and the patterns they express. Team 766 publishes its Programming Tutorials to GitHub Pages, so this material is already public.
-* **Not publishable** — Team 766's specific mechanisms, robot configurations, subsystem constants, and season robot code. These live in a private repository and must not be reproduced in Axon, quoted, or reconstructed from memory.
-
-When a framework example needs a mechanism to act on, invent a generic one for the curriculum rather than importing a real subsystem. If it is unclear which side of the line a piece of code falls on, leave it out and ask.
+Do not reference Maroon Framework or any other team-specific framework, and do not read from team robot repositories. If a concept seems to need a framework primitive, it does not — express it in WPILib or in plain Java.
 
 ---
 
