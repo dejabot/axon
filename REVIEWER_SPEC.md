@@ -18,6 +18,8 @@ Every concept `README.md` follows this six-section shape, in this order:
 
 The companion `demo.html` is embedded via `<iframe>` immediately under the title.
 
+**Length follows the topic.** These six sections are a shape, not a quota. A concept built on a theorem — the Pythagorean theorem, the ray-casting parity argument, the separating axis — earns a long "Building the Math". A concept that is a definition plus its applications, such as linear interpolation, does not, and inflating it with adjacent material produces a worse page than a short honest one. When in doubt, cut. The test for every paragraph is whether it derives something or prevents a real bug; if it does neither, delete it.
+
 ---
 
 ## 7-Point Quality Audit Rubric
@@ -25,7 +27,7 @@ The companion `demo.html` is embedded via `<iframe>` immediately under the title
 | # | Checkpoint | Requirement | Pass Criteria |
 |---|---|---|---|
 | **1** | **Strict No-LaTeX & Clean Text Policy** | Zero LaTeX delimiters (`$`, `$$`, `\(`, `\)`, `\begin{matrix}`, `\frac`, etc.) in `README.md`. No decorative emojis in technical text. | Verified zero LaTeX occurrences. Clean Unicode math, text grids, and professional formatting without emoji clutter. |
-| **2** | **Depth & Time Budget** | A concept is a **30–45 minute** session. Word count is the proxy: 1,800–2,800 words of prose, plus code, demo and two worked checkpoints. | Word count verified (excluding code blocks and SVG markup). No hand-waving or skipping mathematical steps. Under 1,800 words almost always means results are being asserted rather than derived. Past 45 minutes, ask whether it is two concepts — but keep it whole where splitting would amputate the argument. |
+| **2** | **Depth Proportionate to the Topic** | A concept runs as long as its material genuinely requires, and no longer. Most land at 1,800–2,800 words (30–45 min); some legitimately land far shorter. | No hand-waving, no skipped steps — **and no padding**. Judge against the topic, not a target. A concept containing a real derivation that lands under 1,800 words is probably asserting; a concept with no theorem in it that reaches 1,800 words is probably padded. Both failures are equally bad. Past 45 minutes, ask whether it is two concepts. |
 | **3** | **Flattened Taxonomy & 6 Sections** | Follows the two-level hierarchy (Modules & Concepts) and the six standard sections defined above. | Contains 1. Real-World Problem, 2. Building the Math, 3. "Math!" sidebars, 4. Java & WPILib code, 5. ML/Autonomy bridge, 6. Checkpoints & Prompts. |
 | **4** | **No Black Boxes** | Every formula is derived, not asserted. Named prerequisite techniques are taught, not skipped. | Each result traces back to a stated starting assumption. Foundational named methods (e.g. SOH-CAH-TOA, the separating axis idea) appear explicitly rather than being silently assumed. |
 | **5** | **Embedded Visuals & Interactive Demos** | Zero ASCII art. Contains embedded companion visualizer iframe and responsive vector SVGs for geometric figures. | Verified zero ASCII box/line art. Companion `demo.html` is embedded via `<iframe>` alongside crisp inline SVGs that render correctly in both themes. |

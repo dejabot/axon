@@ -48,7 +48,11 @@ Everything in Modules 1 and 2 is robotics-only: Java plus WPILib throughout.
 
 ### Time target
 
-**30–45 minutes per concept.** Word count is a proxy, not the goal: 1,800–2,800 words of prose plus code, demo and two worked checkpoints typically lands in that window. Overrun it when splitting a topic would do more harm than the extra length — one coherent 50-minute concept beats two amputated halves. Do not exceed 45 minutes casually.
+**Length follows the topic.** Most concepts land at 30–45 minutes, or 1,800–2,800 prose words plus code, demo and two worked checkpoints. That is a typical outcome, not a quota.
+
+Concepts carrying a real derivation — the Pythagorean theorem, the ray-casting parity argument, the law of cosines, maximum likelihood — earn the full length. Concepts that are a definition plus its applications do not, and **padding them with adjacent material makes them worse**. Linear interpolation is the worked example of this failure: aimed at 1,800 words it ballooned to 3,944 by absorbing everything near it, when the honest treatment is closer to 1,300.
+
+Both failure modes are equally bad. Under-length usually means results are being asserted rather than derived; over-length usually means padding. Judge every paragraph by whether it derives something or prevents a real bug, and delete it if it does neither.
 
 ---
 

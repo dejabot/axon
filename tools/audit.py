@@ -63,11 +63,14 @@ def check_emoji(path, text):
 
 
 def check_concept(path, text):
+    # Length follows the topic, so both bounds are advisory. A short concept may be
+    # perfectly calibrated (linear interpolation has no theorem in it); a long one may
+    # be padded with adjacent material. Only a human can tell which, so never fail here.
     n = prose_words(text)
     if n < WORD_MIN:
-        err(path, f"{n} prose words, under the {WORD_MIN} floor — likely asserting instead of deriving")
+        warn(path, f"{n} prose words — check this is a genuinely small topic, not an under-derived one")
     elif n > WORD_MAX:
-        warn(path, f"{n} prose words, over the {WORD_MAX} ceiling — consider splitting")
+        warn(path, f"{n} prose words — check this is genuine depth, not padding, and whether it splits")
 
     if '<iframe' not in text:
         err(path, "no embedded demo iframe")
