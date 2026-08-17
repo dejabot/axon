@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 03: Gradient Descent & Learning Rates</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">Gradient Descent Step Simulator</div>
+      <div class="demo-badge">Concept 03 Demo</div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="gdCanvas" width="800" height="420"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Learning Rate (α): <span id="lrLabel" class="value-display">0.20</span></label>
+        <input type="range" id="lrSlider" min="0.02" max="1.10" step="0.02" value="0.20">
+      </div>
+      <div class="control-group">
+        <label>Initial Guess (w₀): <span id="w0Label" class="value-display">8.00</span></label>
+        <input type="range" id="w0Slider" min="-1.0" max="8.5" step="0.5" value="8.00">
+      </div>
+      <div class="control-group" style="display: flex; gap: 8px;">
+        <button class="btn btn-primary" id="stepBtn" style="flex: 1;">Take 1 Step</button>
+        <button class="btn btn-secondary" id="autoBtn" style="flex: 1;">Auto Run</button>
+        <button class="btn btn-secondary" id="resetBtn" style="flex: 1;">Reset</button>
+      </div>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Iteration Step</div>
+        <div class="telemetry-value" id="stepText">0</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Current Weight (w)</div>
+        <div class="telemetry-value" id="wText" style="color: #38bdf8;">8.0000</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Gradient (dLoss / dw)</div>
+        <div class="telemetry-value" id="gradText" style="color: #fbbf24;">+9.0000</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Current Loss</div>
+        <div class="telemetry-value" id="lossText" style="color: #f43f5e;">21.2500</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('gdCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const targetOptimalW = 3.5;
+      let w = 8.0;
+      let lr = 0.20;
+      let stepCount = 0;
+      let history = [{ step: 0, w: 8.0, loss: ((8.0 - 3.5) ** 2 + 1.0) }];
+      let autoTimer = null;
+
+      function lossFn(val) {
+        return (val - targetOptimalW) ** 2 + 1.0;
+      }
+
+      function gradFn(val) {
+        return 2.0 * (val - targetOptimalW);
+      }
+
+      function toScreen(valW, valLoss) {
+        // w ranges from -2.0 to 9.0
+        // loss ranges from 0 to 35.0
+        const sx = 80 + ((valW - (-2.0)) / (9.0 - (-2.0))) * (canvas.width - 160);
+        const sy = (canvas.height - 60) - (valLoss / 35.0) * (canvas.height - 120);
+        return { sx, sy };
+      }
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Axes & Grid
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 1;
+
+        // X-axis ticks (w)
+        for (let tw = -2; tw <= 9; tw += 1) {
+          const pt = toScreen(tw, 0);
+          ctx.beginPath();
+          ctx.moveTo(pt.sx, 40);
+          ctx.lineTo(pt.sx, canvas.height - 60);
+          ctx.stroke();
+
+          ctx.fillStyle = mutedColor;
+          ctx.font = '11px sans-serif';
+          ctx.fillText(tw.toString(), pt.sx - 4, canvas.height - 42);
+        }
+
+        // Y-axis ticks (Loss)
+        for (let tl = 5; tl <= 35; tl += 5) {
+          const pt = toScreen(-2, tl);
+          ctx.beginPath();
+          ctx.moveTo(80, pt.sy);
+          ctx.lineTo(canvas.width - 80, pt.sy);
+          ctx.stroke();
+
+          ctx.fillStyle = mutedColor;
+          ctx.font = '11px sans-serif';
+          ctx.fillText(tl.toString(), 46, pt.sy + 4);
+        }
+
+        // Axis labels
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText('Parameter Weight (w)', canvas.width / 2 - 60, canvas.height - 18);
+        ctx.save();
+        ctx.translate(22, canvas.height / 2 + 30);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText('Loss L(w) = (w - 3.5)² + 1', 0, 0);
+        ctx.restore();
+
+        // Draw Parabolic Loss Curve
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        let first = true;
+        for (let tw = -2.0; tw <= 9.0; tw += 0.1) {
+          const l = lossFn(tw);
+          const pt = toScreen(tw, l);
+          if (first) {
+            ctx.moveTo(pt.sx, pt.sy);
+            first = false;
+          } else {
+            ctx.lineTo(pt.sx, pt.sy);
+          }
+        }
+        ctx.stroke();
+
+        // Mark Global Minimum
+        const optPt = toScreen(targetOptimalW, lossFn(targetOptimalW));
+        ctx.fillStyle = '#4ade80';
+        ctx.beginPath();
+        ctx.arc(optPt.sx, optPt.sy, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#4ade80';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText('Optimal w = 3.5', optPt.sx - 36, optPt.sy + 20);
+
+        // Draw History trajectory arrows
+        if (history.length > 1) {
+          for (let i = 0; i < history.length - 1; i++) {
+            const p1 = toScreen(history[i].w, history[i].loss);
+            const p2 = toScreen(history[i + 1].w, history[i + 1].loss);
+
+            ctx.strokeStyle = 'rgba(244, 63, 94, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(p1.sx, p1.sy);
+            ctx.lineTo(p2.sx, p2.sy);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Dot at each past step
+            ctx.fillStyle = 'rgba(244, 63, 94, 0.6)';
+            ctx.beginPath();
+            ctx.arc(p1.sx, p1.sy, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Draw Current Position Ball
+        const curLoss = lossFn(w);
+        const curPt = toScreen(w, curLoss);
+
+        // Tangent Slope Line
+        const grad = gradFn(w);
+        const tangentLen = 30;
+        const dx = tangentLen;
+        const dy = grad * (tangentLen / 15.0);
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(curPt.sx - dx, curPt.sy + dy);
+        ctx.lineTo(curPt.sx + dx, curPt.sy - dy);
+        ctx.stroke();
+
+        // Glowing Ball
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(curPt.sx, curPt.sy, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Telemetry updates
+        document.getElementById('lrLabel').textContent = lr.toFixed(2);
+        document.getElementById('stepText').textContent = stepCount.toString();
+        document.getElementById('wText').textContent = w.toFixed(4);
+        document.getElementById('gradText').textContent = (grad >= 0 ? '+' : '') + grad.toFixed(4);
+        document.getElementById('lossText').textContent = curLoss.toFixed(4);
+      }
+
+      function takeStep() {
+        if (stepCount >= 40) return;
+        const grad = gradFn(w);
+        w = w - lr * grad;
+        stepCount++;
+        history.push({ step: stepCount, w: w, loss: lossFn(w) });
+        render();
+      }
+
+      function reset() {
+        if (autoTimer) {
+          clearInterval(autoTimer);
+          autoTimer = null;
+          document.getElementById('autoBtn').textContent = 'Auto Run';
+        }
+        w = parseFloat(document.getElementById('w0Slider').value);
+        stepCount = 0;
+        history = [{ step: 0, w: w, loss: lossFn(w) }];
+        render();
+      }
+
+      document.getElementById('stepBtn').addEventListener('click', takeStep);
+
+      document.getElementById('autoBtn').addEventListener('click', () => {
+        if (autoTimer) {
+          clearInterval(autoTimer);
+          autoTimer = null;
+          document.getElementById('autoBtn').textContent = 'Auto Run';
+        } else {
+          document.getElementById('autoBtn').textContent = 'Pause';
+          autoTimer = setInterval(() => {
+            if (stepCount >= 30 || Math.abs(gradFn(w)) < 0.001) {
+              clearInterval(autoTimer);
+              autoTimer = null;
+              document.getElementById('autoBtn').textContent = 'Auto Run';
+            } else {
+              takeStep();
+            }
+          }, 300);
+        }
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', reset);
+
+      document.getElementById('lrSlider').addEventListener('input', (e) => {
+        lr = parseFloat(e.target.value);
+        render();
+      });
+
+      document.getElementById('w0Slider').addEventListener('input', (e) => {
+        document.getElementById('w0Label').textContent = parseFloat(e.target.value).toFixed(2);
+        reset();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+# Concept 02: Acceleration, Jerk & S-Curves
+
+> **▶ Interactive Demo: [Elevator Motion & Jerk Visualizer](demo.html)**
+>
+> Open the interactive demo below to compare an instant acceleration step against a smooth S-Curve profile and watch the sloshing coffee / carriage forces in real time.
+
+<iframe src="demo.html" width="100%" height="450" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
+
+---
+
+## 1. The Real-World Problem: The Coffee-Spill Elevator
+Imagine you are standing inside an elevator holding a full cup of hot coffee filled to the very brim:
+
+1. **Position `x` (Where you are):** Which floor you are on.
+2. **Velocity `v` (How fast you move):** At a steady cruising speed of 3 m/s, the coffee stays completely flat. Velocity creates no extra force.
+3. **Acceleration `a` (Rate of speed change):** When the elevator speeds up, your knees feel heavier. The coffee presses down into the cup with force `F = m·a`. Steady acceleration keeps the surface level.
+4. **Jerk `j` (Rate of acceleration change):** If the motor instantly slams full voltage in 0 milliseconds, the floor violently jerks upward. The sudden jump in force sloshes boiling coffee all over your hand!
+
+<div style="text-align: center; margin: 20px 0;">
+  <svg width="320" height="150" viewBox="0 0 320 150" style="max-width: 100%; height: auto;">
+    <!-- S-Curve -->
+    <path d="M 30 110 C 60 110 70 40 110 40 L 130 40" fill="none" stroke="#4ade80" stroke-width="3" />
+    <text x="30" y="25" fill="#4ade80" font-family="sans-serif" font-weight="bold" font-size="11">Smooth S-Curve (Bounded Jerk)</text>
+    
+    <!-- Instant Step -->
+    <path d="M 190 110 L 190 40 L 290 40" fill="none" stroke="#f43f5e" stroke-width="3" />
+    <text x="190" y="25" fill="#f43f5e" font-family="sans-serif" font-weight="bold" font-size="11">Instant Step (Infinite Jerk)</text>
+    <text x="190" y="135" fill="#f43f5e" font-family="sans-serif" font-size="10">Snaps chains & strips gears!</text>
+  </svg>
+</div>
+
+---
+
+## 2. Solving It in Code (Java & WPILib)
+
+### Production WPILib Equivalent: Motion Profiling
+In WPILib, motion constraints are generated and evaluated via `TrapezoidProfile`:
+
+```java
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
+// Constrain Max Velocity to 3.0 m/s, Max Acceleration to 6.0 m/s²
+TrapezoidProfile.Constraints constraints = 
+    new TrapezoidProfile.Constraints(3.0, 6.0);
+
+TrapezoidProfile profile = new TrapezoidProfile(constraints);
+
+// Set current state (at 0 m) and desired goal (at 5 m)
+TrapezoidProfile.State current = new TrapezoidProfile.State(0.0, 0.0);
+TrapezoidProfile.State goal = new TrapezoidProfile.State(5.0, 0.0);
+
+// Calculate setpoint for the next 20ms robot loop
+TrapezoidProfile.State nextSetpoint = profile.calculate(0.020, current, goal);
+
+System.out.printf("Target Position: %.3f m, Target Velocity: %.3f m/s%n",
+    nextSetpoint.position, nextSetpoint.velocity);
+```
+
+---
+
+## 3. Review Checkpoints
+### Checkpoint 1
+A robot elevator's velocity is given by `v(t) = 3·t²`.
+What is the acceleration `a(t)` at `t = 2.0` seconds?
+
+**Solution:**
+1. Differentiate velocity: `a(t) = dv/dt = 6·t`.
+2. Evaluate at `t = 2.0`: `a(2.0) = 6(2.0) = 12.0 m/s²`.
+
+---
+
+### Checkpoint 2
+Why do modern FRC elevator feedforward controllers include `kA · a`?
+
+**Solution:**
+Because accelerating a heavy mechanism requires extra motor voltage (`F = m·a`). Providing voltage proportionally to target acceleration (`kA · a`) cancels out inertia and eliminates lag.
+
+---
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
+  <div><a href="../01_concept_rates_of_change/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 12: Rates of Change</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 4 Overview</a></div>
+  <div><a href="../03_concept_accumulation_integrals/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 14: Integration & Accumulation →</a></div>
+</div>

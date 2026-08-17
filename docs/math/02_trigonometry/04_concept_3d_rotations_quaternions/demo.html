@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 04: 3D Quaternions Visualizer</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+    }
+    .canvas-container {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .sliders-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
+    .slider-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 0.85rem;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="quatCanvas"></canvas>
+    </div>
+
+    <div class="sliders-row">
+      <div class="slider-item">
+        <label>Pitch (Y-Axis): <b id="pitchLabel">0°</b></label>
+        <input type="range" id="pitchSlider" min="-90" max="90" value="0">
+      </div>
+      <div class="slider-item">
+        <label>Yaw (Z-Axis): <b id="yawLabel">30°</b></label>
+        <input type="range" id="yawSlider" min="-180" max="180" value="30">
+      </div>
+      <div class="slider-item">
+        <label>Roll (X-Axis): <b id="rollLabel">20°</b></label>
+        <input type="range" id="rollSlider" min="-180" max="180" value="20">
+      </div>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Quaternion w</span>
+        <span class="stat-val" id="qwText" style="color: var(--accent);">1.000</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Quaternion x</span>
+        <span class="stat-val" id="qxText" style="color: var(--accent-green);">0.000</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Quaternion y</span>
+        <span class="stat-val" id="qyText" style="color: var(--accent-red);">0.000</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Quaternion z</span>
+        <span class="stat-val" id="qzText" style="color: var(--accent-purple);">0.000</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Gimbal Status</span>
+        <span class="stat-val" id="gimbalStatusText" style="color: var(--accent-green);">Safe</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('quatCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let pitch = 0, yaw = 30, roll = 20;
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      draw();
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+
+    function draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const width = canvas.width / (window.devicePixelRatio || 1);
+      const height = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, width, height);
+
+      const cx = width / 2;
+      const cy = height / 2;
+      const len = 90;
+
+      const p = pitch * Math.PI / 180;
+      const y = yaw * Math.PI / 180;
+      const r = roll * Math.PI / 180;
+
+      const cy_cos = Math.cos(y), sy_sin = Math.sin(y);
+      const cp_cos = Math.cos(p), sp_sin = Math.sin(p);
+      const cr_cos = Math.cos(r), sr_sin = Math.sin(r);
+
+      const R = [
+        [cy_cos*cp_cos, cy_cos*sp_sin*sr_sin - sy_sin*cr_cos, cy_cos*sp_sin*cr_cos + sy_sin*sr_sin],
+        [sy_sin*cp_cos, sy_sin*sp_sin*sr_sin + cy_cos*cr_cos, sy_sin*sp_sin*cr_cos - cy_cos*sr_sin],
+        [-sp_sin,       cp_cos*sr_sin,                        cp_cos*cr_cos]
+      ];
+
+      function proj(vx, vy, vz) {
+        return {
+          x: cx + (vx - vy * 0.5),
+          y: cy + (-vz + vy * 0.3)
+        };
+      }
+
+      const o = proj(0, 0, 0);
+      const xAxis = proj(R[0][0]*len, R[1][0]*len, R[2][0]*len);
+      const yAxis = proj(R[0][1]*len, R[1][1]*len, R[2][1]*len);
+      const zAxis = proj(R[0][2]*len, R[1][2]*len, R[2][2]*len);
+
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#f43f5e';
+      ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(xAxis.x, xAxis.y); ctx.stroke();
+
+      ctx.strokeStyle = '#4ade80';
+      ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(yAxis.x, yAxis.y); ctx.stroke();
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(zAxis.x, zAxis.y); ctx.stroke();
+
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = '#f43f5e'; ctx.fillText('X (Roll)', xAxis.x + 6, xAxis.y);
+      ctx.fillStyle = '#4ade80'; ctx.fillText('Y (Pitch)', yAxis.x + 6, yAxis.y);
+      ctx.fillStyle = '#38bdf8'; ctx.fillText('Z (Yaw)', zAxis.x + 6, zAxis.y);
+
+      // Quaternion Calculation
+      const qw = Math.cos(r/2)*Math.cos(p/2)*Math.cos(y/2) + Math.sin(r/2)*Math.sin(p/2)*Math.sin(y/2);
+      const qx = Math.sin(r/2)*Math.cos(p/2)*Math.cos(y/2) - Math.cos(r/2)*Math.sin(p/2)*Math.sin(y/2);
+      const qy = Math.cos(r/2)*Math.sin(p/2)*Math.cos(y/2) + Math.sin(r/2)*Math.cos(p/2)*Math.sin(y/2);
+      const qz = Math.cos(r/2)*Math.cos(p/2)*Math.sin(y/2) - Math.sin(r/2)*Math.sin(p/2)*Math.cos(y/2);
+
+      document.getElementById('qwText').textContent = qw.toFixed(3);
+      document.getElementById('qxText').textContent = qx.toFixed(3);
+      document.getElementById('qyText').textContent = qy.toFixed(3);
+      document.getElementById('qzText').textContent = qz.toFixed(3);
+
+      const isLocked = Math.abs(pitch) >= 88;
+      const statusEl = document.getElementById('gimbalStatusText');
+      if (isLocked) {
+        statusEl.textContent = 'GIMBAL LOCK!';
+        statusEl.style.color = 'var(--accent-red)';
+      } else {
+        statusEl.textContent = 'Safe (No Lock)';
+        statusEl.style.color = 'var(--accent-green)';
+      }
+    }
+
+    document.getElementById('pitchSlider').addEventListener('input', (e) => {
+      pitch = parseFloat(e.target.value);
+      document.getElementById('pitchLabel').textContent = `${pitch}°`;
+      draw();
+    });
+    document.getElementById('yawSlider').addEventListener('input', (e) => {
+      yaw = parseFloat(e.target.value);
+      document.getElementById('yawLabel').textContent = `${yaw}°`;
+      draw();
+    });
+    document.getElementById('rollSlider').addEventListener('input', (e) => {
+      roll = parseFloat(e.target.value);
+      document.getElementById('rollLabel').textContent = `${roll}°`;
+      draw();
+    });
+
+    resize();
+  </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 01: Joystick Unit Circle Visualizer</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+    }
+    .canvas-container {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 0.85rem;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="trigCanvas"></canvas>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Joystick Angle (θ)</span>
+        <span class="stat-val" id="angleDegText" style="color: var(--accent-amber);">30.0° (0.52 rad)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Forward Power (cos θ)</span>
+        <span class="stat-val" id="cosValText" style="color: var(--accent);">+0.866</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Strafe Power (sin θ)</span>
+        <span class="stat-val" id="sinValText" style="color: var(--accent-green);">+0.500</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">cos² + sin² Check</span>
+        <span class="stat-val" id="pythagText" style="color: var(--muted);">1.000</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('trigCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let angleRad = Math.PI / 6; // 30 deg
+    let dragging = false;
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      draw();
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+
+    function draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const width = canvas.width / (window.devicePixelRatio || 1);
+      const height = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, width, height);
+
+      const cx = width / 2;
+      const cy = height / 2;
+      const r = Math.min(width, height) * 0.38;
+
+      // Axes
+      ctx.strokeStyle = isLight ? '#cbd5e1' : '#232b3b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - r - 30, cy); ctx.lineTo(cx + r + 30, cy);
+      ctx.moveTo(cx, cy - r - 30); ctx.lineTo(cx, cy + r + 30);
+      ctx.stroke();
+
+      // Unit Circle
+      ctx.strokeStyle = isLight ? '#94a3b8' : '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Stick Tip
+      const px = cx + r * Math.cos(angleRad);
+      const py = cy - r * Math.sin(angleRad);
+
+      // Shadow lines
+      ctx.setLineDash([4, 4]);
+      // cos (horizontal)
+      ctx.strokeStyle = isLight ? '#0284c7' : '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy); ctx.lineTo(px, cy);
+      ctx.stroke();
+
+      // sin (vertical)
+      ctx.strokeStyle = isLight ? '#16a34a' : '#4ade80';
+      ctx.beginPath();
+      ctx.moveTo(px, cy); ctx.lineTo(px, py);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Joystick stick
+      ctx.strokeStyle = isLight ? '#d97706' : '#fbbf24';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy); ctx.lineTo(px, py);
+      ctx.stroke();
+
+      // Knob
+      ctx.fillStyle = isLight ? '#d97706' : '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(px, py, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Arc for angle
+      ctx.strokeStyle = isLight ? 'rgba(217, 119, 6, 0.4)' : 'rgba(251, 191, 36, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 30, 0, -angleRad, angleRad < 0);
+      ctx.stroke();
+
+      // Update telemetry
+      let deg = (angleRad * 180 / Math.PI) % 360;
+      if (deg < 0) deg += 360;
+      const cosVal = Math.cos(angleRad);
+      const sinVal = Math.sin(angleRad);
+
+      document.getElementById('angleDegText').textContent = `${deg.toFixed(1)}° (${angleRad.toFixed(2)} rad)`;
+      document.getElementById('cosValText').textContent = `${cosVal >= 0 ? '+' : ''}${cosVal.toFixed(3)}`;
+      document.getElementById('sinValText').textContent = `${sinVal >= 0 ? '+' : ''}${sinVal.toFixed(3)}`;
+      document.getElementById('pythagText').textContent = (cosVal*cosVal + sinVal*sinVal).toFixed(3);
+    }
+
+    function updateFromPointer(e) {
+      const rect = canvas.getBoundingClientRect();
+      const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      const center_x = (canvas.width / (window.devicePixelRatio || 1)) / 2;
+      const center_y = (canvas.height / (window.devicePixelRatio || 1)) / 2;
+      angleRad = Math.atan2(-(cy - center_y), cx - center_x);
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', (e) => { dragging = true; updateFromPointer(e); });
+    window.addEventListener('mousemove', (e) => { if (dragging) updateFromPointer(e); });
+    window.addEventListener('mouseup', () => dragging = false);
+
+    canvas.addEventListener('touchstart', (e) => { dragging = true; updateFromPointer(e); }, { passive: false });
+    window.addEventListener('touchmove', (e) => { if (dragging) { e.preventDefault(); updateFromPointer(e); } }, { passive: false });
+    window.addEventListener('touchend', () => dragging = false);
+
+    resize();
+  </script>
+</body>
+</html>

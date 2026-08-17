@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concept 01: 2D Spatial Convolutions & Feature Maps</title>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <script src="../../../assets/theme.js"></script>
+</head>
+<body class="demo-embed">
+  <div class="demo-container">
+    <div class="demo-header">
+      <div class="demo-title">2D Convolution Filter & Feature Map Simulator</div>
+      <div class="demo-badge">Concept 01 Demo</div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="convCanvas" width="800" height="400"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Select Convolution Kernel:</label>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button class="btn btn-secondary active-class" id="btnSobelV">Sobel Vertical</button>
+          <button class="btn btn-secondary" id="btnSobelH">Sobel Horizontal</button>
+          <button class="btn btn-secondary" id="btnRidge">Ridge / Outline</button>
+          <button class="btn btn-secondary" id="btnSharpen">Sharpen</button>
+          <button class="btn btn-secondary" id="btnBlur">Box Blur</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label>Sliding Window Focus (Row, Col): <span id="posLabel" class="value-display">R: 6, C: 6</span></label>
+        <input type="range" id="rowSlider" min="1" max="14" value="6">
+      </div>
+    </div>
+
+    <div class="telemetry-grid">
+      <div class="telemetry-card">
+        <div class="telemetry-label">Active 3×3 Window Position</div>
+        <div class="telemetry-value" id="windowPosText">Center (6, 6)</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Convolution Output Pixel Sum</div>
+        <div class="telemetry-value" id="convSumText" style="color: #38bdf8;">+184.0</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-label">Feature Detection Status</div>
+        <div class="telemetry-value" id="featStatusText" style="color: #4ade80;">Strong Vertical Edge</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('convCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const N = 16; // 16x16 grid
+      // Create synthetic 16x16 game piece sprite (circular ring in the center)
+      const inputImg = [];
+      for (let r = 0; r < N; r++) {
+        inputImg[r] = [];
+        for (let c = 0; c < N; c++) {
+          const dist = Math.hypot(r - 7.5, c - 7.5);
+          if (dist >= 3.0 && dist <= 6.0) {
+            inputImg[r][c] = 230; // Bright orange ring
+          } else if (dist < 3.0) {
+            inputImg[r][c] = 40;  // Dark center hole
+          } else {
+            inputImg[r][c] = 60;  // Gray floor
+          }
+        }
+      }
+
+      // Kernels
+      const kernels = {
+        sobelV: [
+          [-1, 0, 1],
+          [-2, 0, 2],
+          [-1, 0, 1]
+        ],
+        sobelH: [
+          [-1, -2, -1],
+          [ 0,  0,  0],
+          [ 1,  2,  1]
+        ],
+        ridge: [
+          [-1, -1, -1],
+          [-1,  8, -1],
+          [-1, -1, -1]
+        ],
+        sharpen: [
+          [ 0, -1,  0],
+          [-1,  5, -1],
+          [ 0, -1,  0]
+        ],
+        blur: [
+          [1/9, 1/9, 1/9],
+          [1/9, 1/9, 1/9],
+          [1/9, 1/9, 1/9]
+        ]
+      };
+
+      let activeKernelKey = 'sobelV';
+      let focusRow = 6;
+      let focusCol = 6;
+
+      function render() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+        const mutedColor = isDark ? '#64748b' : '#94a3b8';
+        const gridBorder = isDark ? '#1e293b' : '#e2e8f0';
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const currentKernel = kernels[activeKernelKey];
+
+        // 1. Compute full 16x16 convolution feature map
+        const featureMap = [];
+        for (let r = 0; r < N; r++) {
+          featureMap[r] = [];
+          for (let c = 0; c < N; c++) {
+            if (r === 0 || r === N - 1 || c === 0 || c === N - 1) {
+              featureMap[r][c] = 0;
+            } else {
+              let sum = 0;
+              for (let kr = -1; kr <= 1; kr++) {
+                for (let kc = -1; kc <= 1; kc++) {
+                  sum += inputImg[r + kr][c + kc] * currentKernel[kr + 1][kc + 1];
+                }
+              }
+              featureMap[r][c] = Math.abs(sum);
+            }
+          }
+        }
+
+        // Layout:
+        // Left (x: 40): Input Image (16x16, 240px wide)
+        // Middle (x: 330): 3x3 Kernel Matrix
+        // Right (x: 520): Output Feature Map (16x16, 240px wide)
+
+        const cellSize = 15;
+        const imgOriginX = 40;
+        const imgOriginY = 60;
+
+        // Draw Left: Input Image
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText('1. Input Camera Pixels (16×16)', imgOriginX, 40);
+
+        for (let r = 0; r < N; r++) {
+          for (let c = 0; c < N; c++) {
+            const val = inputImg[r][c];
+            ctx.fillStyle = `rgb(${val + 20}, ${Math.max(0, val - 40)}, ${Math.max(0, val - 120)})`;
+            ctx.fillRect(imgOriginX + c * cellSize, imgOriginY + r * cellSize, cellSize, cellSize);
+            ctx.strokeStyle = gridBorder;
+            ctx.strokeRect(imgOriginX + c * cellSize, imgOriginY + r * cellSize, cellSize, cellSize);
+          }
+        }
+
+        // Draw 3x3 sliding focus box on Input Image
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(
+          imgOriginX + (focusCol - 1) * cellSize,
+          imgOriginY + (focusRow - 1) * cellSize,
+          cellSize * 3,
+          cellSize * 3
+        );
+
+        // Draw Middle: 3x3 Kernel
+        const kernelX = 330;
+        const kernelY = 90;
+        const kCellSize = 36;
+
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText('2. 3×3 Kernel Filter (*)', kernelX, 60);
+
+        for (let kr = 0; kr < 3; kr++) {
+          for (let kc = 0; kc < 3; kc++) {
+            const kw = currentKernel[kr][kc];
+            const px = kernelX + kc * kCellSize;
+            const py = kernelY + kr * kCellSize;
+
+            ctx.fillStyle = isDark ? '#141923' : '#ffffff';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.5;
+            ctx.fillRect(px, py, kCellSize, kCellSize);
+            ctx.strokeRect(px, py, kCellSize, kCellSize);
+
+            ctx.fillStyle = kw > 0 ? '#4ade80' : (kw < 0 ? '#f43f5e' : mutedColor);
+            ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(typeof kw === 'number' && !Number.isInteger(kw) ? kw.toFixed(2) : kw.toString(), px + kCellSize / 2, py + kCellSize / 2 + 4);
+            ctx.textAlign = 'start';
+          }
+        }
+
+        // Draw Right: Feature Map
+        const outOriginX = 520;
+        const outOriginY = 60;
+
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText('3. Output Feature Map (Edges)', outOriginX, 40);
+
+        for (let r = 0; r < N; r++) {
+          for (let c = 0; c < N; c++) {
+            const mag = Math.min(255, featureMap[r][c]);
+            ctx.fillStyle = `rgb(${mag}, ${mag}, ${mag})`;
+            ctx.fillRect(outOriginX + c * cellSize, outOriginY + r * cellSize, cellSize, cellSize);
+            ctx.strokeStyle = gridBorder;
+            ctx.strokeRect(outOriginX + c * cellSize, outOriginY + r * cellSize, cellSize, cellSize);
+          }
+        }
+
+        // Draw Focus Dot on Output Feature Map
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(
+          outOriginX + focusCol * cellSize,
+          outOriginY + focusRow * cellSize,
+          cellSize,
+          cellSize
+        );
+
+        // Compute local window sum
+        let curSum = 0;
+        for (let kr = -1; kr <= 1; kr++) {
+          for (let kc = -1; kc <= 1; kc++) {
+            curSum += inputImg[focusRow + kr][focusCol + kc] * currentKernel[kr + 1][kc + 1];
+          }
+        }
+
+        // Telemetry Update
+        document.getElementById('posLabel').textContent = `R: ${focusRow}, C: ${focusCol}`;
+        document.getElementById('windowPosText').textContent = `Pixel (${focusRow}, ${focusCol})`;
+        document.getElementById('convSumText').textContent = (curSum >= 0 ? '+' : '') + curSum.toFixed(1);
+
+        const featEl = document.getElementById('featStatusText');
+        if (Math.abs(curSum) > 100) {
+          featEl.textContent = 'Strong Feature Edge Detected!';
+          featEl.style.color = '#4ade80';
+        } else if (Math.abs(curSum) > 30) {
+          featEl.textContent = 'Moderate Boundary';
+          featEl.style.color = '#fbbf24';
+        } else {
+          featEl.textContent = 'Uniform Background (Zero Edge)';
+          featEl.style.color = mutedColor;
+        }
+      }
+
+      function setKernel(key) {
+        activeKernelKey = key;
+        ['btnSobelV', 'btnSobelH', 'btnRidge', 'btnSharpen', 'btnBlur'].forEach(id => {
+          document.getElementById(id).style.borderColor = 'var(--line)';
+        });
+        const activeBtnMap = {
+          sobelV: 'btnSobelV',
+          sobelH: 'btnSobelH',
+          ridge: 'btnRidge',
+          sharpen: 'btnSharpen',
+          blur: 'btnBlur'
+        };
+        document.getElementById(activeBtnMap[key]).style.borderColor = '#38bdf8';
+        render();
+      }
+
+      document.getElementById('btnSobelV').addEventListener('click', () => setKernel('sobelV'));
+      document.getElementById('btnSobelH').addEventListener('click', () => setKernel('sobelH'));
+      document.getElementById('btnRidge').addEventListener('click', () => setKernel('ridge'));
+      document.getElementById('btnSharpen').addEventListener('click', () => setKernel('sharpen'));
+      document.getElementById('btnBlur').addEventListener('click', () => setKernel('blur'));
+
+      document.getElementById('rowSlider').addEventListener('input', (e) => {
+        focusRow = parseInt(e.target.value);
+        focusCol = focusRow; // diagonal sync for slider
+        render();
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        if (mx >= 40 && mx <= 40 + 16 * 15 && my >= 60 && my <= 60 + 16 * 15) {
+          focusCol = Math.max(1, Math.min(14, Math.floor((mx - 40) / 15)));
+          focusRow = Math.max(1, Math.min(14, Math.floor((my - 60) / 15)));
+          render();
+        }
+      });
+
+      setKernel('sobelV');
+    })();
+  </script>
+</body>
+</html>
