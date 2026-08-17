@@ -12,6 +12,35 @@
     })();
   </script>
   <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+
+  <!-- KaTeX. Unicode covers inline symbols fine, but nested superscripts and real
+       fractions need a renderer. Delimiters below are dictated by what kramdown
+       actually emits, verified against a built page:
+         source $...$    -> passes through verbatim  -> scan for $...$
+         source $$...$$  -> rewritten to \[...\]     -> scan for \[...\]
+       Do NOT author \(...\) or \[...\] directly: kramdown eats the backslashes.
+       KaTeX skips <code> and <pre> by default, so code fences are untouched. -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+        integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
+        crossorigin="anonymous">
+  <script defer
+          src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+          integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8"
+          crossorigin="anonymous"></script>
+  <script defer
+          src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+          integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05"
+          crossorigin="anonymous"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              { left: '\\[', right: '\\]', display: true },
+              { left: '$$',  right: '$$',  display: true },
+              { left: '$',   right: '$',   display: false }
+            ],
+            ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option'],
+            throwOnError: false
+          });"></script>
 </head>
 <body>
   <header class="site-header">
