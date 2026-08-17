@@ -3,229 +3,448 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Concept 04: 3D Quaternions Visualizer</title>
+  <title>Concept 07: Gimbal Lock &amp; Quaternion Explorer</title>
   <script src="../../../assets/theme.js"></script>
   <link rel="stylesheet" href="../../../assets/axon.css">
   <style>
-    .demo-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 12px;
-    }
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* The container owns its height outright. The canvas is taken out of flow and
+       stretched to fill it, so the canvas size can never feed back into the
+       container size - that loop makes the canvas grow without bound on resize. */
     .canvas-container {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 10px;
       position: relative;
       overflow: hidden;
-      min-height: 340px;
+      height: 400px;
     }
     canvas {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
+      cursor: grab;
+      touch-action: none;
     }
-    .sliders-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-size: 0.8rem;
+    canvas:active { cursor: grabbing; }
+    .hint {
+      position: absolute; left: 10px; top: 8px;
+      font-size: 0.7rem; color: var(--muted);
+      pointer-events: none; font-family: system-ui, sans-serif;
     }
-    .slider-item {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
     }
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--accent);
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=range] { accent-color: var(--accent); width: 130px; }
+    .controls input[type=checkbox] { accent-color: var(--accent); }
+    .controls select, .controls button {
+      font: inherit; cursor: pointer; padding: 4px 10px; border-radius: 7px;
+      border: 1px solid var(--line); background: var(--panel-hover); color: var(--ink);
     }
+    .mono { font-family: ui-monospace, "SF Mono", monospace; }
     .stats-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-family: ui-monospace, "SF Mono", monospace;
-      font-size: 0.85rem;
+      display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: space-between;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.85rem;
     }
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    .stat-val {
-      font-weight: 700;
-      color: var(--ink);
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); }
+    @media (max-width: 620px) {
+      .controls, .stats-row { font-size: 0.72rem; gap: 8px 12px; }
+      .controls input[type=range] { width: 96px; }
+      .stats-row { justify-content: flex-start; }
     }
   </style>
 </head>
 <body>
   <div class="demo-wrap">
     <div class="canvas-container">
-      <canvas id="quatCanvas"></canvas>
+      <canvas id="rotCanvas"></canvas>
+      <div class="hint">Drag to yaw and pitch the robot</div>
     </div>
 
-    <div class="sliders-row">
-      <div class="slider-item">
-        <label>Pitch (Y-Axis): <b id="pitchLabel">0°</b></label>
-        <input type="range" id="pitchSlider" min="-90" max="90" value="0">
-      </div>
-      <div class="slider-item">
-        <label>Yaw (Z-Axis): <b id="yawLabel">30°</b></label>
-        <input type="range" id="yawSlider" min="-180" max="180" value="30">
-      </div>
-      <div class="slider-item">
-        <label>Roll (X-Axis): <b id="rollLabel">20°</b></label>
-        <input type="range" id="rollSlider" min="-180" max="180" value="20">
-      </div>
+    <div class="controls">
+      <label>Roll
+        <input type="range" id="rollSlider" min="-180" max="180" value="0" step="1">
+        <span id="rollVal" class="mono" style="color: var(--accent-amber);">0&#176;</span>
+      </label>
+      <label>Pitch
+        <input type="range" id="pitchSlider" min="-180" max="180" value="-20" step="1">
+        <span id="pitchVal" class="mono" style="color: var(--accent-green);">-20&#176;</span>
+      </label>
+      <label>Yaw
+        <input type="range" id="yawSlider" min="-180" max="180" value="45" step="1">
+        <span id="yawVal" class="mono" style="color: var(--accent);">45&#176;</span>
+      </label>
+      <label>Order
+        <select id="orderSelect">
+          <option value="zyx" selected>yaw, then pitch, then roll</option>
+          <option value="xyz">roll, then pitch, then yaw</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="ghostBox" checked> Ghosts: +20&#176; roll vs +20&#176; yaw</label>
+      <button type="button" id="lockBtn">Go to gimbal lock</button>
+      <button type="button" id="resetBtn">Reset</button>
     </div>
-    
+
     <div class="stats-row">
       <div class="stat-item">
-        <span class="stat-label">Quaternion w</span>
-        <span class="stat-val" id="qwText" style="color: var(--accent);">1.000</span>
+        <span class="stat-label">quaternion w</span>
+        <span class="stat-val" id="wText">+0.90984</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Quaternion x</span>
-        <span class="stat-val" id="qxText" style="color: var(--accent-green);">0.000</span>
+        <span class="stat-label">x</span>
+        <span class="stat-val" id="xText" style="color: var(--accent-amber);">-0.06645</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Quaternion y</span>
-        <span class="stat-val" id="qyText" style="color: var(--accent-red);">0.000</span>
+        <span class="stat-label">y</span>
+        <span class="stat-val" id="yText" style="color: var(--accent-green);">+0.16043</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Quaternion z</span>
-        <span class="stat-val" id="qzText" style="color: var(--accent-purple);">0.000</span>
+        <span class="stat-label">z</span>
+        <span class="stat-val" id="zText" style="color: var(--accent);">+0.37687</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Gimbal Status</span>
-        <span class="stat-val" id="gimbalStatusText" style="color: var(--accent-green);">Safe</span>
+        <span class="stat-label">w&#178;+x&#178;+y&#178;+z&#178;</span>
+        <span class="stat-val" id="normText" style="color: var(--accent-amber);">1.000000</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">single axis</span>
+        <span class="stat-val" id="axisText" style="color: var(--accent-purple);">(-0.160, 0.387, 0.908)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">single angle</span>
+        <span class="stat-val" id="angleText" style="color: var(--accent-purple);">49.03&#176;</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">roll axis vs yaw axis</span>
+        <span class="stat-val" id="lockText">90.0&#176;</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">degrees of freedom</span>
+        <span class="stat-val" id="dofText">3</span>
       </div>
     </div>
   </div>
 
   <script>
-    const canvas = document.getElementById('quatCanvas');
+    const canvas = document.getElementById('rotCanvas');
     const ctx = canvas.getContext('2d');
 
-    let pitch = 0, yaw = 30, roll = 20;
+    const rollSlider  = document.getElementById('rollSlider');
+    const pitchSlider = document.getElementById('pitchSlider');
+    const yawSlider   = document.getElementById('yawSlider');
+    const orderSelect = document.getElementById('orderSelect');
+    const ghostBox    = document.getElementById('ghostBox');
+    const lockBtn     = document.getElementById('lockBtn');
+    const resetBtn    = document.getElementById('resetBtn');
+
+    let roll = 0, pitch = -20, yaw = 45;   // degrees
+    let dragging = false, lastX = 0, lastY = 0;
+
+    /* ---------- quaternion arithmetic ---------- */
+
+    function qFromAxisAngle(nx, ny, nz, deg) {
+      const half = deg * Math.PI / 360;          // (deg in radians) / 2
+      const s = Math.sin(half);
+      return [Math.cos(half), nx * s, ny * s, nz * s];
+    }
+
+    // Apply b first, then a.
+    function qMul(a, b) {
+      return [
+        a[0]*b[0] - a[1]*b[1] - a[2]*b[2] - a[3]*b[3],
+        a[0]*b[1] + a[1]*b[0] + a[2]*b[3] - a[3]*b[2],
+        a[0]*b[2] - a[1]*b[3] + a[2]*b[0] + a[3]*b[1],
+        a[0]*b[3] + a[1]*b[2] - a[2]*b[1] + a[3]*b[0]
+      ];
+    }
+
+    function qNormSq(q) { return q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]; }
+
+    // Rotate a vector by the sandwich q v q^-1, written out.
+    function qRotate(q, v) {
+      const [w, x, y, z] = q;
+      const c = [-x, -y, -z];
+      const t = qMul(q, [0, v[0], v[1], v[2]]);
+      const r = qMul(t, [w, c[0], c[1], c[2]]);
+      return [r[1], r[2], r[3]];
+    }
+
+    function toAxisAngle(q) {
+      const w = Math.max(-1, Math.min(1, q[0]));
+      const angle = 2 * Math.acos(w) * 180 / Math.PI;
+      const s = Math.sqrt(Math.max(0, 1 - w * w));
+      if (s < 1e-9) return { axis: [0, 0, 1], angle: 0 };
+      return { axis: [q[1] / s, q[2] / s, q[3] / s], angle: angle };
+    }
+
+    /* Both orders are INTRINSIC: each turn is about the body's own axes as they
+       stand at that moment. Composing intrinsic turns multiplies on the right,
+       so "yaw, then pitch, then roll" is qZ * qY * qX. Identical slider values,
+       different products, different orientations - that is Step 2. */
+    function orientation(r, p, yw, order) {
+      const qX = qFromAxisAngle(1, 0, 0, r);
+      const qY = qFromAxisAngle(0, 1, 0, p);
+      const qZ = qFromAxisAngle(0, 0, 1, yw);
+      return order === 'zyx' ? qMul(qMul(qZ, qY), qX)
+                             : qMul(qMul(qX, qY), qZ);
+    }
+
+    /* ---------- projection: one scale for both screen axes ---------- */
+
+    /* Orthographic camera at azimuth -35 degrees, elevation 25 degrees. U and VU
+       are unit, perpendicular, and right-handed with the view direction, so the
+       picture is a true projection rather than a mirrored one. */
+    const U  = [ 0.5735764, 0.8191520, 0];           // screen right
+    const VU = [-0.3461706, 0.2424039, 0.9063078];   // screen up
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
+
+    function view() {
+      const { w, h } = cssSize();
+      // ONE scale for both screen axes: separate scales would shear the box and
+      // every angle read off the picture would be a lie.
+      return { cx: w / 2, cy: h / 2 + 10, s: Math.max(40, Math.min(w * 0.24, h * 0.30)) };
+    }
+
+    function project(p) {
+      const v = view();
+      const sx = p[0]*U[0]  + p[1]*U[1]  + p[2]*U[2];
+      const sy = p[0]*VU[0] + p[1]*VU[1] + p[2]*VU[2];
+      return { x: v.cx + sx * v.s, y: v.cy - sy * v.s };
+    }
 
     function resize() {
       const rect = canvas.parentElement.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
+      canvas.width  = rect.width  * dpr;
       canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       draw();
     }
-    window.addEventListener('resize', resize);
-    window.addEventListener('axon-theme-changed', draw);
+
+    function palette() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      return {
+        axis:   isLight ? '#94a3b8' : '#475569',
+        line:   isLight ? '#cbd5e1' : '#232b3b',
+        muted:  isLight ? '#64748b' : '#94a3b8',
+        ink:    isLight ? '#0f172a' : '#f1f5f9',
+        blue:   isLight ? '#0284c7' : '#38bdf8',
+        green:  isLight ? '#16a34a' : '#4ade80',
+        amber:  isLight ? '#d97706' : '#fbbf24',
+        red:    isLight ? '#e11d48' : '#f43f5e',
+        purple: isLight ? '#9333ea' : '#c084fc'
+      };
+    }
+
+    /* ---------- geometry ---------- */
+
+    const HX = 0.70, HY = 0.50, HZ = 0.22;
+    const CORNERS = [
+      [-HX,-HY,-HZ], [ HX,-HY,-HZ], [ HX, HY,-HZ], [-HX, HY,-HZ],
+      [-HX,-HY, HZ], [ HX,-HY, HZ], [ HX, HY, HZ], [-HX, HY, HZ]
+    ];
+    const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+
+    function seg(a, b, color, width, dash, alpha) {
+      const A = project(a), B = project(b);
+      ctx.save();
+      ctx.globalAlpha = alpha === undefined ? 1 : alpha;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dash || []);
+      ctx.beginPath();
+      ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBody(q, color, width, alpha, withNose) {
+      const pts = CORNERS.map(c => qRotate(q, c));
+      for (const [i, j] of EDGES) seg(pts[i], pts[j], color, width, null, alpha);
+      if (withNose) {
+        const tip  = qRotate(q, [1.15, 0, 0]);
+        const base = qRotate(q, [HX, 0, 0]);
+        const f1   = qRotate(q, [0.95,  0.10, 0]);
+        const f2   = qRotate(q, [0.95, -0.10, 0]);
+        seg(base, tip, color, width, null, alpha);
+        seg(f1, tip, color, width, null, alpha);
+        seg(f2, tip, color, width, null, alpha);
+      }
+    }
+
+    /* Labels are nudged back inside the canvas so a long one never runs off the
+       right edge on a narrow screen. */
+    function label(p, text, color, dx, dy) {
+      const P = project(p);
+      const { w } = cssSize();
+      ctx.fillStyle = color;
+      ctx.font = 'bold 11px system-ui, sans-serif';
+      const tw = ctx.measureText(text).width;
+      let x = P.x + dx;
+      if (x + tw > w - 6) x = Math.max(6, w - 6 - tw);
+      ctx.fillText(text, x, P.y + dy);
+    }
 
     function draw() {
-      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      const width = canvas.width / (window.devicePixelRatio || 1);
-      const height = canvas.height / (window.devicePixelRatio || 1);
+      const C = palette();
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
 
-      ctx.clearRect(0, 0, width, height);
+      const order = orderSelect.value;
+      const q  = orientation(roll, pitch, yaw, order);
+      const qR = orientation(roll + 20, pitch, yaw, order);   // +20 degrees of roll
+      const qY = orientation(roll, pitch, yaw + 20, order);   // +20 degrees of yaw
 
-      const cx = width / 2;
-      const cy = height / 2;
-      const len = 90;
+      // World floor: a faint square in the XY plane, plus the world axes.
+      const F = 1.25;
+      const floor = [[-F,-F,0], [F,-F,0], [F,F,0], [-F,F,0]];
+      for (let i = 0; i < 4; i++) seg(floor[i], floor[(i + 1) % 4], C.axis, 1, [4, 4], 0.45);
+      seg([-F,0,0], [F,0,0], C.axis, 1, [3, 5], 0.5);
+      seg([0,-F,0], [0,F,0], C.axis, 1, [3, 5], 0.5);
 
-      const p = pitch * Math.PI / 180;
-      const y = yaw * Math.PI / 180;
-      const r = roll * Math.PI / 180;
-
-      const cy_cos = Math.cos(y), sy_sin = Math.sin(y);
-      const cp_cos = Math.cos(p), sp_sin = Math.sin(p);
-      const cr_cos = Math.cos(r), sr_sin = Math.sin(r);
-
-      const R = [
-        [cy_cos*cp_cos, cy_cos*sp_sin*sr_sin - sy_sin*cr_cos, cy_cos*sp_sin*cr_cos + sy_sin*sr_sin],
-        [sy_sin*cp_cos, sy_sin*sp_sin*sr_sin + cy_cos*cr_cos, sy_sin*sp_sin*cr_cos - cy_cos*sr_sin],
-        [-sp_sin,       cp_cos*sr_sin,                        cp_cos*cr_cos]
-      ];
-
-      function proj(vx, vy, vz) {
-        return {
-          x: cx + (vx - vy * 0.5),
-          y: cy + (-vz + vy * 0.3)
-        };
-      }
-
-      const o = proj(0, 0, 0);
-      const xAxis = proj(R[0][0]*len, R[1][0]*len, R[2][0]*len);
-      const yAxis = proj(R[0][1]*len, R[1][1]*len, R[2][1]*len);
-      const zAxis = proj(R[0][2]*len, R[1][2]*len, R[2][2]*len);
-
-      ctx.lineWidth = 3.5;
-      ctx.strokeStyle = '#f43f5e';
-      ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(xAxis.x, xAxis.y); ctx.stroke();
-
-      ctx.strokeStyle = '#4ade80';
-      ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(yAxis.x, yAxis.y); ctx.stroke();
-
-      ctx.strokeStyle = '#38bdf8';
-      ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(zAxis.x, zAxis.y); ctx.stroke();
-
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillStyle = '#f43f5e'; ctx.fillText('X (Roll)', xAxis.x + 6, xAxis.y);
-      ctx.fillStyle = '#4ade80'; ctx.fillText('Y (Pitch)', yAxis.x + 6, yAxis.y);
-      ctx.fillStyle = '#38bdf8'; ctx.fillText('Z (Yaw)', zAxis.x + 6, zAxis.y);
-
-      // Quaternion Calculation
-      const qw = Math.cos(r/2)*Math.cos(p/2)*Math.cos(y/2) + Math.sin(r/2)*Math.sin(p/2)*Math.sin(y/2);
-      const qx = Math.sin(r/2)*Math.cos(p/2)*Math.cos(y/2) - Math.cos(r/2)*Math.sin(p/2)*Math.sin(y/2);
-      const qy = Math.cos(r/2)*Math.sin(p/2)*Math.cos(y/2) + Math.sin(r/2)*Math.cos(p/2)*Math.sin(y/2);
-      const qz = Math.cos(r/2)*Math.cos(p/2)*Math.sin(y/2) - Math.sin(r/2)*Math.sin(p/2)*Math.cos(y/2);
-
-      document.getElementById('qwText').textContent = qw.toFixed(3);
-      document.getElementById('qxText').textContent = qx.toFixed(3);
-      document.getElementById('qyText').textContent = qy.toFixed(3);
-      document.getElementById('qzText').textContent = qz.toFixed(3);
-
-      const isLocked = Math.abs(pitch) >= 88;
-      const statusEl = document.getElementById('gimbalStatusText');
-      if (isLocked) {
-        statusEl.textContent = 'GIMBAL LOCK!';
-        statusEl.style.color = 'var(--accent-red)';
+      /* The three axes actually turned about, in the order chosen. The first turn
+         uses a world axis; each later turn uses the body axis as it stands after
+         the turns before it. Gimbal lock is the roll axis meeting the yaw axis. */
+      const qFirstZ = qFromAxisAngle(0, 0, 1, yaw);    // yaw, applied first in zyx
+      const qFirstX = qFromAxisAngle(1, 0, 0, roll);   // roll, applied first in xyz
+      let rollAxis, yawAxis, pitchAxis;
+      if (order === 'zyx') {
+        yawAxis   = [0, 0, 1];
+        pitchAxis = qRotate(qFirstZ, [0, 1, 0]);
+        rollAxis  = qRotate(q, [1, 0, 0]);
       } else {
-        statusEl.textContent = 'Safe (No Lock)';
-        statusEl.style.color = 'var(--accent-green)';
+        rollAxis  = [1, 0, 0];
+        pitchAxis = qRotate(qFirstX, [0, 1, 0]);
+        yawAxis   = qRotate(q, [0, 0, 1]);
       }
+
+      const scaleV = (v, k) => [v[0]*k, v[1]*k, v[2]*k];
+      seg([0,0,0], scaleV(yawAxis, 1.35), C.purple, 2.5, [7, 5], 0.95);
+      label(scaleV(yawAxis, 1.35), 'yaw axis', C.purple, 8, -4);
+      seg([0,0,0], scaleV(pitchAxis, 1.05), C.green, 2, null, 0.85);
+      label(scaleV(pitchAxis, 1.05), 'pitch axis', C.green, 8, 4);
+
+      // Ghosts first, so the live body draws on top of them.
+      if (ghostBox.checked) {
+        drawBody(qR, C.amber,  2, 0.4, true);
+        drawBody(qY, C.purple, 2, 0.4, true);
+      }
+
+      drawBody(q, C.blue, 2.5, 1, true);
+
+      seg([0,0,0], scaleV(rollAxis, 1.35), C.amber, 3.5, null, 1);
+      label(scaleV(rollAxis, 1.15), 'roll axis', C.amber, 9, 16);
+
+      // How far apart are the roll axis and the yaw axis, in space?
+      const dot = Math.abs(rollAxis[0]*yawAxis[0] + rollAxis[1]*yawAxis[1] + rollAxis[2]*yawAxis[2]);
+      const sep = Math.acos(Math.min(1, dot)) * 180 / Math.PI;
+
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = C.muted;
+      ctx.fillText(order === 'zyx' ? 'applying: yaw, then pitch, then roll'
+                                   : 'applying: roll, then pitch, then yaw', 12, h - 26);
+      if (ghostBox.checked) {
+        ctx.fillStyle = C.amber;  ctx.fillText('ghost: +20 deg roll', 12, h - 12);
+        ctx.fillStyle = C.purple; ctx.fillText('ghost: +20 deg yaw', 150, h - 12);
+      }
+      if (sep < 5) {
+        ctx.fillStyle = C.red;
+        ctx.font = 'bold 13px system-ui, sans-serif';
+        ctx.fillText('GIMBAL LOCK: roll and yaw now turn about one axis', 12, 52);
+        ctx.font = '11px system-ui, sans-serif';
+        ctx.fillText('the two ghosts move together - only one combination of the two dials has any effect',
+                     12, 68);
+      }
+
+      updateStats(q, sep);
     }
 
-    document.getElementById('pitchSlider').addEventListener('input', (e) => {
-      pitch = parseFloat(e.target.value);
-      document.getElementById('pitchLabel').textContent = `${pitch}°`;
-      draw();
-    });
-    document.getElementById('yawSlider').addEventListener('input', (e) => {
-      yaw = parseFloat(e.target.value);
-      document.getElementById('yawLabel').textContent = `${yaw}°`;
-      draw();
-    });
-    document.getElementById('rollSlider').addEventListener('input', (e) => {
-      roll = parseFloat(e.target.value);
-      document.getElementById('rollLabel').textContent = `${roll}°`;
-      draw();
-    });
+    function signed(x, digits) { return (x >= 0 ? '+' : '') + x.toFixed(digits); }
 
+    function updateStats(q, sep) {
+      const set = (id, val) => document.getElementById(id).textContent = val;
+      const aa = toAxisAngle(q);
+
+      set('wText', signed(q[0], 5));
+      set('xText', signed(q[1], 5));
+      set('yText', signed(q[2], 5));
+      set('zText', signed(q[3], 5));
+      set('normText', qNormSq(q).toFixed(6));
+      set('axisText', '(' + aa.axis.map(c => c.toFixed(3)).join(', ') + ')');
+      set('angleText', aa.angle.toFixed(2) + '°');
+      set('lockText', sep.toFixed(1) + '°' + (sep < 5 ? '  LOCKED' : ''));
+      set('dofText', sep < 5 ? '2  (one axis lost)' : '3');
+
+      set('rollVal',  roll  + '°');
+      set('pitchVal', pitch + '°');
+      set('yawVal',   yaw   + '°');
+      rollSlider.value = roll;
+      pitchSlider.value = pitch;
+      yawSlider.value = yaw;
+    }
+
+    /* ---------- interaction: mouse and touch ---------- */
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+    }
+
+    function wrap(deg) {
+      let d = deg;
+      while (d >  180) d -= 360;
+      while (d < -180) d += 360;
+      return d;
+    }
+
+    function startDrag(e) {
+      dragging = true;
+      const p = getPos(e);
+      lastX = p.x; lastY = p.y;
+    }
+
+    function moveDrag(e) {
+      if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
+      const p = getPos(e);
+      yaw   = wrap(Math.round(yaw   + (p.x - lastX) * 0.6));
+      pitch = wrap(Math.round(pitch + (p.y - lastY) * 0.6));
+      lastX = p.x; lastY = p.y;
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', () => dragging = false);
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('touchend', () => dragging = false);
+
+    rollSlider.addEventListener('input',  () => { roll  = +rollSlider.value;  draw(); });
+    pitchSlider.addEventListener('input', () => { pitch = +pitchSlider.value; draw(); });
+    yawSlider.addEventListener('input',   () => { yaw   = +yawSlider.value;   draw(); });
+    orderSelect.addEventListener('change', draw);
+    ghostBox.addEventListener('change', draw);
+    lockBtn.addEventListener('click', () => { pitch = -90; draw(); });
+    resetBtn.addEventListener('click', () => { roll = 0; pitch = -20; yaw = 45; draw(); });
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
     resize();
   </script>
 </body>

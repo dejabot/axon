@@ -2,7 +2,7 @@
 
 > **▶ Interactive Demo: [Gimbal Lock & Quaternion Explorer](demo.html)**
 >
-> Drive roll, pitch and yaw on a wireframe robot, watch the quaternion update live, and swap the order the three turns are applied in to see identical numbers produce different orientations. Push pitch to 90° and watch the roll and yaw axes collapse onto each other.
+> Drive roll, pitch and yaw on a wireframe robot, swap the order the turns are applied in, and watch the quaternion update live. Push pitch toward 90° and watch the roll and yaw axes collapse onto each other.
 
 <iframe src="demo.html" width="100%" height="660" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 
@@ -10,9 +10,9 @@
 
 ## 1. The Real-World Problem: The Field Is Not Flat
 
-Every concept so far has needed exactly one angle. A navX or a Pigeon reports the robot's heading, Concept 02 rotates a joystick command by it, Concept 04 recovers it with `atan2`, Concept 05 wraps it into range. One number, because the carpet is flat.
+Every concept so far has needed exactly one angle: heading. A navX reports it, Concept 02 rotates a joystick command by it, Concept 04 recovers it with `atan2`, Concept 05 wraps it. One number, because the carpet is flat.
 
-Now drive up a ramp. The nose lifts 20 degrees and the heading number does not change at all — it cannot, because heading only ever measured a turn about the vertical. Yet the orientation is plainly different: a camera bolted to the robot now points 20 degrees into the air.
+Now drive up a ramp. The nose lifts 20 degrees and heading does not change — it cannot, having only ever measured a turn about the vertical. Yet a camera bolted to the robot now points 20 degrees into the air.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="400" height="215" viewBox="0 0 400 215" style="max-width: 100%; height: auto;" role="img" aria-label="Two panels. On the left a robot seen from above on flat carpet with a heading arrow forty-five degrees from down-field. On the right the same robot seen from the side sitting on a twenty-degree ramp, its whole body tilted twenty degrees.">
@@ -47,24 +47,22 @@ Now drive up a ramp. The nose lifts 20 degrees and the heading number does not c
   </svg>
 </div>
 
-The gap opens everywhere once you look. A turret that both spins and elevates has two independent axes. An AprilTag is a flat square hanging on a wall in a specific 3D attitude — WPILib returns its location as a `Pose3d`, not a `Pose2d`, precisely because two numbers of position and one of heading cannot say where a wall tag is or where a camera is looking.
-
-So we need a way to say "this rigid body is oriented like *this*" in three dimensions. The obvious answer is broken in a specific, diagnosable way, and this concept is that failure and its fix.
+The gap opens everywhere: a turret that both spins and elevates has two independent axes, and an AprilTag hangs on a wall at a specific attitude — which is why WPILib returns a tag's location as a `Pose3d`. The obvious answer, one angle per axis, is broken in a diagnosable way.
 
 ---
 
 ## 2. Building the Math: From Three Angles to Four Numbers
 
-### Step 1: The obvious first answer — one angle per axis
+### Step 1: One angle per axis
 
-In 2D there was one axis to spin about. In 3D there are three perpendicular ones, so the natural guess is three numbers. Fix a frame on the robot — **X** out the nose, **Y** out the left side, **Z** straight up — and name a turn about each.
+In 3D there are three perpendicular axes, so the natural guess is three numbers. Fix a frame on the robot — **X** out the nose, **Y** out the left side, **Z** straight up — and name a turn about each.
 
 * **Roll** — about X, the nose axis. The robot leans onto one side's wheels.
-* **Pitch** — about Y, the side-to-side axis. The nose goes up or down; the ramp above is 20 degrees of pitch.
-* **Yaw** — about Z, the vertical. This is heading, the only one Concepts 01 through 05 needed.
+* **Pitch** — about Y. The nose goes up or down; the ramp above is 20 degrees of pitch.
+* **Yaw** — about Z, the vertical. Heading, and all Concepts 01 through 05 needed.
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="340" height="230" viewBox="0 0 340 230" style="max-width: 100%; height: auto;" role="img" aria-label="A three-dimensional axis triad drawn in isometric projection. The X axis goes to the lower left and is labelled the roll axis, the Y axis goes to the lower right and is labelled the pitch axis, and the Z axis goes straight up and is labelled the yaw axis.">
+  <svg width="340" height="230" viewBox="0 0 340 230" style="max-width: 100%; height: auto;" role="img" aria-label="A three-dimensional axis triad drawn in isometric projection. The X axis goes to the lower left and is labeled the roll axis, the Y axis goes to the lower right and is labeled the pitch axis, and the Z axis goes straight up and is labeled the yaw axis.">
     <line x1="170" y1="130" x2="109.9" y2="164.7" stroke="#fbbf24" stroke-width="3" />
     <polygon points="105,167.5 116.5,166 113,159.5" fill="#fbbf24" />
     <line x1="170" y1="130" x2="230.1" y2="164.7" stroke="#4ade80" stroke-width="3" />
@@ -85,18 +83,13 @@ In 2D there was one axis to spin about. In 3D there are three perpendicular ones
   </svg>
 </div>
 
-These three are the **Euler angles**, and they are genuinely good: readable — "pitched up 20, yawed 45" is a sentence a human can picture — and what every IMU dashboard puts on screen. Nothing below says stop *reading* roll, pitch and yaw. It says stop *storing* orientation in them.
+These are the **Euler angles**: readable, and what every IMU dashboard shows. Nothing below says stop *reading* them — it says stop *storing* orientation in them.
 
 ### Step 2: The order is part of the answer
 
-Concept 02 ended on a warning. In 2D, rotating by α and then β is a single rotation by `α + β`, and since `α + β = β + α` the order cannot matter. Addition is commutative, so 2D rotation is commutative. Airtight — in 2D.
+Concept 02 ended on a warning. In 2D, rotating by α then β is one rotation by `α + β`, and `α + β = β + α`, so order cannot matter. In 3D that argument collapses: a rotation is not a number added to a number.
 
-In 3D it collapses, because a 3D rotation is not a number added to a number. The experiment takes ten seconds with a real book. Lay one flat, spine on your left, front cover up, top edge pointing away from you.
-
-1. **Yaw first.** Spin it 90 degrees counter-clockwise on the table, so the top edge points left. Then **pitch**: tip it 90 degrees away from you about the table's left-right axis. It ends up standing on what was its bottom edge, cover facing you.
-2. **Reset, pitch first.** Tip it 90 degrees away from you — it stands upright, cover facing you, top edge at the ceiling. Then **yaw** 90 degrees counter-clockwise about the table's vertical. It ends up on its spine, cover facing left.
-
-Two visibly different books. Pin it down by tracking one direction, the top edge, which started along **+X**:
+Try it with a real book, laid flat, cover up, top edge pointing away from you. **Yaw, then pitch:** spin it 90° counter-clockwise on the table, then tip it 90° away from you. **Reset and swap:** tip it away first, then spin it about the vertical. The two end up visibly different — track the top edge, which started along **+X**:
 
 $$
 \begin{aligned}
@@ -105,10 +98,8 @@ $$
 \end{aligned}
 $$
 
-One ends up pointing left, the other at the floor: 90 degrees apart. Not a rounding disagreement — a different physical orientation.
-
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="340" height="230" viewBox="0 0 340 230" style="max-width: 100%; height: auto;" role="img" aria-label="An isometric axis triad. A dashed grey arrow marks the starting direction along positive X. A green arrow along positive Y marks the result of yawing then pitching, and a rose arrow along negative Z marks the result of pitching then yawing.">
+  <svg width="340" height="230" viewBox="0 0 340 230" style="max-width: 100%; height: auto;" role="img" aria-label="An isometric axis triad. A dashed gray arrow marks the starting direction along positive X. A green arrow along positive Y marks the result of yawing then pitching, and a rose arrow along negative Z marks the result of pitching then yawing.">
     <line x1="170" y1="110" x2="113.43" y2="142.66" stroke="currentColor" stroke-opacity="0.22" stroke-width="1.5" />
     <line x1="170" y1="110" x2="226.57" y2="142.66" stroke="currentColor" stroke-opacity="0.22" stroke-width="1.5" />
     <line x1="170" y1="110" x2="170" y2="44.68" stroke="currentColor" stroke-opacity="0.22" stroke-width="1.5" />
@@ -130,18 +121,16 @@ One ends up pointing left, the other at the floor: 90 degrees apart. Not a round
   </svg>
 </div>
 
-So **"roll 30, pitch 20, yaw 45" is not an orientation.** It is three numbers waiting for a convention: which axis turns first, and whether each turn is about the fixed world axes or about the body's own axes as they move. That is twelve sequences times two, and libraries genuinely disagree. Aerospace usually applies yaw, then pitch, then roll about the body; WPILib's `Rotation3d(roll, pitch, yaw)` documents itself as *extrinsic* — roll about the fixed X, then pitch about the fixed Y, then yaw about the fixed Z. Feed one library's triple into another's constructor and you get a wrong answer that looks plausible.
+So **"roll 30, pitch 20, yaw 45" is not an orientation** — it is three numbers waiting for a convention: which axis turns first, and whether the turns are about fixed world axes or the body's own moving axes. Libraries disagree. WPILib's `Rotation3d(roll, pitch, yaw)` is *extrinsic* — roll about fixed X, then pitch about Y, then yaw about Z — where aerospace usually means body-axis yaw, pitch, roll. Cross the two and the answer is wrong but plausible.
 
 > ### Math!
-> Write `R(θ)` for a rotation by θ, and write applying one and then another as a product. In 2D, `R(α)R(β) = R(β)R(α)`. In 3D, `R₁R₂ ≠ R₂R₁` in general, and the word for that is **non-commutative**. Read `R₁R₂` out loud as **"R-one composed with R-two"**. Almost everywhere the rightmost factor is applied *first*, so `R₁R₂` means "do R₂, then do R₁" — reading that backwards is the commonest 3D transform bug.
+> Write `R(θ)` for a rotation by θ, and a product for applying one then another. In 2D `R(α)R(β) = R(β)R(α)`; in 3D `R₁R₂ ≠ R₂R₁`, which is what **non-commutative** means. Read `R₁R₂` as **"R-one composed with R-two"** — and the rightmost factor is applied *first*.
 
-### Step 3: Gimbal lock — when two of your three controls become one
+### Step 3: Gimbal lock, derived
 
-Order dependence is annoying. The next problem is fatal.
+The next problem is fatal. Picture a two-axis turret, read the aerospace way: yaw about the vertical, then pitch about the new side-to-side axis, then roll about the nose. With the barrel horizontal these are three different motions.
 
-Take the aerospace reading — yaw about the vertical, then pitch about the new side-to-side axis, then roll about the nose — and picture a two-axis turret. With the barrel horizontal, the three are obviously different motions: yaw sweeps the barrel across the field, roll spins it about its own length and moves the aim point not at all.
-
-Now elevate the barrel through **90 degrees of pitch**, until it points straight up. (A right-hand turn about +Y tips the nose *down*, so "straight up" is a pitch of −90° — a sign convention worth knowing, because WPILib uses this frame.) The nose axis is now the vertical axis, the same physical line the yaw stage turns about. Roll is a spin about the barrel; the barrel is vertical; yaw is a spin about the vertical. **They are the same rotation.**
+Now elevate the barrel through **90 degrees of pitch**, until it points straight up. (A right-hand turn about +Y tips the nose *down*, so "straight up" is a pitch of −90°.) The nose axis is now the vertical — the line the yaw stage turns about. **Roll and yaw have become the same rotation.**
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="380" height="215" viewBox="0 0 380 215" style="max-width: 100%; height: auto;" role="img" aria-label="Two panels. On the left, at zero pitch, the amber roll axis points to the lower left and the purple dashed yaw axis points straight up, and they are ninety degrees apart in space. On the right, at ninety degrees of pitch, both the roll axis and the yaw axis lie along the same vertical line and are zero degrees apart.">
@@ -168,7 +157,7 @@ Now elevate the barrel through **90 degrees of pitch**, until it points straight
   </svg>
 </div>
 
-Check it. Hold pitch at −90 degrees and ask what the pair (yaw, roll) produces. Because the nose axis has become the vertical, a roll of φ *is* a yaw of φ, so the pair only ever produces a turn of `yaw + roll` about the vertical:
+A roll of φ about a vertical nose *is* a yaw of φ, so the pair only produces `yaw + roll` about the vertical:
 
 ```
    yaw    pitch   roll     resulting orientation
@@ -181,34 +170,29 @@ Check it. Hold pitch at −90 degrees and ask what the pair (yaw, roll) produces
     0°    -90°     30°     identical
 ```
 
-Three dials, two degrees of freedom. One whole axis of control has vanished, and the encoding is now many-to-one: infinitely many `(yaw, roll)` pairs name the same orientation, so converting *back* to angles has no unique answer. This is **gimbal lock**, named for the mechanical version — a three-ring gimbal in which two rings become coplanar and the inner mass can no longer be commanded about the lost axis.
+Three dials, two degrees of freedom. The encoding is many-to-one — infinitely many `(yaw, roll)` pairs name that orientation, so converting *back* has no unique answer. This is **gimbal lock**, after the three-ring mechanism whose rings become coplanar.
 
-**The real damage is not the exact singularity; it is the neighborhood around it.** Elevate the barrel to 89.9 degrees, so it points 0.1 degrees off vertical, and sweep yaw through a full 90 degrees. The nose moves along a tiny circle of angular radius 0.1 degrees, and two points on that circle 90 degrees apart in yaw are separated by
+**The damage is the neighborhood, not the exact singularity.** Elevate to 89.9 degrees instead, so the barrel points 0.1 degrees off vertical, and sweep yaw through 90 degrees. The nose travels a circle of angular radius 0.1 degrees, and two points 90 degrees apart on it differ by
 
 $$
 \sqrt{2} \times 0.1° = 0.141°
 $$
 
-of actual physical direction. Read that backwards: **a 0.141-degree nudge of the barrel demands a 90-degree jump in the reported yaw.** Millidegree sensor noise, which every IMU has, becomes yaw readings that swing tens of degrees between loop cycles. A controller holding yaw to a setpoint sees an enormous error appear from nothing and commands full output to chase it. Point an arm straight up and a naive Euler-angle controller does not fail gracefully — it thrashes.
+of actual direction. Read that backwards: **a 0.141-degree nudge of the barrel demands a 90-degree jump in reported yaw.** Millidegree IMU noise becomes yaw swings of tens of degrees per loop cycle, and a controller sees a huge error from nothing. Point an arm straight up and a naive Euler-angle controller thrashes.
 
-### Step 4: Euler's rotation theorem — every rotation is one turn about one axis
+### Step 4: Euler's rotation theorem
 
-The escape is one surprising fact. **Any orientation of a rigid body about a fixed point, however you got there, is achievable as a single rotation by some angle about some single axis.** No sequence, no order, no three-stage assembly — one axis, one angle. This is **Euler's rotation theorem**, and it is the key idea of this concept.
+**Any orientation of a rigid body about a fixed point, however you got there, is a single rotation by some angle about some single axis.** This is **Euler's rotation theorem**, and it is the key idea of this concept.
 
-Test it on the book. Yaw 90 then pitch 90 looked like two turns about two axes; Euler's theorem says one suffices, and it does. A rotation of **120 degrees about the diagonal axis** `(1, 1, 1)/√3` sends `+X → +Y`, `+Y → +Z`, `+Z → +X` — exactly what the two turns did. Reverse the order and you get a different single rotation: 120 degrees about `(−1, 1, 1)/√3`.
+Test it on the book. A rotation of **120 degrees about the diagonal** `(1, 1, 1)/√3` sends `+X → +Y`, `+Y → +Z`, `+Z → +X` — what yaw-then-pitch did. The reverse order is a different single rotation: 120 degrees about `(−1, 1, 1)/√3`.
 
-Why must the theorem hold? A rotation keeps the origin fixed and preserves all lengths and angles, so it maps the unit sphere onto itself. Every such map either turns the sphere about some axis or reflects it, and a reflection turns a right hand into a left hand — impossible for a rigid body that was moved rather than mirrored. What survives is a turn, and a turn has an axis: the two points on the sphere that did not move.
+Why must it hold? A rotation preserves lengths and fixes the origin, so it maps the unit sphere onto itself, and such a map either turns the sphere about an axis or reflects it. Reflection is out — it would turn a right hand into a left one. What survives is a turn, and a turn has an axis: the two points that did not move.
 
-So orientation is not three sequenced angles. It is **a direction plus an amount** — an axis, 3 numbers, and an angle, 1 more. There is no order to get wrong, because there is only one turn, and no configuration where two controls collide, because there is only one axis.
+So orientation is **a direction plus an amount**: an axis, 3 numbers, and an angle, 1 more. No order to get wrong, and no configuration where controls collide.
 
-> ### Math!
-> The pair is written `(n̂, θ)` and called the **axis-angle** representation. `n̂` is read **"n-hat"**, and as with Concept 02's `î` and `ĵ` the hat means the vector has length 1 — direction only. Read the pair out loud as **"a rotation of theta about the axis n-hat."** Note that `(n̂, θ)` and `(−n̂, −θ)` are the same physical turn: reverse the axis and reverse the angle and you have turned the same way.
+### Step 5: Quaternions encode axis-angle
 
-### Step 5: Quaternions — packing the axis and the angle into four numbers
-
-Axis-angle is the right idea but awkward to compute with: composing two pairs into one is a mess, and the axis is undefined at zero angle. The **quaternion** fixes both, and it is what your IMU is really computing whether or not it shows you.
-
-A unit quaternion is four numbers, `(w, x, y, z)`, built from the axis-angle pair:
+Axis-angle is right but awkward: composing two pairs is a mess, and the axis is undefined at zero angle. The **quaternion** fixes both, and is what your IMU is really computing — four numbers, from the axis `n̂` and angle θ:
 
 $$
 \begin{aligned}
@@ -217,16 +201,16 @@ w &= \cos\!\left(\frac{\theta}{2}\right) \\[6pt]
 \end{aligned}
 $$
 
-Every ingredient is from Concept 01: a cosine, a sine, and a unit vector scaled by a number. `w` is a scalar; `(x, y, z)` points along the rotation axis, with a length that grows with the angle.
+Every ingredient is from Concept 01: a cosine, a sine, and a scaled unit vector.
 
-**Why the half?** Because of how a quaternion is *applied*. Rotating a vector `v` is not a single multiplication — a lone quaternion product does not send 3D vectors to 3D vectors while preserving lengths. The construction that works is a two-sided sandwich: multiply by `q` on the left and by its inverse on the right, `q v q⁻¹`. Because `q` appears on both sides, whatever angle is stored inside it gets used **twice**. Store the full θ and you get a rotation of 2θ; store θ/2 and the two applications combine into exactly θ. The half is not a mystery, it is bookkeeping for a formula that touches `q` twice. You never need to grind that algebra by hand — the library does it — but knowing why the half is there stops it looking arbitrary.
+**Why the half?** Because of how a quaternion is *applied*. A lone quaternion product does not send 3D vectors to 3D vectors while preserving lengths; what works is the two-sided sandwich `q v q⁻¹`. Since `q` appears on both sides, the angle inside it is used **twice** — store the full θ and you get a turn of 2θ, store θ/2 and the two applications combine into exactly θ.
 
-One consequence to carry: since the half-angle runs 0 to 180 degrees as θ runs 0 to 360, `q` and `−q` name the *same* orientation. Negating all four components flips the axis and adds a full turn, landing you where you started. A log will occasionally show every component flip sign with the robot perfectly still, and nothing is wrong.
+Since the half-angle runs 0 to 180 degrees as θ runs 0 to 360, `q` and `−q` name the *same* orientation: a log will occasionally show all four components flip sign with the robot still, and nothing is wrong.
 
 > ### Math!
-> `q = (w, x, y, z)` is read **"the quaternion w, x, y, z."** The name is from *quaternio*, Latin for a set of four. Quaternions extend the complex numbers the way the complex numbers extend the reals, and William Rowan Hamilton wrote the algebra down in 1843, a century before there was a computer to run it on. You do not need that algebra here. You need that four numbers constrained to length 1 encode an axis and an angle, and that libraries multiply them for you.
+> `(n̂, θ)` is the **axis-angle** representation, read **"a rotation of theta about the axis n-hat"**; as with Concept 02's `î` and `ĵ`, the hat means length 1. `q = (w, x, y, z)` is read **"the quaternion w, x, y, z"**, from *quaternio*, Latin for a set of four — Hamilton's 1843 extension of the complex numbers, as the complex numbers extend the reals. You need none of that algebra, only that four numbers of length 1 encode an axis and an angle.
 
-### Step 6: The constraint is Concept 01's identity, one dimension up
+### Step 6: The constraint is Concept 01's identity
 
 Not every four numbers is a rotation. It has to be a **unit** quaternion:
 
@@ -234,23 +218,20 @@ $$
 w^2 + x^2 + y^2 + z^2 = 1
 $$
 
-That is not an extra rule bolted on; it falls out of the definition. Substitute, using the fact that `n̂` has length 1 so `nx² + ny² + nz² = 1`:
+It falls out of the definition, using `n̂`'s own unit length `nx² + ny² + nz² = 1`:
 
 $$
 \begin{aligned}
 w^2 + x^2 + y^2 + z^2 &= \cos^2\!\left(\tfrac{\theta}{2}\right) + \left(n_x^2 + n_y^2 + n_z^2\right)\sin^2\!\left(\tfrac{\theta}{2}\right) \\[4pt]
-&= \cos^2\!\left(\tfrac{\theta}{2}\right) + \sin^2\!\left(\tfrac{\theta}{2}\right) \\[4pt]
-&= 1
+&= \cos^2\!\left(\tfrac{\theta}{2}\right) + \sin^2\!\left(\tfrac{\theta}{2}\right) = 1
 \end{aligned}
 $$
 
-The last line is `sin² + cos² = 1` from Concept 01 — Pythagoras on a hypotenuse of 1 — evaluated at the half-angle. Concept 01 used it to show that splitting a speed into components does not change the speed; Concept 02 used it to show a 2D rotation preserves length. It does the same job here: the unit constraint is exactly what makes the rotation **rigid**, unable to stretch or squash what it is applied to.
-
-It is also a free self-check, which three Euler angles do not offer. Sum the four squares; if the answer has drifted from 1, your orientation has drifted from being a rotation, and the repair is to divide all four by their own root-sum-of-squares.
+The last line is Concept 01's `sin² + cos² = 1` — Pythagoras on a hypotenuse of 1 — at the half-angle. It proved there that splitting a speed preserves the speed, and in Concept 02 that a 2D rotation preserves length. Same job here: the unit constraint keeps the rotation **rigid**, and no Euler triple offers a self-check like it.
 
 ### Step 7: The book experiment, in quaternions
 
-Run Step 2's two orderings through the encoding. Yaw 90 degrees is a turn about `(0, 0, 1)`, half-angle 45 degrees, and `cos 45° = sin 45° = 0.70711`:
+Yaw 90 degrees turns about `(0, 0, 1)` with half-angle 45 degrees, and `cos 45° = sin 45° = 0.70711`:
 
 $$
 q_{\text{yaw}} = (0.70711,\ 0,\ 0,\ 0.70711) \qquad q_{\text{pitch}} = (0.70711,\ 0,\ 0.70711,\ 0)
@@ -263,27 +244,22 @@ Multiply them in the two orders:
    pitch then yaw:   q = ( 0.5, -0.5, 0.5, 0.5)   ->  120° about (-1, 1, 1)/sqrt(3)
 ```
 
-Both satisfy `0.5² × 4 = 1`, so both are legal rotations, and both are turns of `2 × arccos(0.5) = 120°`. They differ in the sign of one component — and that single sign is the difference between the nose pointing left and the nose pointing at the floor. Concept 02's non-commutativity, made arithmetic.
+Both satisfy `0.5² × 4 = 1`, so both are legal rotations, and both are turns of `2 × arccos(0.5) = 120°`. They differ in one sign — the difference between the nose pointing left and pointing at the floor. Concept 02's non-commutativity, made arithmetic.
 
-### Step 8: What this actually buys a team
+### Step 8: What this buys a team
 
-**No gimbal lock, anywhere.** Every unit quaternion is an ordinary point on the unit sphere in four dimensions, and none is special. The barrel straight up is `(0.70711, 0, −0.70711, 0)`, four unremarkable numbers with no more noise sensitivity than any others. The singularity was never in the rotation; it was in the three-angle *encoding*, and the encoding is gone.
+* **No gimbal lock, anywhere.** Every unit quaternion is an ordinary point on the unit sphere in four dimensions; the barrel straight up is `(0.70711, 0, −0.70711, 0)`, four unremarkable numbers. The singularity was never in the rotation, only in the *encoding*.
+* **Composition is multiplication.** "This rotation, then that one" is one quaternion product — sixteen multiplies, twelve adds, no trigonometry. Concept 03's field → robot → camera chain is the same in 3D.
+* **Drift is cheap to repair.** Products accumulate floating-point error until the four squares stop summing to 1; the repair is one square root and four divisions. Three Euler angles have no invariant to check.
+* **Interpolation works.** Geometry Concept 03 warned that angles cannot be blended naively — halfway between 350° and 10° comes out 180°, exactly backwards — and it returns in 3D: averaging roll, pitch and yaw separately lurches through orientations neither endpoint was near. Blending quaternions along the shortest arc of the 4D unit sphere gives a smooth turn about one axis instead: **SLERP**.
 
-**Composition is multiplication.** "Apply this rotation, then that one" is one quaternion product: sixteen multiplies and twelve adds, no trigonometry in the inner loop. Chaining field → robot → camera → tag, which Concept 03 built in 2D as rotate-then-translate, is the same chain in 3D with quaternion products doing the rotating.
-
-**Drift is cheap to repair.** Every product adds a little floating-point error, and after thousands of loop cycles the four squares no longer sum to 1. The repair is one square root and four divisions. Three Euler angles have no invariant to check, so there is nothing to notice and nothing to fix.
-
-**Interpolation works.** Geometry Concept 03 warned that angles cannot be blended naively — halfway between 350° and 10° comes out 180°, exactly backwards — and fixed it in 1D by wrapping the difference into range, which is Concept 05's job. The same problem returns in 3D: averaging two orientations' roll, pitch and yaw separately gives a path that lurches and can pass through orientations neither endpoint was near. Blending quaternions instead, along the shortest arc of the 4D unit sphere, gives a smooth constant-rate turn about a single axis. That operation is **SLERP**, spherical linear interpolation.
-
-**And the honest caveat.** A quaternion is not intuitive. Nobody looks at `(0.90984, −0.06645, 0.16043, 0.37687)` and pictures a robot, and roll, pitch and yaw are far better for a dashboard or a log you have to read at 2 a.m. The rule is not "quaternions are better" — it is **store and compute in quaternions, convert to Euler angles at the moment you show a human, and never convert back.**
+**The honest caveat.** Nobody looks at `(0.90984, 0.06645, −0.16043, 0.37687)` and pictures a robot; Euler angles are far better for a dashboard or a log read at 2 a.m. So: **store and compute in quaternions, convert to Euler angles for humans, and never convert back.**
 
 ---
 
 ## 3. Solving It in Code (Java & WPILib)
 
 ### First Principles (Java)
-
-Build a quaternion from an axis and an angle, compose two, and check the constraint.
 
 ```java
 // A unit quaternion from an axis-angle pair. The axis must have length 1.
@@ -320,7 +296,7 @@ System.out.println(norm(yawThenPitch));   // 1.0  <- still a legal rotation
 System.out.println(norm(pitchThenYaw));   // 1.0  <- also legal, and NOT the same one
 ```
 
-Reading the axis and angle back is the definition run in reverse: `w = cos(θ/2)` gives the angle, and dividing the other three by `sin(θ/2)` gives the axis.
+Reading the axis and angle back is the definition in reverse: `w` gives the angle, and dividing the other three by `sin(θ/2)` gives the axis.
 
 ```java
 // Recover (axis, angle) from a unit quaternion. Round-trips fromAxisAngle exactly.
@@ -338,11 +314,9 @@ double[] back = toAxisAngle(yawThenPitch);
 // axis (0.57735, 0.57735, 0.57735) = (1,1,1)/sqrt(3),  angle 2.0944 rad = 120.000 deg
 ```
 
-That `1e-9` guard is the only special case in the file, and it is not a singularity — a zero rotation genuinely has no distinguished axis, so any unit vector is correct. Euler-angle code needs a branch every time pitch approaches ±90 degrees, and has no correct answer to give inside it.
+That `1e-9` guard is the only special case in the file, and it is not a singularity: a zero rotation has no distinguished axis. Euler-angle code needs a branch whenever pitch nears ±90 degrees, with no correct answer inside it.
 
 ### In a Robot Project (Java & WPILib)
-
-WPILib's `Rotation3d` accepts all three descriptions and stores exactly one of them.
 
 ```java
 import edu.wpi.first.math.geometry.Pose3d;
@@ -356,7 +330,7 @@ import edu.wpi.first.math.VecBuilder;
 //    fixed Y, then yaw about fixed Z. Another library's triple may not mean this.
 Rotation3d onTheRamp = new Rotation3d(
     Math.toRadians(0.0),     // roll
-    Math.toRadians(20.0),    // pitch -- the 20 degree ramp
+    Math.toRadians(-20.0),   // pitch -- nose 20 degrees UP the ramp; see Step 3
     Math.toRadians(45.0));   // yaw
 
 // 2. From an axis and an angle -- Euler's rotation theorem, spelled out.
@@ -366,29 +340,27 @@ Rotation3d spinUp = new Rotation3d(VecBuilder.fill(0, 0, 1), Math.toRadians(90))
 Rotation3d fromImu = new Rotation3d(new Quaternion(0.70711, 0, 0, 0.70711));
 ```
 
-All three do the same thing internally: **`Rotation3d` stores a quaternion and nothing else**, exactly as Concept 01's `Rotation2d` stores a cosine and a sine rather than an angle. Roll, pitch and yaw are computed on demand, never stored.
+All three constructors do the same thing internally: **`Rotation3d` stores a quaternion and nothing else**, as Concept 01's `Rotation2d` stores a cosine and a sine rather than an angle. Euler angles are computed on demand, never stored.
 
 ```java
 Quaternion q = onTheRamp.getQuaternion();
 System.out.printf("w %.5f  x %.5f  y %.5f  z %.5f%n",
                   q.getW(), q.getX(), q.getY(), q.getZ());
-// w 0.90984  x -0.06645  y 0.16043  z 0.37687
+// w 0.90984  x 0.06645  y -0.16043  z 0.37687
 
 double sumOfSquares = q.getW()*q.getW() + q.getX()*q.getX()
                     + q.getY()*q.getY() + q.getZ()*q.getZ();   // 1.00000
 
 // Euler's theorem, from the library: one axis, one angle.
-var axis         = onTheRamp.getAxis();                   // (-0.1601, 0.3866, 0.9082)
+var axis         = onTheRamp.getAxis();                   // (0.1601, -0.3866, 0.9082)
 double angleDeg  = Math.toDegrees(onTheRamp.getAngle());  // 49.0325
 
 // And back to human-readable numbers, for the dashboard only.
-double pitchDeg = Math.toDegrees(onTheRamp.getY());       // 20.0
+double pitchDeg = Math.toDegrees(onTheRamp.getY());       // -20.0
 double yawDeg   = Math.toDegrees(onTheRamp.getZ());       // 45.0
 ```
 
-Pitch 20 plus yaw 45 is a **single rotation of 49.03 degrees about the axis (−0.1601, 0.3866, 0.9082)** — mostly vertical, tipped over. Two turns in, one turn out, exactly as Step 4 promised. The from-scratch tier agrees: feed that axis and angle to `fromAxisAngle` and it reproduces `(0.90984, −0.06645, 0.16043, 0.37687)` component for component.
-
-None of this is academic — an AprilTag's location comes back as a `Pose3d`, and so does the camera-to-tag observation:
+A pitch of −20 plus a yaw of 45 is a **single rotation of 49.03 degrees about the axis (0.1601, −0.3866, 0.9082)**. Two turns in, one turn out, as Step 4 promised; the from-scratch tier agrees, reproducing `(0.90984, 0.06645, −0.16043, 0.37687)` from that axis and angle. And none of this is academic — an AprilTag's location is a `Pose3d`:
 
 ```java
 // Position in three numbers, orientation in a Rotation3d that holds a quaternion.
@@ -406,11 +378,11 @@ Rotation3d halfway = onTheRamp.interpolate(spinUp, 0.5);
 
 ## 4. Bridge to Graphics, Games & Machine Learning
 
-**Every 3D engine runs on this.** Unity's `Quaternion` is the only type it stores a rotation in; `transform.eulerAngles` is a view computed on demand, and Unity's own documentation warns against using it as storage. Unreal, Godot, Blender and glTF — the format most 3D assets ship in — all store orientation as four numbers. Character animation is the reason: blending two keyframed poses is a SLERP, sixty times a second, on every joint of every skeleton in the scene, and Euler angles would make limbs take the long way round exactly as a naively blended turret does.
+**Every 3D engine runs on this.** Unity stores a rotation only as a `Quaternion`; `transform.eulerAngles` is a view computed on demand, and Unity's own documentation warns against using it as storage. Unreal, Godot, Blender and glTF all store orientation as four numbers. Character animation is the reason: blending two keyframed poses is a SLERP, sixty times a second, on every joint of every skeleton.
 
-**Orientation is also a live problem in machine learning, and the representation is the whole difficulty.** A network predicting an object's pose from an image has to emit a rotation, and emitting three Euler angles trains badly. The reason is the discontinuity Concept 05 fixed for a single angle, now unavoidable: the map from orientations to Euler triples has points where a tiny change in the true orientation forces a large change in the target numbers, and near gimbal lock the target is not even unique. A regression loss cannot reconcile that — the network is asked to fit a function with a jump in it, and hedges by predicting the average of both sides, which is wrong everywhere.
+**Orientation is a live problem in machine learning too, and the representation is the difficulty.** A network predicting an object's pose from an image must emit a rotation, and three Euler angles train badly. The cause is the discontinuity Concept 05 fixed for a single angle, now unavoidable: the map to Euler triples has points where a tiny change in the true orientation forces a large change in the target numbers, and near gimbal lock the target is not unique. A regression loss cannot fit a function with a jump in it, so the network hedges toward the average of both sides.
 
-Predicting a quaternion is a large improvement, and is what most pose-estimation networks did first: the four outputs are normalized to length 1, which is Step 6's constraint imposed as a network layer. It is still imperfect, because `q` and `−q` are the same rotation, so the target is ambiguous unless a sign is chosen consistently. The current standard fix is a **6D representation** — predict two vectors and orthogonalize them into a frame — which removes that ambiguity too. The lesson generalizes past robotics: when a quantity lives on a curved space, the coordinates you pick for it are not neutral bookkeeping, and picking badly makes a solvable learning problem hard.
+Predicting a quaternion is what most pose-estimation networks did instead: four outputs normalized to length 1, Step 6's constraint imposed as a network layer. It is still imperfect — `q` and `−q` are the same rotation, so the target is ambiguous unless a sign is chosen consistently — and the standard fix now is a **6D representation**, predicting two vectors and orthogonalizing them into a frame.
 
 ---
 
@@ -418,38 +390,36 @@ Predicting a quaternion is a large improvement, and is what most pose-estimation
 
 ### Checkpoint 1
 
-A robot is level and facing straight down-field: no rotation at all. Write its quaternion. Then write the quaternion for a robot yawed 180 degrees, and confirm from the four numbers alone that it is a half turn about the vertical.
+A robot is level and facing straight down-field: no rotation at all. Write its quaternion. Then write the one for a robot yawed 180 degrees, and confirm from the numbers alone that it is a half turn about the vertical.
 
 **Solution:**
 
-1. **No rotation** means θ = 0 about any axis. The half-angle is 0, so `w = cos 0° = 1`, and `sin 0° = 0` kills the axis: `(x, y, z) = (0, 0, 0)`.
-2. The **identity quaternion** is `(1, 0, 0, 0)`, and `1² + 0 + 0 + 0 = 1`. ✓ The axis is undefined, correctly — a zero rotation has no distinguished axis, which is the `1e-9` branch in `toAxisAngle`.
-3. **Yawed 180 degrees** is θ = 180° about `n̂ = (0, 0, 1)`. The half-angle is 90°, so `w = cos 90° = 0` and `(x, y, z) = (0, 0, 1) × sin 90° = (0, 0, 1)`.
-4. The quaternion is `(0, 0, 0, 1)`, and `0 + 0 + 0 + 1² = 1`. ✓
-5. **Read it back.** `θ = 2 × arccos(0) = 180°`, and `sin(θ/2) = 1`, so the axis is `(0, 0, 1)` — straight up. A half turn about the vertical, recovered from the numbers alone.
+1. **No rotation** is θ = 0. The half-angle is 0, so `w = cos 0° = 1` and `sin 0° = 0` kills the axis: the **identity quaternion** is `(1, 0, 0, 0)`, with `1² = 1`. ✓ Its axis is undefined, correctly — the `1e-9` branch in `toAxisAngle`.
+2. **Yawed 180 degrees** is θ = 180° about `n̂ = (0, 0, 1)`, half-angle 90°, so `w = cos 90° = 0` and `(x, y, z) = (0, 0, 1) × sin 90°`. That is `(0, 0, 0, 1)`, and `1² = 1`. ✓
+3. **Read it back.** `θ = 2 × arccos(0) = 180°` and `sin(θ/2) = 1`, so the axis is `(0, 0, 1)` — straight up.
 
 ---
 
 ### Checkpoint 2
 
-A shooter is elevated until its barrel points straight up — a pitch of −90 degrees in the frame of Step 1. Software commands yaw 40 degrees, roll 0. A moment later it commands yaw 0, roll 40. The mechanism does not move. Explain why, and say what a controller comparing those two yaw readings would do.
+A shooter's barrel points straight up: pitch −90 degrees. Software commands yaw 40, roll 0; a moment later, yaw 0, roll 40. The mechanism does not move. Explain why, and say what a controller comparing the two yaw readings would do.
 
 **Solution:**
 
-1. **Identify the axes.** At −90 degrees of pitch the nose axis has been tipped onto the vertical, so the roll axis and the yaw axis are the same line.
-2. **The two commands are therefore the same rotation.** A roll of 40 about a vertical nose *is* a yaw of 40. Only the sum `yaw + roll` reaches the hardware, and the split between them is unobservable — Step 3's table shows the same collapse for `(30, −30)` against `(0, 0)`.
-3. **What the controller sees.** Its yaw feedback dropped from 40 to 0 while the mechanism sat perfectly still: a 40-degree error appearing in one loop cycle from nothing. A proportional controller answers with a large output and slams a stationary mechanism.
-4. **Why reality is worse.** Nothing sits at exactly 90 degrees; it sits near it, where the encoding is not degenerate but is violently sensitive. At 89.9 degrees, `√2 × 0.1° = 0.141°` of real motion swings the yaw reading through 90 degrees, and noise alone produces that. The fix is not to filter yaw harder — it is to stop storing orientation as three angles.
+1. **The axes.** At −90 degrees of pitch the nose has been tipped onto the vertical, so the roll axis and the yaw axis are the same line.
+2. **So the two commands are the same rotation.** A roll of 40 about a vertical nose *is* a yaw of 40, and only the sum `yaw + roll` reaches the hardware — Step 3's table shows the same collapse for `(30, −30)`.
+3. **What the controller sees.** Yaw feedback dropped from 40 to 0 while the mechanism sat still — a 40-degree error from nothing. A proportional controller answers with a large output, slamming a stationary mechanism.
+4. **Why reality is worse.** Near 90 degrees the encoding is violently sensitive rather than merely degenerate: at 89.9 degrees, `0.141°` of real motion swings yaw through 90 degrees, and noise alone produces that. The fix is not a harder filter — it is to stop storing orientation as three angles.
 
 ---
 
 ### Deep Dive 1
 
-Step 5 asserted the half-angle without proving it. Check the simplest case by hand: let `q` be a rotation of θ about Z, so `q = (cos(θ/2), 0, 0, sin(θ/2))`, and let `v` be `(1, 0, 0)` written as the quaternion `(0, 1, 0, 0)`. Work out `q v q⁻¹` with the multiplication rule from the code section, remembering that the inverse of a unit quaternion negates `x`, `y` and `z`. Show that the result is `(0, cos θ, sin θ, 0)` — the vector `(cos θ, sin θ, 0)`, which is exactly Concept 02's 2D rotation applied to `î`. Then say precisely where the two half-angles combined into one full angle, and predict what you would get if the full θ had been stored instead.
+Step 5 asserted the half-angle without proving it. Check the simplest case by hand: let `q` be a rotation of θ about Z, so `q = (cos(θ/2), 0, 0, sin(θ/2))`, and let `v` be `(1, 0, 0)` written as `(0, 1, 0, 0)`. Work out `q v q⁻¹` with the multiplication rule from the code section, remembering that a unit quaternion's inverse negates `x`, `y` and `z`. The result is `(0, cos θ, sin θ, 0)` — Concept 02's 2D rotation applied to `î`. Say where the two half-angles combined, and predict what the full θ would have given.
 
 ### Deep Dive 2
 
-Step 8 claimed SLERP blends orientations correctly and averaging Euler angles does not. Build the counterexample: orientation A is roll 0, pitch 0, yaw 170 degrees, and orientation B is roll 0, pitch 0, yaw −170 degrees — 20 degrees apart. Blend by averaging each angle at `t = 0.25`, `0.5` and `0.75`, describe the path the nose takes, compare it with Geometry Concept 03's answer for `lerp(350, 10, 0.5)`, and name the shared root cause. Then convert both to quaternions and work out what goes wrong if a SLERP implementation does *not* check whether the two have a negative dot product first — recall from Step 5 that `q` and `−q` are the same orientation, and decide which arc the interpolation takes in each case.
+Step 8 claimed SLERP blends orientations correctly and averaging Euler angles does not. Build the counterexample: A is yaw 170 degrees, B is yaw −170 degrees, roll and pitch zero. Average each angle at `t = 0.25`, `0.5` and `0.75`, describe the path the nose takes, and compare it with Geometry Concept 03's answer for `lerp(350, 10, 0.5)`. Then convert both to quaternions and work out what goes wrong if a SLERP implementation does *not* check the sign of their dot product first, recalling that `q` and `−q` are the same orientation.
 
 ---
 
