@@ -72,7 +72,11 @@ Arrives with: arithmetic, square roots, the Cartesian plane. Leaves with: distan
 
 ## Module 2: Trigonometry & Angles — next
 
-Arrives with: Module 1. Leaves with: `cos`/`sin`/`tan`, radians, the rotation matrix as a recipe, rigid transforms, `atan2`, angle wrapping, quaternions.
+Arrives with: Module 1. Leaves with: `cos`/`sin`/`tan`, radians, rotation as two scalar equations, rigid transforms, `atan2`, angle wrapping, quaternions.
+
+**Running example: the steerable wheel.** This module uses one mechanism throughout rather than a fresh vignette per concept. A wheel that can be pointed in any direction and driven at any speed is natively *polar* — an angle and a speed, because those are two physical motors — while the chassis and every path follower think in Cartesian components. Converting between the two is what this module is for. Concept 01 resolves one wheel into components, 02 rotates a command into the robot's frame, 04 recovers a wheel angle with `atan2`, and 05 wraps that angle and flips the module through 180°.
+
+Introduce the vocabulary late. Concept 01 says "a wheel pointed 30° off down-field, moving at 4.0 m/s" and only names it a swerve module in a single closing sentence. Never combine four modules anywhere in this axon — chassis kinematics, the `ω × r` term and module optimisation belong to the Kinematics axon and depend on tools this reader does not have.
 
 | # | Concept | Scope & key derivations | Language | Status |
 |---|---|---|---|---|

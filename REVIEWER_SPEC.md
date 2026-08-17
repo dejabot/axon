@@ -10,6 +10,10 @@ The Reviewer Sub-Agent enforces rigorous standards across all Axon curriculum mo
 Every concept `README.md` follows this six-section shape, in this order:
 
 1. **The Real-World Problem** — an FRC or everyday scenario, stated in plain language with a diagram, that the reader cannot solve yet.
+
+   The opening should cost the reader **no vocabulary they do not already have**. A scenario that must first explain a mechanism has made them learn two things to learn one, and the mechanism is the one they did not come for. Prefer "a wheel pointed 30° off down-field at 4.0 m/s" over "a swerve module at a 30° azimuth"; name the jargon in a closing sentence once the mathematics has landed.
+
+   Pick a scenario the mathematics genuinely serves. A gamepad stick already reports x and y, so decomposing one into components solves a problem that does not exist; a steered wheel's state is genuinely an angle and a speed, so converting it to components is real work. Where a module can run one mechanism across all its concepts, do that rather than inventing a fresh vignette each time.
 2. **Building the Math** — the result derived step by step from something the reader already believes. No formula appears before its justification.
 3. **"Math!" Sidebars** — formal notation introduced as a translation of the prose, with an explicit "how to read this out loud" line. These are interleaved into section 2 rather than gathered at the end.
 4. **Code (Java & WPILib)** — first-principles Java that mirrors the derivation line for line, followed by the production WPILib class that replaces it.
