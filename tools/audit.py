@@ -55,31 +55,35 @@ def check_math(path, text):
     `\\[...\\]` do NOT — kramdown strips the backslash and the math renders as
     bare parentheses. That is the main trap this checks for.
     """
-    # Language-tagged fences are real code and are left alone entirely.
-    body = re.sub(r'```[a-zA-Z]+.*?```', '', text, flags=re.S)
+    # Blank out code fences and well-formed math, preserving length and newlines
+    # so every offset still maps to the original line number. Anything flagged
+    # below is therefore genuinely outside a math region.
+    def blank(m):
+        return re.sub(r'[^\n]', ' ', m.group(0))
 
-    for pat, shown in ((r'\\\(', r'\('), (r'\\\[', r'\[')):
-        if re.search(pat, body):
-            line = text[:re.search(pat, body) and text.index(re.search(pat, body).group(0)) or 0].count('\n') + 1
-            err(path, f"authored {shown} near line {line} — kramdown eats the "
-                      f"backslash, so KaTeX never sees it. Use $...$ or $$...$$")
+    masked = re.sub(r'```.*?```', blank, text, flags=re.S)
+    masked = re.sub(r'\$\$.*?\$\$', blank, masked, flags=re.S)
+    masked = re.sub(r'\$[^$\n]+\$', blank, masked)
 
-    # Remove well-formed math so what remains can be checked as plain text.
-    outside = re.sub(r'\$\$.*?\$\$', '', body, flags=re.S)
-    outside = re.sub(r'\$[^$\n]+\$', '', outside)
-    outside = re.sub(r'```.*?```', '', outside, flags=re.S)
+    def line_at(pos):
+        return masked[:pos].count('\n') + 1
 
-    if '$' in outside:
-        line = text[:text.rindex('$')].count('\n') + 1
-        err(path, f"unpaired $ near line {line} — an odd delimiter will swallow "
-                  f"the rest of the paragraph into a math span")
+    # Authored \( or \[ OUTSIDE math. Inside math these are legitimate LaTeX
+    # (\\[4pt] is a line break), which is why masking has to happen first.
+    for m in re.finditer(r'(?<!\\)\\[\(\[]', masked):
+        err(path, f"authored {m.group(0)!r} at line {line_at(m.start())} — kramdown "
+                  f"strips the backslash, so KaTeX never sees it. Use $...$ or $$...$$")
 
-    # Brace sub/superscripts only render via KaTeX. Outside math they are literal.
-    for m in re.finditer(r'[A-Za-z0-9)\]]([_^])\{[^}]*\}', outside):
-        line = text[:text.find(m.group(0))].count('\n') + 1
+    for m in re.finditer(r'\$', masked):
+        err(path, f"unpaired $ at line {line_at(m.start())} — an odd delimiter "
+                  f"swallows the rest of the paragraph into a math span")
+        break
+
+    # Brace sub/superscripts render only via KaTeX; outside math they are literal.
+    for m in re.finditer(r'[A-Za-z0-9)\]]([_^])\{[^}]*\}', masked):
         kind = 'subscript' if m.group(1) == '_' else 'superscript'
-        err(path, f"LaTeX {kind} {m.group(0)!r} at line {line} is outside any "
-                  f"math delimiter — wrap it in $...$ or use v[i+1]")
+        err(path, f"LaTeX {kind} {m.group(0)!r} at line {line_at(m.start())} is "
+                  f"outside any math delimiter — wrap it in $...$ or use v[i+1]")
 
 
 def check_emoji(path, text):
