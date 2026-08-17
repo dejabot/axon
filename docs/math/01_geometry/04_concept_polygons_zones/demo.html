@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 04: Zone Membership & Shoelace Area</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* Container owns its height; the canvas is absolutely positioned so its size
+       can never feed back into the container's and grow without bound. */
+    .canvas-container {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 10px; position: relative; overflow: hidden; height: 370px;
+    }
+    canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      display: block; cursor: grab; touch-action: none;
+    }
+    .hint {
+      position: absolute; left: 10px; top: 8px; font-size: 0.7rem;
+      color: var(--muted); pointer-events: none; font-family: system-ui, sans-serif;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
+    }
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=checkbox] { accent-color: var(--accent); }
+    .controls button {
+      background: var(--panel-hover); color: var(--ink); border: 1px solid var(--line);
+      border-radius: 7px; padding: 5px 12px; cursor: pointer; font-size: 0.78rem;
+      font-family: system-ui, sans-serif;
+    }
+    .controls button:hover { border-color: var(--accent); color: var(--accent); }
+    .stats-row {
+      display: flex; flex-wrap: wrap; gap: 10px 18px;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.82rem;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 3px; min-width: 96px; }
+    .stat-label { font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: 0.78rem; }
+    .badge-in  { background: rgba(74, 222, 128, 0.18); color: var(--accent-green); }
+    .badge-out { background: rgba(244, 63, 94, 0.18); color: var(--accent-red); }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="zoneCanvas"></canvas>
+      <div class="hint">Drag the zone's vertices or the robot. The dashed ray counts edge crossings.</div>
+    </div>
+
+    <div class="controls">
+      <label><input type="checkbox" id="showFan"> Show shoelace triangle fan from origin</label>
+      <label><input type="checkbox" id="showRay" checked> Show ray-casting crossings</label>
+      <button type="button" id="dentBtn">Toggle dent (convex ⇄ concave)</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Robot is</span>
+        <span id="statusBadge" class="badge badge-in">inside</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Ray crossings</span>
+        <span class="stat-val" id="crossVal" style="color: var(--accent-amber);">1 (odd)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Shoelace signed area</span>
+        <span class="stat-val" id="signedVal">+0.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Area</span>
+        <span class="stat-val" id="areaVal" style="color: var(--accent-green);">0.00 m²</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Winding</span>
+        <span class="stat-val" id="windVal">counter-clockwise</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Shape</span>
+        <span class="stat-val" id="convexVal">convex</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Bounding box area</span>
+        <span class="stat-val" id="bboxVal">0.00 m²</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('zoneCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const FIELD_X = 10.0, FIELD_Y = 6.0, PAD = 34;
+
+    // Counter-clockwise by construction.
+    const CONVEX = [
+      { x: 1.6, y: 1.0 }, { x: 7.4, y: 1.2 }, { x: 8.6, y: 3.6 },
+      { x: 5.0, y: 5.2 }, { x: 1.4, y: 4.0 }
+    ];
+    const DENTED = [
+      { x: 1.6, y: 1.0 }, { x: 7.4, y: 1.2 }, { x: 8.6, y: 3.6 },
+      { x: 5.0, y: 2.4 }, { x: 1.4, y: 4.0 }
+    ];
+
+    let poly = CONVEX.map((p) => ({ ...p }));
+    let robot = { x: 4.2, y: 3.0 };
+    let dragging = null;
+
+    const showFan = document.getElementById('showFan');
+    const showRay = document.getElementById('showRay');
+    const dentBtn = document.getElementById('dentBtn');
+
+    const cross = (u, v) => u.x * v.y - u.y * v.x;
+    const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y });
+
+    /** Crossing-number test with the half-open rule on the Y comparison. */
+    function containsPoint(pts, p) {
+      let inside = false;
+      const n = pts.length;
+      for (let i = 0, j = n - 1; i < n; j = i++) {
+        const a = pts[i], b = pts[j];
+        const straddles = (a.y > p.y) !== (b.y > p.y);
+        if (!straddles) continue;
+        const t = (p.y - a.y) / (b.y - a.y);
+        const crossingX = a.x + t * (b.x - a.x);
+        if (p.x < crossingX) inside = !inside;
+      }
+      return inside;
+    }
+
+    /** Every x where an edge meets the horizontal line y = p.y, to the right of p. */
+    function crossingPoints(pts, p) {
+      const hits = [];
+      const n = pts.length;
+      for (let i = 0, j = n - 1; i < n; j = i++) {
+        const a = pts[i], b = pts[j];
+        if ((a.y > p.y) === (b.y > p.y)) continue;
+        const t = (p.y - a.y) / (b.y - a.y);
+        const x = a.x + t * (b.x - a.x);
+        if (x > p.x) hits.push(x);
+      }
+      return hits;
+    }
+
+    function signedArea(pts) {
+      let sum = 0;
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[i], b = pts[(i + 1) % pts.length];
+        sum += a.x * b.y - b.x * a.y;
+      }
+      return sum / 2;
+    }
+
+    function isConvex(pts) {
+      let sign = 0;
+      const n = pts.length;
+      for (let i = 0; i < n; i++) {
+        const a = pts[i], b = pts[(i + 1) % n], c = pts[(i + 2) % n];
+        const z = cross(sub(b, a), sub(c, b));
+        if (Math.abs(z) < 1e-9) continue;
+        const s = Math.sign(z);
+        if (sign === 0) sign = s;
+        else if (s !== sign) return false;
+      }
+      return true;
+    }
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
+    function view() {
+      const { w, h } = cssSize();
+      const scale = Math.min((w - PAD * 2) / FIELD_X, (h - PAD * 2) / FIELD_Y);
+      return { scale, ox: (w - FIELD_X * scale) / 2, oy: (h + FIELD_Y * scale) / 2 };
+    }
+    const sxf = (mx) => view().ox + mx * view().scale;
+    const syf = (my) => view().oy - my * view().scale;
+    const toMeters = (px, py) => {
+      const v = view();
+      return {
+        x: Math.max(0, Math.min(FIELD_X, (px - v.ox) / v.scale)),
+        y: Math.max(0, Math.min(FIELD_Y, (v.oy - py) / v.scale))
+      };
+    };
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function palette() {
+      const light = document.documentElement.getAttribute('data-theme') === 'light';
+      return {
+        light,
+        grid:  light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.035)',
+        line:  light ? '#cbd5e1' : '#232b3b',
+        muted: light ? '#64748b' : '#94a3b8',
+        blue:  light ? '#0284c7' : '#38bdf8',
+        red:   light ? '#e11d48' : '#f43f5e',
+        green: light ? '#16a34a' : '#4ade80',
+        amber: light ? '#d97706' : '#fbbf24',
+        purple:light ? '#9333ea' : '#c084fc'
+      };
+    }
+
+    function draw() {
+      const C = palette();
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let x = 1; x < FIELD_X; x++) {
+        ctx.beginPath(); ctx.moveTo(sxf(x), syf(0)); ctx.lineTo(sxf(x), syf(FIELD_Y)); ctx.stroke();
+      }
+      for (let y = 1; y < FIELD_Y; y++) {
+        ctx.beginPath(); ctx.moveTo(sxf(0), syf(y)); ctx.lineTo(sxf(FIELD_X), syf(y)); ctx.stroke();
+      }
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+      ctx.strokeRect(sxf(0), syf(FIELD_Y), sxf(FIELD_X) - sxf(0), syf(0) - syf(FIELD_Y));
+
+      // Shoelace triangle fan: positive-signed triangles green, negative red.
+      if (showFan.checked) {
+        for (let i = 0; i < poly.length; i++) {
+          const a = poly[i], b = poly[(i + 1) % poly.length];
+          const signed = (a.x * b.y - b.x * a.y) / 2;
+          ctx.beginPath();
+          ctx.moveTo(sxf(0), syf(0));
+          ctx.lineTo(sxf(a.x), syf(a.y));
+          ctx.lineTo(sxf(b.x), syf(b.y));
+          ctx.closePath();
+          ctx.fillStyle = signed >= 0
+            ? (C.light ? 'rgba(22,163,74,0.13)' : 'rgba(74,222,128,0.13)')
+            : (C.light ? 'rgba(225,29,72,0.16)' : 'rgba(244,63,94,0.16)');
+          ctx.fill();
+          ctx.strokeStyle = signed >= 0 ? C.green : C.red;
+          ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.stroke(); ctx.setLineDash([]);
+        }
+      }
+
+      // The zone itself
+      ctx.beginPath();
+      ctx.moveTo(sxf(poly[0].x), syf(poly[0].y));
+      for (let i = 1; i < poly.length; i++) ctx.lineTo(sxf(poly[i].x), syf(poly[i].y));
+      ctx.closePath();
+      ctx.fillStyle = C.light ? 'rgba(22,163,74,0.12)' : 'rgba(74,222,128,0.12)';
+      ctx.fill();
+      ctx.strokeStyle = C.green; ctx.lineWidth = 2.5; ctx.stroke();
+
+      const hits = crossingPoints(poly, robot);
+      const inside = containsPoint(poly, robot);
+
+      if (showRay.checked) {
+        ctx.save();
+        ctx.setLineDash([6, 5]);
+        ctx.strokeStyle = C.amber; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(sxf(robot.x), syf(robot.y));
+        ctx.lineTo(sxf(FIELD_X) + 20, syf(robot.y));
+        ctx.stroke();
+        ctx.restore();
+
+        hits.forEach((x, i) => {
+          ctx.fillStyle = C.amber;
+          ctx.beginPath(); ctx.arc(sxf(x), syf(robot.y), 6, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+          ctx.fillStyle = C.amber; ctx.font = 'bold 10px system-ui, sans-serif';
+          ctx.fillText(String(i + 1), sxf(x) - 3, syf(robot.y) - 11);
+        });
+      }
+
+      // Vertices
+      poly.forEach((p, i) => {
+        ctx.fillStyle = C.green;
+        ctx.beginPath(); ctx.arc(sxf(p.x), syf(p.y), 7, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = C.muted; ctx.font = '11px ui-monospace, monospace';
+        ctx.fillText('v' + i, sxf(p.x) + 10, syf(p.y) - 9);
+      });
+
+      // Robot
+      ctx.fillStyle = inside ? C.blue : C.red;
+      ctx.beginPath(); ctx.arc(sxf(robot.x), syf(robot.y), 9, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+
+      updateStats(inside, hits.length);
+    }
+
+    function updateStats(inside, crossings) {
+      const set = (id, v) => document.getElementById(id).textContent = v;
+      const sa = signedArea(poly);
+
+      set('crossVal', crossings + (crossings % 2 === 1 ? ' (odd)' : ' (even)'));
+      set('signedVal', (sa >= 0 ? '+' : '') + sa.toFixed(2));
+      set('areaVal', Math.abs(sa).toFixed(2) + ' m²');
+      set('windVal', sa > 0 ? 'counter-clockwise' : 'clockwise');
+      set('convexVal', isConvex(poly) ? 'convex' : 'concave (has a dent)');
+
+      const xs = poly.map((p) => p.x), ys = poly.map((p) => p.y);
+      const bbox = (Math.max(...xs) - Math.min(...xs)) * (Math.max(...ys) - Math.min(...ys));
+      set('bboxVal', bbox.toFixed(2) + ' m²');
+
+      const badge = document.getElementById('statusBadge');
+      badge.textContent = inside ? 'inside' : 'outside';
+      badge.className = 'badge ' + (inside ? 'badge-in' : 'badge-out');
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+    }
+
+    function startDrag(e) {
+      const pos = getPos(e);
+      let best = null, bestDist = 26;
+      const dRobot = Math.hypot(pos.x - sxf(robot.x), pos.y - syf(robot.y));
+      if (dRobot < bestDist) { bestDist = dRobot; best = 'robot'; }
+      poly.forEach((p, i) => {
+        const d = Math.hypot(pos.x - sxf(p.x), pos.y - syf(p.y));
+        if (d < bestDist) { bestDist = d; best = i; }
+      });
+      dragging = best;
+    }
+
+    function moveDrag(e) {
+      if (dragging === null) return;
+      if (e.cancelable) e.preventDefault();
+      const pos = getPos(e);
+      const m = toMeters(pos.x, pos.y);
+      if (dragging === 'robot') robot = m;
+      else poly[dragging] = m;
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', () => dragging = null);
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('touchend', () => dragging = null);
+
+    let dented = false;
+    dentBtn.addEventListener('click', () => {
+      dented = !dented;
+      poly = (dented ? DENTED : CONVEX).map((p) => ({ ...p }));
+      draw();
+    });
+    showFan.addEventListener('change', draw);
+    showRay.addEventListener('change', draw);
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+    resize();
+  </script>
+</body>
+</html>

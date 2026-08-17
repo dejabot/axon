@@ -8,16 +8,19 @@ Welcome to the **Mathematical Foundations Axon**. This track bridges high-school
 
 ### [1. Geometry for Robotics](01_geometry/)
 * [Concept 01: Coordinates, Poses & Pythagorean Distance](01_geometry/01_concept_coordinates_distance/) — [Interactive Visualizer](01_geometry/01_concept_coordinates_distance/demo.html)
-* [Concept 02: Coordinate Frames (Field vs. Robot vs. Camera)](01_geometry/02_concept_coordinate_frames/) — [Interactive Visualizer](01_geometry/02_concept_coordinate_frames/demo.html)
-* [Concept 03: 2D Bounding Boxes & Collision Detection](01_geometry/03_concept_bounding_boxes/) — [Interactive Visualizer](01_geometry/03_concept_bounding_boxes/demo.html)
+* [Concept 02: Lines, Segments & Intersections](01_geometry/02_concept_lines_intersections/) — [Interactive Visualizer](01_geometry/02_concept_lines_intersections/demo.html)
+* [Concept 03: Bounding Boxes, Overlap & Collision](01_geometry/03_concept_bounding_boxes/) — [Interactive Visualizer](01_geometry/03_concept_bounding_boxes/demo.html)
+* [Concept 04: Polygons, Areas & Field Zones](01_geometry/04_concept_polygons_zones/) — [Interactive Visualizer](01_geometry/04_concept_polygons_zones/demo.html)
 
 ---
 
 ### [2. Trigonometry & Angles](02_trigonometry/)
 * [Concept 01: The Unit Circle & Trigonometric Ratios](02_trigonometry/01_concept_unit_circle_ratios/) — [Interactive Visualizer](02_trigonometry/01_concept_unit_circle_ratios/demo.html)
-* [Concept 02: 4-Quadrant Heading with atan2](02_trigonometry/02_concept_atan2_heading/) — [Interactive Visualizer](02_trigonometry/02_concept_atan2_heading/demo.html)
-* [Concept 03: Angle Wrapping & Swerve 180° Speed Flip](02_trigonometry/03_concept_angle_wrapping_swerve/) — [Interactive Visualizer](02_trigonometry/03_concept_angle_wrapping_swerve/demo.html)
-* [Concept 04: 3D Rotations & Quaternions](02_trigonometry/04_concept_3d_rotations_quaternions/) — [Interactive Visualizer](02_trigonometry/04_concept_3d_rotations_quaternions/demo.html)
+* [Concept 02: Rotating a Vector & the 2D Rotation Matrix](02_trigonometry/02_concept_rotating_vectors/) — [Interactive Visualizer](02_trigonometry/02_concept_rotating_vectors/demo.html)
+* [Concept 03: Coordinate Frames (Field, Robot & Camera)](02_trigonometry/03_concept_coordinate_frames/) — [Interactive Visualizer](02_trigonometry/03_concept_coordinate_frames/demo.html)
+* [Concept 04: 4-Quadrant Heading with atan2](02_trigonometry/04_concept_atan2_heading/) — [Interactive Visualizer](02_trigonometry/04_concept_atan2_heading/demo.html)
+* [Concept 05: Angle Wrapping & Swerve 180° Speed Flip](02_trigonometry/05_concept_angle_wrapping_swerve/) — [Interactive Visualizer](02_trigonometry/05_concept_angle_wrapping_swerve/demo.html)
+* [Concept 06: 3D Rotations & Quaternions](02_trigonometry/06_concept_3d_rotations_quaternions/) — [Interactive Visualizer](02_trigonometry/06_concept_3d_rotations_quaternions/demo.html)
 
 ---
 

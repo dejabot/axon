@@ -107,7 +107,7 @@ If a robot drives with `vx = 0.6` m/s and `vy = 0.8` m/s, what is its total stra
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../../01_geometry/03_concept_bounding_boxes/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 03: Bounding Boxes</a></div>
+  <div><a href="../../01_geometry/04_concept_polygons_zones/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 04: Polygons & Zones</a></div>
   <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
-  <div><a href="../02_concept_atan2_heading/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 05: 4-Quadrant atan2 →</a></div>
+  <div><a href="../02_concept_rotating_vectors/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 02: Rotating a Vector →</a></div>
 </div>

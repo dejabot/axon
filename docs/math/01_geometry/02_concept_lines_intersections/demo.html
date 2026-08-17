@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 02: Path Crossing & Clearance Visualizer</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* Container owns its height; canvas is absolutely positioned so its size can
+       never feed back into the container's, which would grow it without bound. */
+    .canvas-container {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 10px; position: relative; overflow: hidden; height: 360px;
+    }
+    canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      display: block; cursor: grab; touch-action: none;
+    }
+    .hint {
+      position: absolute; left: 10px; top: 8px; font-size: 0.7rem;
+      color: var(--muted); pointer-events: none; font-family: system-ui, sans-serif;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
+    }
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=checkbox] { accent-color: var(--accent); }
+    .stats-row {
+      display: flex; flex-wrap: wrap; gap: 10px 18px;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.82rem;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; min-width: 92px; }
+    .stat-label { font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-weight: 700; font-size: 0.78rem;
+    }
+    .badge-cross { background: rgba(244, 63, 94, 0.18); color: var(--accent-red); }
+    .badge-clear { background: rgba(74, 222, 128, 0.18); color: var(--accent-green); }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="lineCanvas"></canvas>
+      <div class="hint">Drag any of the five handles: path A, B — barrier C, D — probe P</div>
+    </div>
+
+    <div class="controls">
+      <label><input type="checkbox" id="showInfinite"> Show infinite lines (the classic bug)</label>
+      <label><input type="checkbox" id="showClearance" checked> Show clearance from P</label>
+      <label><input type="checkbox" id="showParallelogram"> Show cross-product parallelogram</label>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">Segments</span>
+        <span id="statusBadge" class="badge badge-clear">Clear</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">d1 = orient(A,B,C)</span>
+        <span class="stat-val" id="d1">+0.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">d2 = orient(A,B,D)</span>
+        <span class="stat-val" id="d2">+0.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">d3 = orient(C,D,A)</span>
+        <span class="stat-val" id="d3">+0.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">d4 = orient(C,D,B)</span>
+        <span class="stat-val" id="d4">+0.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">cross(r, s)</span>
+        <span class="stat-val" id="denom">0.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">t (along A→B)</span>
+        <span class="stat-val" id="tVal" style="color: var(--accent-amber);">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">u (along C→D)</span>
+        <span class="stat-val" id="uVal" style="color: var(--accent-amber);">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Clearance P → path</span>
+        <span class="stat-val" id="clearVal" style="color: var(--accent-purple);">0.00 m</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('lineCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const FIELD_X = 10.0, FIELD_Y = 6.0, PAD = 30;
+
+    // Draggable handles, in meters.
+    const pts = {
+      A: { x: 1.0, y: 1.2, color: 'amber',  label: 'A' },
+      B: { x: 8.6, y: 4.8, color: 'amber',  label: 'B' },
+      C: { x: 5.2, y: 0.6, color: 'red',    label: 'C' },
+      D: { x: 5.2, y: 5.4, color: 'red',    label: 'D' },
+      P: { x: 2.4, y: 4.4, color: 'purple', label: 'P' }
+    };
+    let dragging = null;
+
+    const showInfinite = document.getElementById('showInfinite');
+    const showClearance = document.getElementById('showClearance');
+    const showParallelogram = document.getElementById('showParallelogram');
+
+    const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y });
+    const cross = (u, v) => u.x * v.y - u.y * v.x;
+    const orient = (a, b, p) => cross(sub(b, a), sub(p, a));
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
+
+    // One scale for both axes so angles and lengths are drawn truthfully.
+    function view() {
+      const { w, h } = cssSize();
+      const scale = Math.min((w - PAD * 2) / FIELD_X, (h - PAD * 2) / FIELD_Y);
+      return { scale, ox: (w - FIELD_X * scale) / 2, oy: (h + FIELD_Y * scale) / 2 };
+    }
+
+    const toScreen = (p) => { const v = view(); return { x: v.ox + p.x * v.scale, y: v.oy - p.y * v.scale }; };
+    const toMeters = (sx, sy) => {
+      const v = view();
+      return {
+        x: Math.max(0, Math.min(FIELD_X, (sx - v.ox) / v.scale)),
+        y: Math.max(0, Math.min(FIELD_Y, (v.oy - sy) / v.scale))
+      };
+    };
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function palette() {
+      const light = document.documentElement.getAttribute('data-theme') === 'light';
+      return {
+        light,
+        grid:   light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.035)',
+        line:   light ? '#cbd5e1' : '#232b3b',
+        muted:  light ? '#64748b' : '#94a3b8',
+        amber:  light ? '#d97706' : '#fbbf24',
+        red:    light ? '#e11d48' : '#f43f5e',
+        purple: light ? '#9333ea' : '#c084fc',
+        green:  light ? '#16a34a' : '#4ade80',
+        blue:   light ? '#0284c7' : '#38bdf8'
+      };
+    }
+
+    /** Clamped nearest point on segment ab to p, plus the unclamped parameter t. */
+    function nearestOnSegment(a, b, p) {
+      const r = sub(b, a);
+      const lenSq = r.x * r.x + r.y * r.y;
+      if (lenSq === 0) return { point: a, t: 0 };
+      const ap = sub(p, a);
+      let t = (ap.x * r.x + ap.y * r.y) / lenSq;
+      t = Math.max(0, Math.min(1, t));
+      return { point: { x: a.x + r.x * t, y: a.y + r.y * t }, t };
+    }
+
+    function drawSegment(p, q, color, width, dash) {
+      const s1 = toScreen(p), s2 = toScreen(q);
+      ctx.save();
+      ctx.setLineDash(dash || []);
+      ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(s2.x, s2.y); ctx.stroke();
+      ctx.restore();
+    }
+
+    /** Extend a segment far past both ends, to show the infinite-line trap. */
+    function drawInfinite(p, q, color) {
+      const d = sub(q, p);
+      const far = 40;
+      drawSegment({ x: p.x - d.x * far, y: p.y - d.y * far },
+                  { x: q.x + d.x * far, y: q.y + d.y * far }, color, 1.5, [6, 5]);
+    }
+
+    function draw() {
+      const C = palette();
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
+
+      // Grid
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let x = 1; x < FIELD_X; x++) {
+        const a = toScreen({ x, y: 0 }), b = toScreen({ x, y: FIELD_Y });
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      for (let y = 1; y < FIELD_Y; y++) {
+        const a = toScreen({ x: 0, y }), b = toScreen({ x: FIELD_X, y });
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      const tl = toScreen({ x: 0, y: FIELD_Y }), br = toScreen({ x: FIELD_X, y: 0 });
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+      ctx.strokeRect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+
+      const { A, B, C: Cp, D, P } = pts;
+
+      if (showInfinite.checked) {
+        drawInfinite(A, B, C.amber + '66');
+        drawInfinite(Cp, D, C.red + '66');
+      }
+
+      // Cross-product parallelogram spanned by (B-A) and (P-A).
+      if (showParallelogram.checked) {
+        const r = sub(B, A), ap = sub(P, A);
+        const corners = [A, { x: A.x + r.x, y: A.y + r.y },
+                         { x: A.x + r.x + ap.x, y: A.y + r.y + ap.y },
+                         { x: A.x + ap.x, y: A.y + ap.y }].map(toScreen);
+        ctx.beginPath();
+        ctx.moveTo(corners[0].x, corners[0].y);
+        for (let i = 1; i < corners.length; i++) ctx.lineTo(corners[i].x, corners[i].y);
+        ctx.closePath();
+        ctx.fillStyle = C.light ? 'rgba(147,51,234,0.10)' : 'rgba(192,132,252,0.12)';
+        ctx.fill();
+        ctx.strokeStyle = C.purple; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+        ctx.stroke(); ctx.setLineDash([]);
+      }
+
+      drawSegment(Cp, D, C.red, 5);
+      drawSegment(A, B, C.amber, 4);
+
+      // Intersection maths
+      const r = sub(B, A), s = sub(D, Cp);
+      const denom = cross(r, s);
+      const d1 = orient(A, B, Cp), d2 = orient(A, B, D);
+      const d3 = orient(Cp, D, A), d4 = orient(Cp, D, B);
+      const crosses = d1 * d2 <= 0 && d3 * d4 <= 0;
+
+      let t = null, u = null;
+      if (Math.abs(denom) > 1e-12) {
+        const ca = sub(Cp, A);
+        t = cross(ca, s) / denom;
+        u = cross(ca, r) / denom;
+      }
+
+      if (crosses && t !== null) {
+        const hit = toScreen({ x: A.x + r.x * t, y: A.y + r.y * t });
+        ctx.beginPath(); ctx.arc(hit.x, hit.y, 9, 0, Math.PI * 2);
+        ctx.strokeStyle = C.green; ctx.lineWidth = 3; ctx.stroke();
+        ctx.fillStyle = C.green; ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.fillText('crossing', hit.x + 13, hit.y - 8);
+      }
+
+      // Clearance from P to the path segment
+      const near = nearestOnSegment(A, B, P);
+      const clearance = Math.hypot(P.x - near.point.x, P.y - near.point.y);
+      if (showClearance.checked) {
+        drawSegment(P, near.point, C.purple, 2, [5, 4]);
+        const mid = toScreen({ x: (P.x + near.point.x) / 2, y: (P.y + near.point.y) / 2 });
+        ctx.fillStyle = C.purple; ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.fillText(clearance.toFixed(2) + ' m', mid.x + 8, mid.y);
+      }
+
+      // Handles
+      for (const key of Object.keys(pts)) {
+        const p = pts[key];
+        const sc = toScreen(p);
+        ctx.fillStyle = C[p.color];
+        ctx.beginPath(); ctx.arc(sc.x, sc.y, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = C[p.color]; ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText(p.label, sc.x + 11, sc.y - 10);
+      }
+
+      updateStats({ d1, d2, d3, d4, denom, t, u, crosses, clearance });
+    }
+
+    function updateStats(m) {
+      const set = (id, v) => document.getElementById(id).textContent = v;
+      const sgn = (v) => (v >= 0 ? '+' : '') + v.toFixed(2);
+      set('d1', sgn(m.d1)); set('d2', sgn(m.d2));
+      set('d3', sgn(m.d3)); set('d4', sgn(m.d4));
+      set('denom', Math.abs(m.denom) < 1e-12 ? '0 (parallel)' : m.denom.toFixed(2));
+      set('tVal', m.t === null ? '—' : m.t.toFixed(3));
+      set('uVal', m.u === null ? '—' : m.u.toFixed(3));
+      set('clearVal', m.clearance.toFixed(2) + ' m');
+
+      const badge = document.getElementById('statusBadge');
+      badge.textContent = m.crosses ? 'Path blocked' : 'Clear';
+      badge.className = 'badge ' + (m.crosses ? 'badge-cross' : 'badge-clear');
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+    }
+
+    function startDrag(e) {
+      const pos = getPos(e);
+      let best = null, bestDist = 26;
+      for (const key of Object.keys(pts)) {
+        const sc = toScreen(pts[key]);
+        const d = Math.hypot(pos.x - sc.x, pos.y - sc.y);
+        if (d < bestDist) { bestDist = d; best = key; }
+      }
+      dragging = best;
+    }
+
+    function moveDrag(e) {
+      if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
+      const pos = getPos(e);
+      const m = toMeters(pos.x, pos.y);
+      pts[dragging].x = m.x;
+      pts[dragging].y = m.y;
+      draw();
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', () => dragging = null);
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('touchend', () => dragging = null);
+
+    [showInfinite, showClearance, showParallelogram].forEach(
+      (el) => el.addEventListener('change', draw));
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+    resize();
+  </script>
+</body>
+</html>

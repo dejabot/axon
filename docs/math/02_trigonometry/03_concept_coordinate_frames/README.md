@@ -40,9 +40,18 @@ These measurements are in the **Robot Frame** (local coordinates relative to the
 
 If your autonomous routine wants to drive to that game piece, your navigation system needs its coordinates on the **Field Frame** (global coordinates where the field origin is at `(0, 0)`).
 
-If the robot is located at `(x = 4.0m, y = 2.0m)` facing directly East:
+If the robot is located at `(x = 4.0m, y = 2.0m)` **and is facing directly East** (heading `θ = 0`), the conversion is plain addition:
 * Global X = `robot_x + local_x = 4.0 + 1.5 = 5.5 meters`.
 * Global Y = `robot_y + local_y = 2.0 + 0.5 = 2.5 meters`.
+
+That "facing directly East" clause is doing an enormous amount of work, and it is the whole reason this concept comes after [Concept 02: Rotating a Vector](../02_concept_rotating_vectors/). The instant the robot is turned, the camera's "1.5 metres ahead" no longer points along the field's X-axis, and adding it to the field coordinate is simply wrong. The local offset must be **rotated by the robot's heading** before it is added:
+
+```
+   field_x = robot_x + (local_x·cos θ − local_y·sin θ)
+   field_y = robot_y + (local_x·sin θ + local_y·cos θ)
+```
+
+Rotate first, then translate. That combination — a rotation followed by a translation — is called a **rigid transform**, and it is what `Pose2d.plus(Transform2d)` performs in the code below. Setting `θ = 0` collapses it back to the plain addition above, which is why the naive version survives testing on a robot that never turns and fails the moment it does.
 
 ---
 
@@ -64,9 +73,16 @@ double cameraOffsetY = 0.0; // centered left/right
 double pieceCameraX = 1.5;  // 1.5 meters ahead of camera lens
 double pieceCameraY = -0.4; // 0.4 meters to the right
 
-// 4. Transform to Global Field Coordinates
-double pieceFieldX = robotFieldX + cameraOffsetX + pieceCameraX; // 5.0 + 0.3 + 1.5 = 6.8 m
-double pieceFieldY = robotFieldY + cameraOffsetY + pieceCameraY; // 3.0 + 0.0 - 0.4 = 2.6 m
+// 4. Combine the two robot-relative offsets (both are already in the robot frame)
+double pieceRobotX = cameraOffsetX + pieceCameraX; // 0.3 + 1.5 =  1.8 m ahead
+double pieceRobotY = cameraOffsetY + pieceCameraY; // 0.0 - 0.4 = -0.4 m right
+
+// 5. Rotate by the robot's heading, THEN translate by its field position.
+double heading = Math.toRadians(35.0);   // from the gyro, not assumed to be zero
+double c = Math.cos(heading), s = Math.sin(heading);
+
+double pieceFieldX = robotFieldX + (pieceRobotX * c - pieceRobotY * s);
+double pieceFieldY = robotFieldY + (pieceRobotX * s + pieceRobotY * c);
 
 System.out.printf("Piece on Field: (%.2f, %.2f) m%n", pieceFieldX, pieceFieldY);
 ```
@@ -130,7 +146,7 @@ Because as the robot moves, its camera moves too! If the target was at `1.5m ahe
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../01_concept_coordinates_distance/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 01: Coordinates & Distance</a></div>
-  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 1 Overview</a></div>
-  <div><a href="../03_concept_bounding_boxes/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 03: Bounding Boxes →</a></div>
+  <div><a href="../02_concept_rotating_vectors/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 02: Rotating a Vector</a></div>
+  <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 2 Overview</a></div>
+  <div><a href="../04_concept_atan2_heading/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 04: 4-Quadrant atan2 →</a></div>
 </div>

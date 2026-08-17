@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concept 02: Rotation & Field-Oriented Drive</title>
+  <script src="../../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../../assets/axon.css">
+  <style>
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* Container owns its height; the canvas is absolutely positioned so its size
+       can never feed back into the container's and grow without bound. */
+    .canvas-container {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 10px; position: relative; overflow: hidden; height: 360px;
+    }
+    canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      display: block; cursor: grab; touch-action: none;
+    }
+    .hint {
+      position: absolute; left: 10px; top: 8px; font-size: 0.7rem;
+      color: var(--muted); pointer-events: none; font-family: system-ui, sans-serif;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
+    }
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=range] { accent-color: var(--accent); width: 150px; }
+    .controls input[type=checkbox] { accent-color: var(--accent); }
+    .stats-row {
+      display: flex; flex-wrap: wrap; gap: 10px 18px;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.82rem;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 3px; min-width: 100px; }
+    .stat-label { font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); }
+    .warn { color: var(--accent-red); }
+    .matrix {
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.78rem;
+      color: var(--muted); white-space: pre; line-height: 1.35;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-wrap">
+    <div class="canvas-container">
+      <canvas id="rotCanvas"></canvas>
+      <div class="hint">Drag the gold arrow tip to change the driver's command</div>
+    </div>
+
+    <div class="controls">
+      <label>Robot heading θ
+        <input type="range" id="thetaSlider" min="-180" max="180" step="1" value="40">
+        <span id="thetaVal" style="color: var(--accent-purple); font-family: ui-monospace, monospace;">40°</span>
+      </label>
+      <label><input type="checkbox" id="showBasis" checked> Show rotated basis î, ĵ</label>
+      <label><input type="checkbox" id="wrongSign"> Use +θ instead of −θ (the classic bug)</label>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-label">cos θ</span>
+        <span class="stat-val" id="cosVal">0.766</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">sin θ</span>
+        <span class="stat-val" id="sinVal">0.643</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Field command (vx, vy)</span>
+        <span class="stat-val" id="fieldVal" style="color: var(--accent-amber);">3.00, 0.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Robot forward</span>
+        <span class="stat-val" id="fwdVal" style="color: var(--accent);">2.30</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Robot strafe</span>
+        <span class="stat-val" id="strafeVal" style="color: var(--accent-green);">−1.93</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">‖v‖ field → robot</span>
+        <span class="stat-val" id="normVal">3.00 → 3.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Heading error</span>
+        <span class="stat-val" id="errVal">0.0°</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">R(θ)</span>
+        <span class="matrix" id="matVal">[ 0.766  −0.643 ]
+[ 0.643   0.766 ]</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('rotCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const SPAN = 5.0;            // half-width of the visible world, in meters
+    let thetaDeg = 40;
+    let command = { x: 3.0, y: 0.0 };   // driver's field-frame command
+    let dragging = false;
+
+    const thetaSlider = document.getElementById('thetaSlider');
+    const showBasis = document.getElementById('showBasis');
+    const wrongSign = document.getElementById('wrongSign');
+
+    /** x' = x cos - y sin ; y' = x sin + y cos */
+    function rotate(v, rad) {
+      const c = Math.cos(rad), s = Math.sin(rad);
+      return { x: v.x * c - v.y * s, y: v.x * s + v.y * c };
+    }
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
+    function view() {
+      const { w, h } = cssSize();
+      // Uniform scale so a right angle looks like a right angle.
+      const scale = Math.min(w, h) / (SPAN * 2.2);
+      return { scale, ox: w / 2, oy: h / 2 };
+    }
+    const sxf = (mx) => view().ox + mx * view().scale;
+    const syf = (my) => view().oy - my * view().scale;
+    const toMeters = (px, py) => {
+      const v = view();
+      return { x: (px - v.ox) / v.scale, y: (v.oy - py) / v.scale };
+    };
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function palette() {
+      const light = document.documentElement.getAttribute('data-theme') === 'light';
+      return {
+        light,
+        grid:  light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.035)',
+        axis:  light ? '#94a3b8' : '#475569',
+        muted: light ? '#64748b' : '#94a3b8',
+        blue:  light ? '#0284c7' : '#38bdf8',
+        red:   light ? '#e11d48' : '#f43f5e',
+        green: light ? '#16a34a' : '#4ade80',
+        amber: light ? '#d97706' : '#fbbf24',
+        purple:light ? '#9333ea' : '#c084fc'
+      };
+    }
+
+    function arrow(from, to, color, width, label) {
+      const x1 = sxf(from.x), y1 = syf(from.y), x2 = sxf(to.x), y2 = syf(to.y);
+      const ang = Math.atan2(y2 - y1, x2 - x1);
+      const head = 11;
+      ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - head * Math.cos(ang - 0.4), y2 - head * Math.sin(ang - 0.4));
+      ctx.lineTo(x2 - head * Math.cos(ang + 0.4), y2 - head * Math.sin(ang + 0.4));
+      ctx.closePath(); ctx.fill();
+      if (label) {
+        ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText(label, x2 + 9, y2 - 7);
+      }
+    }
+
+    function draw() {
+      const C = palette();
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
+
+      // Field grid and axes
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let i = -5; i <= 5; i++) {
+        ctx.beginPath(); ctx.moveTo(sxf(i), syf(-5)); ctx.lineTo(sxf(i), syf(5)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sxf(-5), syf(i)); ctx.lineTo(sxf(5), syf(i)); ctx.stroke();
+      }
+      ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(sxf(-5), syf(0)); ctx.lineTo(sxf(5), syf(0)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sxf(0), syf(-5)); ctx.lineTo(sxf(0), syf(5)); ctx.stroke();
+      ctx.fillStyle = C.muted; ctx.font = '11px system-ui, sans-serif';
+      ctx.fillText('Field X', sxf(4.1), syf(0) - 8);
+      ctx.fillText('Field Y', sxf(0) + 8, syf(4.2));
+
+      const th = thetaDeg * Math.PI / 180;
+
+      // Robot chassis, drawn rotated to its heading
+      ctx.save();
+      ctx.translate(sxf(0), syf(0));
+      ctx.rotate(-th);
+      const halfPx = 0.75 * view().scale;
+      ctx.fillStyle = C.light ? 'rgba(2,132,199,0.16)' : 'rgba(56,189,248,0.16)';
+      ctx.fillRect(-halfPx, -halfPx, halfPx * 2, halfPx * 2);
+      ctx.strokeStyle = C.blue; ctx.lineWidth = 2;
+      ctx.strokeRect(-halfPx, -halfPx, halfPx * 2, halfPx * 2);
+      ctx.restore();
+
+      // Rotated basis vectors: where i-hat and j-hat land
+      if (showBasis.checked) {
+        const ih = rotate({ x: 2.2, y: 0 }, th);
+        const jh = rotate({ x: 0, y: 2.2 }, th);
+        ctx.fillStyle = C.purple;
+        arrow({ x: 0, y: 0 }, ih, C.purple, 2.5, 'î → (cos θ, sin θ)');
+        ctx.fillStyle = C.green;
+        arrow({ x: 0, y: 0 }, jh, C.green, 2.5, 'ĵ → (−sin θ, cos θ)');
+      }
+
+      // Heading arc
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(sxf(0), syf(0), 1.35 * view().scale, 0, -th, th > 0);
+      ctx.stroke();
+      ctx.fillStyle = C.purple; ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillText('θ = ' + thetaDeg + '°', sxf(1.5), syf(0) - 12 - (th > 0 ? 14 : -14));
+
+      // The driver's field-frame command
+      ctx.fillStyle = C.amber;
+      arrow({ x: 0, y: 0 }, command, C.amber, 3.5, 'driver command');
+
+      // Convert into the robot frame. Correct sign is -theta.
+      const applied = wrongSign.checked ? th : -th;
+      const robotFrame = rotate(command, applied);
+
+      // Draw the resulting motion, expressed back in field terms so the two
+      // arrows can be compared directly. With the correct sign they coincide.
+      const realized = rotate(robotFrame, th);
+      arrow({ x: 0, y: 0 }, realized, wrongSign.checked ? C.red : C.green, 2.5,
+            wrongSign.checked ? 'robot actually goes' : 'robot goes (matches)');
+
+      // Robot-frame components drawn along the chassis axes
+      const fwdAxis = rotate({ x: robotFrame.x, y: 0 }, th);
+      const strAxis = rotate({ x: 0, y: robotFrame.y }, th);
+      ctx.save();
+      ctx.setLineDash([5, 4]);
+      arrow({ x: 0, y: 0 }, fwdAxis, C.blue, 2, 'forward');
+      arrow(fwdAxis, { x: fwdAxis.x + strAxis.x, y: fwdAxis.y + strAxis.y }, C.green, 2, 'strafe');
+      ctx.restore();
+
+      updateStats(th, robotFrame, realized);
+    }
+
+    function updateStats(th, robotFrame, realized) {
+      const set = (id, v) => document.getElementById(id).textContent = v;
+      const c = Math.cos(th), s = Math.sin(th);
+      const fmt = (v) => (v < 0 ? '−' : '') + Math.abs(v).toFixed(3);
+      const fmt2 = (v) => (v < 0 ? '−' : '') + Math.abs(v).toFixed(2);
+
+      set('cosVal', fmt(c));
+      set('sinVal', fmt(s));
+      set('fieldVal', fmt2(command.x) + ', ' + fmt2(command.y));
+      set('fwdVal', fmt2(robotFrame.x));
+      set('strafeVal', fmt2(robotFrame.y));
+
+      const nIn = Math.hypot(command.x, command.y);
+      const nOut = Math.hypot(robotFrame.x, robotFrame.y);
+      set('normVal', nIn.toFixed(2) + ' → ' + nOut.toFixed(2));
+
+      // Angle between what the driver asked for and what the robot does.
+      let err = 0;
+      if (nIn > 1e-6) {
+        const a = Math.atan2(command.y, command.x);
+        const b = Math.atan2(realized.y, realized.x);
+        err = (b - a) * 180 / Math.PI;
+        while (err > 180) err -= 360;
+        while (err < -180) err += 360;
+      }
+      const errEl = document.getElementById('errVal');
+      errEl.textContent = (Math.abs(err) < 0.05 ? '0.0' : err.toFixed(1)) + '°';
+      errEl.className = 'stat-val' + (Math.abs(err) > 0.5 ? ' warn' : '');
+
+      set('matVal',
+        '[ ' + fmt(c) + '  ' + fmt(-s) + ' ]\n[ ' + fmt(s) + '   ' + fmt(c) + ' ]');
+      set('thetaVal', thetaDeg + '°');
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const pos = getPos(e);
+      if (Math.hypot(pos.x - sxf(command.x), pos.y - syf(command.y)) < 30) dragging = true;
+    });
+    canvas.addEventListener('touchstart', (e) => {
+      const pos = getPos(e);
+      if (Math.hypot(pos.x - sxf(command.x), pos.y - syf(command.y)) < 34) dragging = true;
+    }, { passive: true });
+
+    function moveDrag(e) {
+      if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
+      const pos = getPos(e);
+      const m = toMeters(pos.x, pos.y);
+      const n = Math.hypot(m.x, m.y);
+      const cap = 4.0;
+      command = n > cap ? { x: m.x / n * cap, y: m.y / n * cap } : m;
+      draw();
+    }
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', () => dragging = false);
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('touchend', () => dragging = false);
+
+    thetaSlider.addEventListener('input', () => { thetaDeg = +thetaSlider.value; draw(); });
+    showBasis.addEventListener('change', draw);
+    wrongSign.addEventListener('change', draw);
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
+    resize();
+  </script>
+</body>
+</html>

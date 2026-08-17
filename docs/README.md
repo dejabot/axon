@@ -47,7 +47,7 @@ Axon is an educational curriculum designed from first principles to bridge high-
 ---
 
 ### [Axon 01: Mathematical Foundations](math/)
-* **[Geometry for Robotics](math/01_geometry/)**: Coordinates, Poses, Frame Transforms, 2D AABB Bounding Boxes.
+* **[Geometry for Robotics](math/01_geometry/)**: Coordinates, Poses, Distance, Lines & Intersections, Bounding Boxes & Collision, Polygon Field Zones.
 * **[Trigonometry & Angles](math/02_trigonometry/)**: Unit Circle, `atan2`, Angle Wrapping, 180° Swerve Speed Flips, 3D Quaternions.
 * **[Linear Algebra & Matrix Transformations](math/03_linear_algebra/)**: Vectors, Dot Products, Matrices, Determinants, Matrix Inverses.
 * **[Calculus, Motion & Optimization](math/04_calculus/)**: Rates of Change, S-Curves & Jerk, Numerical Integrals, Multivariable Gradients.

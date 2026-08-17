@@ -7,80 +7,100 @@
   <script src="../../../assets/theme.js"></script>
   <link rel="stylesheet" href="../../../assets/axon.css">
   <style>
-    .demo-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 12px;
-    }
+    .demo-wrap { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+    /* The container owns its height outright. The canvas is taken out of flow and
+       stretched to fill it, so the canvas size can never feed back into the
+       container size — that loop makes the canvas grow without bound on resize. */
     .canvas-container {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 10px;
       position: relative;
       overflow: hidden;
-      min-height: 340px;
+      height: 340px;
     }
     canvas {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
       cursor: crosshair;
+      touch-action: none;
     }
+    .hint {
+      position: absolute; left: 10px; top: 8px;
+      font-size: 0.7rem; color: var(--muted);
+      pointer-events: none; font-family: system-ui, sans-serif;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 0.8rem; font-family: system-ui, sans-serif;
+    }
+    .controls label { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+    .controls input[type=range] { accent-color: var(--accent); width: 130px; }
+    .controls input[type=checkbox] { accent-color: var(--accent); }
     .stats-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: space-between;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-family: ui-monospace, "SF Mono", monospace;
-      font-size: 0.85rem;
+      display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: space-between;
+      background: var(--panel); border: 1px solid var(--line);
+      padding: 12px 16px; border-radius: 10px;
+      font-family: ui-monospace, "SF Mono", monospace; font-size: 0.85rem;
     }
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    .stat-val {
-      font-weight: 700;
-      color: var(--ink);
-    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-val { font-weight: 700; color: var(--ink); }
   </style>
 </head>
 <body>
   <div class="demo-wrap">
     <div class="canvas-container">
       <canvas id="fieldCanvas"></canvas>
+      <div class="hint">Drag the robot or the target</div>
     </div>
-    
+
+    <div class="controls">
+      <label>Robot heading θ
+        <input type="range" id="headingSlider" min="-180" max="180" value="45" step="1">
+        <span id="headingVal" style="color: var(--accent-purple); font-family: ui-monospace, monospace;">45°</span>
+      </label>
+      <label><input type="checkbox" id="showL1"> Show L1 (Manhattan) path</label>
+      <label><input type="checkbox" id="showMid"> Show midpoint</label>
+    </div>
+
     <div class="stats-row">
       <div class="stat-item">
-        <span class="stat-label">Robot (x₁, y₁)</span>
-        <span class="stat-val" id="robotPosText" style="color: var(--accent);">[3.0, 2.0] m</span>
+        <span class="stat-label">Robot pose (x, y, θ)</span>
+        <span class="stat-val" id="robotPosText" style="color: var(--accent);">3.0, 2.0, 45°</span>
       </div>
       <div class="stat-item">
         <span class="stat-label">Target (x₂, y₂)</span>
-        <span class="stat-val" id="targetPosText" style="color: var(--accent-red);">[12.0, 6.0] m</span>
+        <span class="stat-val" id="targetPosText" style="color: var(--accent-red);">12.0, 6.0</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Δx (East/West)</span>
-        <span class="stat-val" id="dxText">9.00 m</span>
+        <span class="stat-label">Δx</span>
+        <span class="stat-val" id="dxText">+9.00 m</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Δy (North/South)</span>
-        <span class="stat-val" id="dyText">4.00 m</span>
+        <span class="stat-label">Δy</span>
+        <span class="stat-val" id="dyText">+4.00 m</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Straight-Line Distance</span>
+        <span class="stat-label">L2 distance √(Δx²+Δy²)</span>
         <span class="stat-val" id="distText" style="color: var(--accent-amber); font-size: 1.05rem;">9.85 m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Squared d² (no sqrt)</span>
+        <span class="stat-val" id="dsqText">97.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">L1 |Δx|+|Δy|</span>
+        <span class="stat-val" id="l1Text">13.00 m</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">L∞ max(|Δx|,|Δy|)</span>
+        <span class="stat-val" id="linfText">9.00 m</span>
       </div>
     </div>
   </div>
@@ -89,176 +109,231 @@
     const canvas = document.getElementById('fieldCanvas');
     const ctx = canvas.getContext('2d');
 
-    const fieldMetersX = 16.5;
-    const fieldMetersY = 8.2;
+    const fieldMetersX = 16.54;
+    const fieldMetersY = 8.21;
+    const PAD = 32;
 
     let robot = { x: 3.0, y: 2.0 };
     let target = { x: 12.0, y: 6.0 };
+    let headingDeg = 45;
     let dragging = null;
+
+    const headingSlider = document.getElementById('headingSlider');
+    const showL1 = document.getElementById('showL1');
+    const showMid = document.getElementById('showMid');
+
+    function cssSize() {
+      const dpr = window.devicePixelRatio || 1;
+      return { w: canvas.width / dpr, h: canvas.height / dpr };
+    }
 
     function resize() {
       const rect = canvas.parentElement.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       draw();
     }
-    window.addEventListener('resize', resize);
-    window.addEventListener('axon-theme-changed', draw);
 
-    function toScreen(mx, my) {
-      const pad = 30;
-      const w = (canvas.width / (window.devicePixelRatio || 1)) - pad * 2;
-      const h = (canvas.height / (window.devicePixelRatio || 1)) - pad * 2;
+    /* One scale for both axes, so a meter East is the same number of pixels as a
+       meter North. Without this the field stretches to fill the box and the right
+       triangle is drawn with the wrong shape — fatal for a lesson about distance.
+       The leftover space is split evenly, letterboxing the field in its container. */
+    function view() {
+      const { w, h } = cssSize();
+      const scale = Math.min((w - PAD * 2) / fieldMetersX, (h - PAD * 2) / fieldMetersY);
       return {
-        x: pad + (mx / fieldMetersX) * w,
-        y: pad + h - (my / fieldMetersY) * h
+        scale,
+        originX: (w - fieldMetersX * scale) / 2,
+        originY: (h + fieldMetersY * scale) / 2
       };
     }
 
+    function toScreen(mx, my) {
+      const v = view();
+      return { x: v.originX + mx * v.scale, y: v.originY - my * v.scale };
+    }
+
     function toMeters(sx, sy) {
-      const pad = 30;
-      const w = (canvas.width / (window.devicePixelRatio || 1)) - pad * 2;
-      const h = (canvas.height / (window.devicePixelRatio || 1)) - pad * 2;
+      const v = view();
       return {
-        x: Math.max(0, Math.min(fieldMetersX, ((sx - pad) / w) * fieldMetersX)),
-        y: Math.max(0, Math.min(fieldMetersY, (1.0 - (sy - pad) / h) * fieldMetersY))
+        x: Math.max(0, Math.min(fieldMetersX, (sx - v.originX) / v.scale)),
+        y: Math.max(0, Math.min(fieldMetersY, (v.originY - sy) / v.scale))
       };
     }
 
     function draw() {
       const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      const width = canvas.width / (window.devicePixelRatio || 1);
-      const height = canvas.height / (window.devicePixelRatio || 1);
+      const { w, h } = cssSize();
+      ctx.clearRect(0, 0, w, h);
 
-      ctx.clearRect(0, 0, width, height);
+      const C = {
+        line:   isLight ? '#cbd5e1' : '#232b3b',
+        grid:   isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.035)',
+        muted:  isLight ? '#64748b' : '#94a3b8',
+        blue:   isLight ? '#0284c7' : '#38bdf8',
+        green:  isLight ? '#16a34a' : '#4ade80',
+        amber:  isLight ? '#d97706' : '#fbbf24',
+        red:    isLight ? '#e11d48' : '#f43f5e',
+        purple: isLight ? '#9333ea' : '#c084fc'
+      };
 
-      // Draw Field Border
-      const tl = toScreen(0, fieldMetersY);
-      const br = toScreen(fieldMetersX, 0);
-      ctx.strokeStyle = isLight ? '#cbd5e1' : '#232b3b';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
-
-      // Grid lines every 2m
-      ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)';
+      // Grid every 2 m
+      ctx.strokeStyle = C.grid;
       ctx.lineWidth = 1;
       for (let x = 2; x < fieldMetersX; x += 2) {
-        const p1 = toScreen(x, 0);
-        const p2 = toScreen(x, fieldMetersY);
-        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+        const a = toScreen(x, 0), b = toScreen(x, fieldMetersY);
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
       for (let y = 2; y < fieldMetersY; y += 2) {
-        const p1 = toScreen(0, y);
-        const p2 = toScreen(fieldMetersX, y);
-        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+        const a = toScreen(0, y), b = toScreen(fieldMetersX, y);
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
 
-      const rScr = toScreen(robot.x, robot.y);
-      const tScr = toScreen(target.x, target.y);
-      const cornerScr = toScreen(target.x, robot.y);
+      // Field border
+      const tl = toScreen(0, fieldMetersY), br = toScreen(fieldMetersX, 0);
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+      ctx.strokeRect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
 
-      // Triangle components
-      ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = isLight ? 'rgba(2, 132, 199, 0.4)' : 'rgba(56, 189, 248, 0.3)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(rScr.x, rScr.y);
-      ctx.lineTo(cornerScr.x, cornerScr.y);
-      ctx.lineTo(tScr.x, tScr.y);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      // Origin marker
+      const org = toScreen(0, 0);
+      ctx.fillStyle = C.blue;
+      ctx.beginPath(); ctx.arc(org.x, org.y, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = C.muted;
+      ctx.fillText('(0, 0)', org.x + 7, org.y - 7);
 
-      // Straight-line distance
-      ctx.strokeStyle = isLight ? '#d97706' : '#fbbf24';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(rScr.x, rScr.y);
-      ctx.lineTo(tScr.x, tScr.y);
-      ctx.stroke();
+      const rS = toScreen(robot.x, robot.y);
+      const tS = toScreen(target.x, target.y);
+      const cS = toScreen(target.x, robot.y);
 
-      // Robot box
-      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.fillRect(rScr.x - 12, rScr.y - 12, 24, 24);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(rScr.x - 12, rScr.y - 12, 24, 24);
-
-      // Target circle
-      ctx.fillStyle = isLight ? '#e11d48' : '#f43f5e';
-      ctx.beginPath();
-      ctx.arc(tScr.x, tScr.y, 9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Labels
-      ctx.font = '12px system-ui, sans-serif';
-      ctx.fillStyle = isLight ? '#0284c7' : '#38bdf8';
-      ctx.fillText('Robot', rScr.x - 16, rScr.y - 16);
-      ctx.fillStyle = isLight ? '#e11d48' : '#f43f5e';
-      ctx.fillText('Target', tScr.x - 16, tScr.y - 14);
-
-      // Update Text
       const dx = target.x - robot.x;
       const dy = target.y - robot.y;
-      const dist = Math.hypot(dx, dy);
 
-      document.getElementById('robotPosText').textContent = `[${robot.x.toFixed(1)}, ${robot.y.toFixed(1)}] m`;
-      document.getElementById('targetPosText').textContent = `[${target.x.toFixed(1)}, ${target.y.toFixed(1)}] m`;
-      document.getElementById('dxText').textContent = `${dx >= 0 ? '+' : ''}${dx.toFixed(2)} m`;
-      document.getElementById('dyText').textContent = `${dy >= 0 ? '+' : ''}${dy.toFixed(2)} m`;
-      document.getElementById('distText').textContent = `${dist.toFixed(2)} m`;
+      // L1 path (elbow through the corner)
+      if (showL1.checked) {
+        ctx.strokeStyle = C.green; ctx.lineWidth = 5; ctx.globalAlpha = 0.35;
+        ctx.beginPath();
+        ctx.moveTo(rS.x, rS.y); ctx.lineTo(cS.x, cS.y); ctx.lineTo(tS.x, tS.y);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      // Right-triangle legs
+      ctx.setLineDash([5, 4]); ctx.lineWidth = 2;
+      ctx.strokeStyle = C.blue;
+      ctx.beginPath(); ctx.moveTo(rS.x, rS.y); ctx.lineTo(cS.x, cS.y); ctx.stroke();
+      ctx.strokeStyle = C.green;
+      ctx.beginPath(); ctx.moveTo(cS.x, cS.y); ctx.lineTo(tS.x, tS.y); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Right-angle marker at the corner
+      const sx = Math.sign(rS.x - cS.x) || 1;
+      const sy = Math.sign(tS.y - cS.y) || 1;
+      ctx.strokeStyle = C.muted; ctx.lineWidth = 1.5;
+      ctx.strokeRect(Math.min(cS.x, cS.x + sx * 11), Math.min(cS.y, cS.y + sy * 11), 11, 11);
+
+      // Hypotenuse
+      ctx.strokeStyle = C.amber; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(rS.x, rS.y); ctx.lineTo(tS.x, tS.y); ctx.stroke();
+
+      // Leg labels
+      ctx.font = 'bold 12px system-ui, sans-serif';
+      ctx.fillStyle = C.blue;
+      ctx.fillText('Δx = ' + dx.toFixed(1), (rS.x + cS.x) / 2 - 24, rS.y + (dy > 0 ? 17 : -8));
+      ctx.fillStyle = C.green;
+      ctx.fillText('Δy = ' + dy.toFixed(1), cS.x + (dx > 0 ? 8 : -70), (cS.y + tS.y) / 2);
+      ctx.fillStyle = C.amber;
+      ctx.fillText('d = ' + Math.hypot(dx, dy).toFixed(2) + ' m',
+                   (rS.x + tS.x) / 2 - 60, (rS.y + tS.y) / 2 - 10);
+
+      // Midpoint
+      if (showMid.checked) {
+        const mS = toScreen((robot.x + target.x) / 2, (robot.y + target.y) / 2);
+        ctx.fillStyle = C.purple;
+        ctx.beginPath(); ctx.arc(mS.x, mS.y, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = C.purple;
+        ctx.font = '11px system-ui, sans-serif';
+        ctx.fillText('midpoint', mS.x + 9, mS.y + 15);
+      }
+
+      // Robot body, rotated to its heading
+      const th = headingDeg * Math.PI / 180;
+      ctx.save();
+      ctx.translate(rS.x, rS.y);
+      ctx.rotate(-th);                    // screen Y grows downward, so negate
+      ctx.fillStyle = C.blue;
+      ctx.fillRect(-14, -14, 28, 28);
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+      ctx.strokeRect(-14, -14, 28, 28);
+      ctx.strokeStyle = C.purple; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(30, 0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(23, -5); ctx.lineTo(23, 5);
+      ctx.closePath(); ctx.fillStyle = C.purple; ctx.fill();
+      ctx.restore();
+
+      // Target
+      ctx.fillStyle = C.red;
+      ctx.beginPath(); ctx.arc(tS.x, tS.y, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+
+      updateStats(dx, dy);
+    }
+
+    function updateStats(dx, dy) {
+      const d = Math.hypot(dx, dy);
+      const set = (id, v) => document.getElementById(id).textContent = v;
+      const sgn = (v) => (v >= 0 ? '+' : '') + v.toFixed(2) + ' m';
+
+      set('robotPosText', `${robot.x.toFixed(1)}, ${robot.y.toFixed(1)}, ${headingDeg}°`);
+      set('targetPosText', `${target.x.toFixed(1)}, ${target.y.toFixed(1)}`);
+      set('dxText', sgn(dx));
+      set('dyText', sgn(dy));
+      set('distText', d.toFixed(2) + ' m');
+      set('dsqText', (dx * dx + dy * dy).toFixed(2));
+      set('l1Text', (Math.abs(dx) + Math.abs(dy)).toFixed(2) + ' m');
+      set('linfText', Math.max(Math.abs(dx), Math.abs(dy)).toFixed(2) + ' m');
+      set('headingVal', headingDeg + '°');
     }
 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
-      const cx = e.touches ? e.touches[0].clientX : e.clientX;
-      const cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: cx - rect.left, y: cy - rect.top };
+      const p = e.touches && e.touches.length ? e.touches[0] : e;
+      return { x: p.clientX - rect.left, y: p.clientY - rect.top };
     }
 
-    canvas.addEventListener('mousedown', (e) => {
+    function startDrag(e) {
       const p = getPos(e);
-      const rScr = toScreen(robot.x, robot.y);
-      const tScr = toScreen(target.x, target.y);
-      if (Math.hypot(p.x - rScr.x, p.y - rScr.y) < 25) dragging = 'robot';
-      else if (Math.hypot(p.x - tScr.x, p.y - tScr.y) < 25) dragging = 'target';
-    });
+      const rS = toScreen(robot.x, robot.y);
+      const tS = toScreen(target.x, target.y);
+      if (Math.hypot(p.x - rS.x, p.y - rS.y) < 28) dragging = 'robot';
+      else if (Math.hypot(p.x - tS.x, p.y - tS.y) < 28) dragging = 'target';
+    }
 
-    window.addEventListener('mousemove', (e) => {
+    function moveDrag(e) {
       if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
       const p = getPos(e);
       const m = toMeters(p.x, p.y);
-      if (dragging === 'robot') { robot.x = m.x; robot.y = m.y; }
-      if (dragging === 'target') { target.x = m.x; target.y = m.y; }
+      if (dragging === 'robot') robot = m; else target = m;
       draw();
-    });
+    }
 
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
     window.addEventListener('mouseup', () => dragging = null);
-
-    canvas.addEventListener('touchstart', (e) => {
-      const p = getPos(e);
-      const rScr = toScreen(robot.x, robot.y);
-      const tScr = toScreen(target.x, target.y);
-      if (Math.hypot(p.x - rScr.x, p.y - rScr.y) < 30) dragging = 'robot';
-      else if (Math.hypot(p.x - tScr.x, p.y - tScr.y) < 30) dragging = 'target';
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-      if (!dragging) return;
-      e.preventDefault();
-      const p = getPos(e);
-      const m = toMeters(p.x, p.y);
-      if (dragging === 'robot') { robot.x = m.x; robot.y = m.y; }
-      if (dragging === 'target') { target.x = m.x; target.y = m.y; }
-      draw();
-    }, { passive: false });
-
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
     window.addEventListener('touchend', () => dragging = null);
 
+    headingSlider.addEventListener('input', () => { headingDeg = +headingSlider.value; draw(); });
+    showL1.addEventListener('change', draw);
+    showMid.addEventListener('change', draw);
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('axon-theme-changed', draw);
     resize();
   </script>
 </body>

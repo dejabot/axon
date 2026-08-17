@@ -103,7 +103,7 @@ A robot's velocity vector is `v = [2.0, 4.0]` m/s. The driver hits the "Turbo" b
 ---
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line, #232b3b);">
-  <div><a href="../../02_trigonometry/04_concept_3d_rotations_quaternions/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 07: 3D Quaternions</a></div>
+  <div><a href="../../02_trigonometry/06_concept_3d_rotations_quaternions/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">← Concept 07: 3D Quaternions</a></div>
   <div><a href="../" style="color: var(--muted, #94a3b8); text-decoration: none;">Module 3 Overview</a></div>
   <div><a href="../02_concept_dot_products/" style="color: var(--accent, #38bdf8); text-decoration: none; font-weight: 600;">Concept 09: Dot Products & Projections →</a></div>
 </div>
