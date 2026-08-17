@@ -62,33 +62,34 @@ The gap between the rows is where the robot actually lives. Filling it takes one
 
 Concept 02 described a line as a walk:
 
-```
-   P(t) = A + t · (B − A)
-```
+$$
+P(t) = A + t \cdot (B - A)
+$$
 
 read out loud as "the point you reach after travelling `t` of the way from A toward B." That sentence *is* the definition of **linear interpolation** — you have been using it for a whole concept without the word.
 
 Nothing in the formula cares that `A` and `B` are points; subtract, scale and add work just as well on plain numbers. So drop the geometry:
 
-```
-   lerp(a, b, t) = a + t · (b − a)
-```
+$$
+\operatorname{lerp}(a, b, t) = a + t \cdot (b - a)
+$$
 
 Now `a` and `b` can be flywheel speeds, voltages or brightness values, and `t` is the blend fraction: 0 gives `a`, 1 gives `b`, 0.5 gives the average.
 
 > ### Math!
-> ```
->    lerp(a, b, t) = a + t·(b − a),    t ∈ [0, 1]
-> ```
+> $$
+> \operatorname{lerp}(a, b, t) = a + t \cdot (b - a), \quad t \in [0, 1]
+> $$
+>
 > Read as **"lerp of a, b, t equals a plus t times the quantity b minus a."** Programmers pronounce `lerp` to rhyme with "burp". *Interpolation* is Latin for polishing between: inventing a value between two you know.
 
 ### Step 2: The same formula, written two ways
 
 Multiply the definition out:
 
-```
-   a + t·b − t·a  =  (1 − t)·a + t·b
-```
+$$
+a + t \cdot b - t \cdot a = (1 - t) \cdot a + t \cdot b
+$$
 
 Algebraically identical. Read aloud, though, the second says something new: **take `(1 − t)` of `a` and `t` of `b`, and add them** — a weighted average whose weights always sum to 1. That is the reading you meet in graphics and machine learning, where 30% opacity is weights 0.7 and 0.3.
 
@@ -109,18 +110,20 @@ That is all you need to use interpolation safely. Deep Dive 1 chases the full st
 
 Constantly you need the reverse: given a value, what fraction of the way along is it? Solve the definition for `t`:
 
-```
-   v = a + t·(b − a)
-   v − a = t·(b − a)
-   t = (v − a) / (b − a)
-```
+$$
+\begin{aligned}
+v &= a + t \cdot (b - a) \\
+v - a &= t \cdot (b - a) \\
+t &= \frac{v - a}{b - a}
+\end{aligned}
+$$
 
 That is **inverse lerp**, better known as normalization. A sensor reading 3.1 V across a 0.2–4.8 V range sits `(3.1 − 0.2) / (4.8 − 0.2) = 0.630` of the way along; feed that `t` into a `lerp` over a different range and you have **remapped** it onto metres: `lerp(0.3, 5.0, 0.630) = 3.263 m`. The denominator is the only failure mode — if `a = b` there is no answer, so guard it rather than let a `NaN` escape into a control loop.
 
 > ### Math!
-> ```
->    invLerp(a, b, v) = (v − a) / (b − a),    a ≠ b
-> ```
+> $$
+> \operatorname{invLerp}(a, b, v) = \frac{v - a}{b - a}, \quad a \neq b
+> $$
 > Read as **"inverse lerp of a, b, v equals v minus a, over b minus a."** Statistics calls it **min-max normalization**; graphics calls it `unlerp`. The two undo each other: `invLerp(a, b, lerp(a, b, t)) = t`.
 
 ### Step 4: Interpolating lookup tables, and the dangerous edge

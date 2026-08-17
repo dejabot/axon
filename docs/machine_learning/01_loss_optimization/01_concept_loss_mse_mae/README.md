@@ -35,17 +35,17 @@ Choosing how to collapse them is not a detail. Two reasonable choices, both used
 
 For each shot `i`, the **residual** is the signed difference between what the model predicted and what actually happened:
 
-```
-   residual = prediction − actual
-```
+$$
+\text{residual} = \text{prediction} - \text{actual}
+$$
 
 Signed, so it carries direction: positive means the shot went long, negative means short. That sign is genuinely useful information — it tells you which way to adjust.
 
 But it makes the residual useless as a score. Add up the five residuals above:
 
-```
-   +0.2 − 0.1 + 1.0 − 0.2 + 0.1 = +1.0
-```
+$$
++0.2 - 0.1 + 1.0 - 0.2 + 0.1 = +1.0
+$$
 
 Now imagine a much worse model that misses by `+5.0` on one shot and `−5.0` on another. Its residuals sum to `0.0` — a perfect score, from a model that missed by five metres twice. Positive and negative errors cancel, and cancellation is exactly what a score must not do.
 
@@ -55,15 +55,15 @@ The fix is to strip the sign before summing. There are two natural ways to strip
 
 **Take the absolute value.** Average those, and you get **Mean Absolute Error**:
 
-```
-   MAE = (1/N) · Σ |ŷᵢ − yᵢ|
-```
+$$
+\text{MAE} = \frac{1}{N} \cdot \sum_i \left| \hat{y}_i - y_i \right|
+$$
 
 **Square it.** Squaring also kills the sign, since a negative times a negative is positive. Average those and you get **Mean Squared Error**:
 
-```
-   MSE = (1/N) · Σ (ŷᵢ − yᵢ)²
-```
+$$
+\text{MSE} = \frac{1}{N} \cdot \sum_i (\hat{y}_i - y_i)^2
+$$
 
 > ### Math!
 > Read `MSE = (1/N) · Σ (ŷᵢ − yᵢ)²` out loud as **"M-S-E equals one over N, times the sum over i of y-hat-sub-i minus y-sub-i, all squared."**
@@ -85,9 +85,9 @@ The residuals were in metres. Squaring them produced metres squared, and averagi
 
 Taking the square root at the end restores the units and gives **Root Mean Squared Error**:
 
-```
-   RMSE = √MSE = √0.22 ≈ 0.47 metres
-```
+$$
+\text{RMSE} = \sqrt{\text{MSE}} = \sqrt{0.22} \approx 0.47 \text{ metres}
+$$
 
 That is a number you can reason about — this shooter is typically off by about half a metre. Note it is meaningfully larger than the MAE of `0.32 m` computed from the identical data. RMSE always comes out at least as large as MAE, and the gap between them widens as your errors become more uneven. Two models with identical MAE but different RMSE differ in *consistency*: the one with higher RMSE is the streakier shooter.
 
@@ -99,23 +99,23 @@ Forget the model for a moment. Suppose you must summarise a set of numbers with 
 
 **For MSE**, we want to minimise `Σ (c − xᵢ)²`. A function is at its minimum where its derivative is zero, so differentiate with respect to `c`:
 
-```
-   d/dc Σ (c − xᵢ)² = Σ 2(c − xᵢ) = 0
-```
+$$
+\frac{d}{dc} \sum_i (c - x_i)^2 = \sum_i 2(c - x_i) = 0
+$$
 
 Divide by 2 and split the sum:
 
-```
-   Nc − Σ xᵢ = 0     which gives     c = (1/N) Σ xᵢ
-```
+$$
+Nc - \sum_i x_i = 0 \qquad \text{which gives} \qquad c = \frac{1}{N} \sum_i x_i
+$$
 
 The best constant under MSE is **the mean**.
 
 **For MAE**, we want to minimise `Σ |c − xᵢ|`. The derivative of `|c − xᵢ|` is `+1` when `c` is above `xᵢ` and `−1` when it is below. Setting the sum to zero:
 
-```
-   (count of points below c) − (count of points above c) = 0
-```
+$$
+(\text{count of points below } c) - (\text{count of points above } c) = 0
+$$
 
 The best constant under MAE is whatever value splits the data in half — **the median**.
 
@@ -142,10 +142,12 @@ If MAE is robust, why is MSE the default across most of machine learning? Becaus
 
 Differentiate each loss with respect to a single prediction `ŷ`:
 
-```
-   d/dŷ (ŷ − y)²  =  2(ŷ − y)          proportional to the error
-   d/dŷ |ŷ − y|   =  sign(ŷ − y)       always exactly +1 or −1
-```
+$$
+\begin{aligned}
+\frac{d}{d\hat{y}} (\hat{y} - y)^2 &= 2(\hat{y} - y) && \text{proportional to the error} \\[4pt]
+\frac{d}{d\hat{y}} \left| \hat{y} - y \right| &= \operatorname{sign}(\hat{y} - y) && \text{always exactly } +1 \text{ or } -1
+\end{aligned}
+$$
 
 Two consequences follow.
 
@@ -162,10 +164,12 @@ Worse, MAE has a **kink** at zero — the derivative jumps from `−1` to `+1` w
 
 You do not have to choose. **Huber loss** is quadratic for small errors and linear for large ones, switching over at a threshold `δ`:
 
-```
-   L(e) = ½e²                  when |e| ≤ δ
-   L(e) = δ(|e| − ½δ)          when |e| > δ
-```
+$$
+\begin{aligned}
+L(e) &= \tfrac{1}{2} e^2 && \text{when } |e| \leq \delta \\[4pt]
+L(e) &= \delta \left( |e| - \tfrac{1}{2}\delta \right) && \text{when } |e| > \delta
+\end{aligned}
+$$
 
 Near zero it is MSE, so it keeps the well-behaved shrinking gradient where convergence happens. Beyond `δ` it is MAE, so one glitched reading contributes proportionally rather than quadratically.
 

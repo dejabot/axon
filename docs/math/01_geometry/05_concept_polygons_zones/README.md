@@ -1,4 +1,4 @@
-# Concept 04: Polygons, Areas & Field Zones
+# Concept 05: Polygons, Areas & Field Zones
 
 > **▶ Interactive Demo: [Zone Membership & Shoelace Area Visualizer](demo.html)**
 >
@@ -12,7 +12,7 @@
 
 FRC games are built around regions of the carpet that mean something. A launching zone that scores you extra points, a protected area you are penalised for entering, a starting box you must be fully inside when autonomous begins, an amplified region that changes what a game piece is worth.
 
-Concept 03 could handle these only if they were rectangles. They rarely are. Field regions are marked by tape lines running at angles, they get cut off by the diagonal of an alliance station, and they are often five- or six-sided. Approximating a slanted zone with an axis-aligned box either claims territory you do not have or gives away territory you do.
+Concept 04 could handle these only if they were rectangles. They rarely are. Field regions are marked by tape lines running at angles, they get cut off by the diagonal of an alliance station, and they are often five- or six-sided. Approximating a slanted zone with an axis-aligned box either claims territory you do not have or gives away territory you do.
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="360" height="200" viewBox="0 0 360 200" style="max-width: 100%; height: auto;" role="img" aria-label="A five-sided field zone with a robot inside it and a rectangle poorly approximating the same zone.">
@@ -47,9 +47,9 @@ A polygon is **convex** if it has no dents — every interior angle is at most 1
 
 Concept 02 already gave us a way to tell the difference. Walk the vertices in order and compute the orientation of each consecutive triple. If every turn goes the same way, the shape is convex; if the sign flips somewhere, you have found a dent.
 
-```
-   convex  ⟺  cross(v[i+1] − v[i],  v[i+2] − v[i+1])  has the same sign for every i
-```
+$$
+\text{convex} \iff \operatorname{cross}(v[i+1] - v[i],\ v[i+2] - v[i+1]) \quad \text{has the same sign for every } i
+$$
 
 ### Step 2: Inside a convex zone — the same side of everything
 
@@ -59,9 +59,9 @@ That claim is easier to believe than to prove, and the picture carries it. Each 
 
 Since Concept 02's orientation test reports which side a point is on, the membership test is a loop of cross products:
 
-```
-   inside  ⟺  orient(v[i], v[i+1], P) ≥ 0   for every edge i
-```
+$$
+\text{inside} \iff \operatorname{orient}(v[i], v[i+1], P) \geq 0 \quad \text{for every edge } i
+$$
 
 One negative result and you can stop immediately — the point is out. No division, no square roots, no trigonometry, and an early exit on most queries. For the convex zones that make up most of a field, this is the test to use.
 
@@ -108,10 +108,12 @@ Start with a triangle with one corner at the origin and the other two at `u` and
 
 Now fan the whole polygon into triangles from the origin: origin to `v[0]` to `v[1]`, then origin to `v[1]` to `v[2]`, and so on around the loop. Summing the signed cross products gives the **shoelace formula**:
 
-```
-   Area = ½ · | Σᵢ cross(v[i], v[i+1]) |
-        = ½ · | Σᵢ ( x[i] · y[i+1] − x[i+1] · y[i] ) |
-```
+$$
+\begin{aligned}
+\text{Area} &= \frac{1}{2} \cdot \left\lvert \sum_i \operatorname{cross}(v[i], v[i+1]) \right\rvert \\
+&= \frac{1}{2} \cdot \left\lvert \sum_i \left( x[i] \cdot y[i+1] - x[i+1] \cdot y[i] \right) \right\rvert
+\end{aligned}
+$$
 
 The elegance is in the word *signed*. If the origin sits outside the polygon, some of those triangles stick out beyond the shape and should not be counted. They are not counted — because those triangles are traversed in the opposite rotational direction, their cross products come out negative, and they subtract exactly the excess that the other triangles overcounted. The formula needs no special handling for where you put the origin, and none for concave shapes.
 
@@ -125,7 +127,7 @@ The sign of the sum before you take the absolute value is useful on its own: pos
 Three tools now overlap, and picking between them is a judgement about cost and shape.
 
 ```
-   bounding box (Concept 03)   4 comparisons     rectangles only, or as a first filter
+   bounding box (Concept 04)   4 comparisons     rectangles only, or as a first filter
    convex half-planes          n cross products  convex zones, early exit, no division
    ray casting                 n edge tests      any simple polygon, handles dents
 ```
@@ -224,7 +226,7 @@ Each ReLU unit computes a weighted sum and clips it at zero. Whether it is activ
 
 The consequence is worth sitting with: inside any one of those regions the network is perfectly linear, because the active units are fixed and the clipped ones contribute nothing. A deep ReLU network is therefore a **piecewise-linear function** — a plane sliced into polytopes, each carrying its own linear map. Training does not smooth this out; it moves the cuts. When the machine learning axon shows a decision boundary bending to separate two clusters, the bend is made of flat pieces, and counting them is a standard way to measure a network's expressive capacity.
 
-The shoelace formula has a direct second life in computer vision. **Instance segmentation** models such as Mask R-CNN and the polygon-output detectors used for aerial and document imagery report objects as vertex lists rather than boxes, precisely because a box overclaims for anything slanted — the same complaint that opened this concept. Scoring those predictions needs polygon area for the intersection-over-union of Concept 03, and that area comes from the shoelace sum. Training-data pipelines lean on the crossing-number test too: deciding which labelled region a click or a pixel belongs to is Step 3, run millions of times.
+The shoelace formula has a direct second life in computer vision. **Instance segmentation** models such as Mask R-CNN and the polygon-output detectors used for aerial and document imagery report objects as vertex lists rather than boxes, precisely because a box overclaims for anything slanted — the same complaint that opened this concept. Scoring those predictions needs polygon area for the intersection-over-union of Concept 04, and that area comes from the shoelace sum. Training-data pipelines lean on the crossing-number test too: deciding which labelled region a click or a pixel belongs to is Step 3, run millions of times.
 
 The autonomy link is more direct still. Ray casting is how an occupancy grid decides which cells a sensor beam passed through, and the even-odd rule is how a planner decides whether a candidate waypoint sits inside a keep-out region before it wastes time expanding it.
 

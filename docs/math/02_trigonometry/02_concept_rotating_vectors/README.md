@@ -62,11 +62,13 @@ Start with a plain right triangle. Pick one of its non-right angles and call it 
 
 The ratios between those sides depend only on θ, never on how big you draw the triangle — scale the triangle up and both sides grow by the same factor, leaving the ratio untouched. Three of those ratios get names, remembered by the mnemonic **SOH-CAH-TOA**:
 
-```
-   SOH:  sin θ = Opposite / Hypotenuse
-   CAH:  cos θ = Adjacent / Hypotenuse
-   TOA:  tan θ = Opposite / Adjacent
-```
+$$
+\begin{aligned}
+\text{SOH:} \quad \sin\theta &= \frac{\text{Opposite}}{\text{Hypotenuse}} \\[4pt]
+\text{CAH:} \quad \cos\theta &= \frac{\text{Adjacent}}{\text{Hypotenuse}} \\[4pt]
+\text{TOA:} \quad \tan\theta &= \frac{\text{Opposite}}{\text{Adjacent}}
+\end{aligned}
+$$
 
 Now shrink the hypotenuse to exactly 1. Dividing by 1 changes nothing, so the two ratios collapse into something much easier to hold in your head: the adjacent side simply *is* `cos θ`, and the opposite side simply *is* `sin θ`. Drawn on a circle of radius 1 centred at the origin — the **unit circle** — a point at angle θ sits at coordinates `(cos θ, sin θ)`.
 
@@ -113,18 +115,22 @@ Rotation is **linear**, which means two things: rotating a scaled vector is the 
 
 So take any vector `v = (x, y)`, write it as `x·î + y·ĵ`, and rotate:
 
-```
-   R(v) = R(x·î + y·ĵ)
-        = x·R(î) + y·R(ĵ)                    (linearity)
-        = x·(cos θ, sin θ) + y·(−sin θ, cos θ)   (Step 2)
-```
+$$
+\begin{aligned}
+R(v) &= R(x \cdot \hat{\imath} + y \cdot \hat{\jmath}) \\[4pt]
+     &= x \cdot R(\hat{\imath}) + y \cdot R(\hat{\jmath}) && \text{(linearity)} \\[4pt]
+     &= x \cdot (\cos\theta,\ \sin\theta) + y \cdot (-\sin\theta,\ \cos\theta) && \text{(Step 2)}
+\end{aligned}
+$$
 
 Adding those two scaled vectors component by component gives the result:
 
-```
-   x' = x·cos θ − y·sin θ
-   y' = x·sin θ + y·cos θ
-```
+$$
+\begin{aligned}
+x' &= x \cdot \cos\theta - y \cdot \sin\theta \\[4pt]
+y' &= x \cdot \sin\theta + y \cdot \cos\theta
+\end{aligned}
+$$
 
 Two lines of arithmetic, and everything else in this concept is a consequence of them.
 
@@ -139,28 +145,30 @@ Two lines of arithmetic, and everything else in this concept is a consequence of
 
 A rotation should not stretch anything. Let us confirm the formula agrees, by computing the new squared length:
 
-```
-   x'² + y'² = (x cos θ − y sin θ)² + (x sin θ + y cos θ)²
-```
+$$
+{x'}^2 + {y'}^2 = (x \cos\theta - y \sin\theta)^2 + (x \sin\theta + y \cos\theta)^2
+$$
 
 Expand both squares:
 
-```
-   = x² cos²θ − 2xy cos θ sin θ + y² sin²θ
-   + x² sin²θ + 2xy sin θ cos θ + y² cos²θ
-```
+$$
+\begin{aligned}
+&= x^2 \cos^2\theta - 2xy \cos\theta \sin\theta + y^2 \sin^2\theta \\[4pt]
+&\phantom{=} + x^2 \sin^2\theta + 2xy \sin\theta \cos\theta + y^2 \cos^2\theta
+\end{aligned}
+$$
 
 The two middle terms are identical apart from sign, so they cancel. Grouping what remains:
 
-```
-   = x² (cos²θ + sin²θ) + y² (sin²θ + cos²θ)
-```
+$$
+= x^2 (\cos^2\theta + \sin^2\theta) + y^2 (\sin^2\theta + \cos^2\theta)
+$$
 
 And `cos²θ + sin²θ = 1` — which is just the Pythagorean theorem from Concept 01 applied to a triangle with hypotenuse 1. So:
 
-```
-   x'² + y'² = x² + y²
-```
+$$
+{x'}^2 + {y'}^2 = x^2 + y^2
+$$
 
 Length out equals length in, for every angle and every vector. A transformation that preserves all distances is called **rigid**, and rigid is exactly what you want when the thing being transformed is a physical robot.
 
@@ -168,10 +176,12 @@ Length out equals length in, for every angle and every vector. A transformation 
 
 To rotate back, rotate by `−θ`. Two facts about the unit circle make this cheap: `cos(−θ) = cos θ` (a point and its mirror image below the X-axis share the same x-coordinate) while `sin(−θ) = −sin θ` (their y-coordinates are opposite). Substituting those into our two equations:
 
-```
-   x' =  x·cos θ + y·sin θ
-   y' = −x·sin θ + y·cos θ
-```
+$$
+\begin{aligned}
+x' &= \phantom{-} x \cdot \cos\theta + y \cdot \sin\theta \\[4pt]
+y' &= -x \cdot \sin\theta + y \cdot \cos\theta
+\end{aligned}
+$$
 
 Compare the coefficients with the forward rotation from Step 3. They are the same four numbers — `cos θ`, `sin θ`, `−sin θ`, `cos θ` — merely rearranged. Undoing a rotation costs you nothing beyond flipping one sign. There is no division, no square root, and nothing that can lose precision.
 
@@ -183,17 +193,21 @@ Rotate by β, then by α. Physically the result must be a single rotation by `α
 
 Now do it algebraically. Take `î = (1, 0)`, rotate it by β to get `(cos β, sin β)`, then feed that result back through the Step 3 equations with angle α:
 
-```
-   x'' = cos β·cos α − sin β·sin α
-   y'' = cos β·sin α + sin β·cos α
-```
+$$
+\begin{aligned}
+x'' &= \cos\beta \cdot \cos\alpha - \sin\beta \cdot \sin\alpha \\[4pt]
+y'' &= \cos\beta \cdot \sin\alpha + \sin\beta \cdot \cos\alpha
+\end{aligned}
+$$
 
 But we already know where a single rotation by `α + β` sends `î`: to `(cos(α + β), sin(α + β))`. Both routes must land on the same point, so the expressions must be equal. You have just derived the angle-addition identities from geometry, rather than memorising them:
 
-```
-   cos(α + β) = cos α cos β − sin α sin β
-   sin(α + β) = sin α cos β + cos α sin β
-```
+$$
+\begin{aligned}
+\cos(\alpha + \beta) &= \cos\alpha \cos\beta - \sin\alpha \sin\beta \\[4pt]
+\sin(\alpha + \beta) &= \sin\alpha \cos\beta + \cos\alpha \sin\beta
+\end{aligned}
+$$
 
 One caution: in 2D we get lucky, because `α + β = β + α`, so the order you apply two rotations in cannot matter. That luck runs out in three dimensions. Turn a book 90 degrees to the right and then 90 degrees forward, then reset and do it in the opposite order — the book ends up in two visibly different orientations. Concept 07 returns to this when 3D rotations and quaternions arrive, and it is the root of gimbal lock.
 
@@ -201,9 +215,9 @@ One caution: in 2D we get lucky, because `α + β = β + α`, so the order you a
 
 The formula spins everything around `(0, 0)`. To pivot about some other centre `c` — say a swerve module's location, or the robot's centre of mass — use the standard three-step sandwich: subtract `c` to move the pivot to the origin, rotate, then add `c` back.
 
-```
-   v_rotated = R(θ) · (v − c) + c
-```
+$$
+v_{\text{rotated}} = R(\theta) \cdot (v - c) + c
+$$
 
 Getting the order wrong here is one of the most common geometry bugs in robot code, and it fails in a distinctive way: the object rotates correctly but also swings around the field on a large arc, because you rotated its position vector along with its shape.
 

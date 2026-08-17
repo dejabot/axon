@@ -56,9 +56,9 @@ Forget the field for a second and think about an elevator carriage on a vertical
 
 But if you command it back down, the subtraction gives `0.4 − 1.1 = −0.7`. The carriage did not travel negative seven-tenths of a meter; it travelled seven-tenths of a meter downward. Distance is a length, and lengths are never negative. So in one dimension:
 
-```
-   distance = |h₂ − h₁|
-```
+$$
+\text{distance} = |h_2 - h_1|
+$$
 
 The bars mean **absolute value**: throw away the sign, keep the size. This distinction between a *displacement* (signed, carries direction) and a *distance* (unsigned, just magnitude) is going to reappear in every axon of this curriculum.
 
@@ -101,15 +101,15 @@ Now count the same area two different ways.
 
 Both counts describe the identical region, so they must be equal:
 
-```
-   a² + 2ab + b²  =  2ab + c²
-```
+$$
+a^2 + 2ab + b^2 = 2ab + c^2
+$$
 
 Subtract `2ab` from both sides, and the cross terms vanish:
 
-```
-   a² + b² = c²
-```
+$$
+a^2 + b^2 = c^2
+$$
 
 That is the Pythagorean theorem, and nothing went into it except "area is area". No black box.
 
@@ -117,10 +117,12 @@ That is the Pythagorean theorem, and nothing went into it except "area is area".
 
 Our triangle's legs are `Δx` and `Δy`, and its hypotenuse is the distance `d` we want. Substituting into `a² + b² = c²`:
 
-```
-   d² = (Δx)² + (Δy)²
-   d  = √( (x₂ − x₁)² + (y₂ − y₁)² )
-```
+$$
+\begin{aligned}
+d^2 &= (\Delta x)^2 + (\Delta y)^2 \\
+d &= \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}
+\end{aligned}
+$$
 
 Notice that the squaring quietly solved the sign problem from Step 1 for us. `(−9.0)²` and `(9.0)²` are both 81, so it no longer matters which point you call "first". We never need absolute value bars here — squaring already discards the sign.
 
@@ -129,9 +131,9 @@ For our robot and target: `d = √(9.0² + 4.0²) = √(81 + 16) = √97 ≈ 9.8
 > ### Math!
 > Written formally, a point is a **vector** and the distance between two of them is the length of their difference:
 >
-> ```
->    d(p, q) = ‖p − q‖₂ = √( Σᵢ (pᵢ − qᵢ)² )
-> ```
+> $$
+> d(p, q) = \lVert p - q \rVert_2 = \sqrt{\sum_i (p_i - q_i)^2}
+> $$
 >
 > Read this out loud as **"the distance from p to q equals the norm of p minus q, which is the square root of the sum over i of p-sub-i minus q-sub-i, squared."** The double bars `‖ ‖` mean **norm**, the general word for "length of a vector". The subscript `₂` marks it as the **L2 norm**, because everything inside is raised to the power 2. The capital sigma `Σ` means **sum**, and the `i` underneath is a counter that walks through the coordinates — `i = 1` for x, `i = 2` for y, and onward for as many dimensions as you have. Written this way, the formula does not care whether you hand it 2 coordinates or 2,048.
 
@@ -149,9 +151,9 @@ Knowing the robot is at `(3.0, 2.0)` still leaves a question unanswered: which w
 
 So we track a third number, the **heading** `θ`, measured counter-clockwise from the positive X-axis. Bundle all three together and you have a **pose**:
 
-```
-   pose = (x, y, θ)
-```
+$$
+\text{pose} = (x, y, \theta)
+$$
 
 Two numbers of position plus one of orientation gives a planar robot three **degrees of freedom** — three independent quantities you can change. Every odometry system, every path follower, and every auto-alignment routine in this curriculum tracks the robot's state as exactly this triple.
 

@@ -86,9 +86,9 @@ Both pictures show the *same triangle*: only the chosen angle changed, and the b
 
 This observation makes trigonometry possible, and it is almost always skipped. Scale a triangle by `k`: opposite becomes `k · opposite`, hypotenuse becomes `k · hypotenuse`. Form the ratio:
 
-```
-   (k · opposite) / (k · hypotenuse)  =  opposite / hypotenuse
-```
+$$
+\frac{k \cdot \text{opposite}}{k \cdot \text{hypotenuse}} = \frac{\text{opposite}}{\text{hypotenuse}}
+$$
 
 The `k` cancels: **the ratio is untouched by scaling.**
 
@@ -100,21 +100,25 @@ Together: **the ratio between two named sides depends on θ and nothing else** �
 
 Three ratios get names:
 
-```
-   sin θ  =  opposite / hypotenuse
-   cos θ  =  adjacent / hypotenuse
-   tan θ  =  opposite / adjacent
-```
+$$
+\begin{aligned}
+\sin\theta &= \frac{\text{opposite}}{\text{hypotenuse}} \\[4pt]
+\cos\theta &= \frac{\text{adjacent}}{\text{hypotenuse}} \\[4pt]
+\tan\theta &= \frac{\text{opposite}}{\text{adjacent}}
+\end{aligned}
+$$
 
 Generations have memorised them as **SOH-CAH-TOA** — Sine is Opposite over Hypotenuse, Cosine is Adjacent over Hypotenuse, Tangent is Opposite over Adjacent. A mnemonic, but a good one.
 
 Try it on Geometry Concept 01's 3-4-5 triangle, scaled to sides 90, 120 and 150. At the left vertex the opposite is 90, the adjacent 120:
 
-```
-   sin θ = 90 / 150 = 0.600
-   cos θ = 120 / 150 = 0.800
-   tan θ = 90 / 120 = 0.750
-```
+$$
+\begin{aligned}
+\sin\theta &= \frac{90}{150} = 0.600 \\[4pt]
+\cos\theta &= \frac{120}{150} = 0.800 \\[4pt]
+\tan\theta &= \frac{90}{120} = 0.750
+\end{aligned}
+$$
 
 Stand at the *other* acute vertex, φ, and the two swap: `sin φ = 0.800`, `cos φ = 0.600`. The sine of one acute angle is the cosine of the other — the "co" marks the **co**mplementary angle, the one completing 90°.
 
@@ -125,10 +129,12 @@ Stand at the *other* acute vertex, φ, and the two swap: `sin φ = 0.800`, `cos 
 
 Use that scaling freedom aggressively: divide every side of a right triangle by its own hypotenuse. The hypotenuse becomes 1, the ratios are unchanged, and the definitions now say:
 
-```
-   sin θ = opposite / 1 = opposite
-   cos θ = adjacent / 1 = adjacent
-```
+$$
+\begin{aligned}
+\sin\theta &= \frac{\text{opposite}}{1} = \text{opposite} \\[4pt]
+\cos\theta &= \frac{\text{adjacent}}{1} = \text{adjacent}
+\end{aligned}
+$$
 
 The ratios have stopped being ratios: **they are now the side lengths themselves.**
 
@@ -140,10 +146,12 @@ Pin that triangle so θ sits at the origin and the adjacent leg lies along the p
 
 A right triangle spends 90° of its 180° budget on the right angle, so each acute angle is under 90° — no right triangle has a 150° angle. But a **point at 150° on a circle** is perfectly ordinary. So the circle becomes the definition:
 
-```
-   cos θ  =  the x-coordinate of the point at angle θ on the unit circle
-   sin θ  =  the y-coordinate of that same point
-```
+$$
+\begin{aligned}
+\cos\theta &= \text{the x-coordinate of the point at angle } \theta \text{ on the unit circle} \\[4pt]
+\sin\theta &= \text{the y-coordinate of that same point}
+\end{aligned}
+$$
 
 Between 0° and 90° this agrees with SOH-CAH-TOA, where the point sits at a first-quadrant triangle's corner. Beyond it the circle sails on alone: an **extension**, not a replacement.
 
@@ -193,9 +201,9 @@ To *evaluate* `cos 150°`, drop a perpendicular to the X-axis. It, the axis and 
 θ may also pass 360° or go negative: walking right around the rim returns you to the same point, so `cos(θ + 360°) = cos θ` and the functions are **periodic**. A heading of 370° and one of 10° command identical wheel angles, and subtracting headings to compare them is a trap Concept 05 cleans up.
 
 > ### Math!
-> ```
->    cos(θ + 2πk) = cos θ        for any whole number k
-> ```
+> $$
+> \cos(\theta + 2\pi k) = \cos\theta \qquad \text{for any whole number } k
+> $$
 > Read out loud as **"cosine of theta plus two pi k equals cosine of theta, for any integer k."** The `k` is a lap counter: whole turns change the angle you *wrote down*, not the point you *landed on*. `2π` is the **period**.
 
 ### Step 6: Radians, and why 360 is the strange number
@@ -218,17 +226,19 @@ Where did 360 come from? Babylonian base-60 arithmetic, a 360-day year, and the 
 
 One radian is the angle whose arc, on a circle of radius 1, has length 1. A full lap is the circumference `2πr`, so a full turn is `2π ≈ 6.28318` radians; half a turn `π`, a quarter turn `π/2`. Setting `360° = 2π rad` gives `180° = π rad` and both conversions:
 
-```
-   radians = degrees × (π / 180)
-   degrees = radians × (180 / π)
-```
+$$
+\begin{aligned}
+\text{radians} &= \text{degrees} \times \frac{\pi}{180} \\[4pt]
+\text{degrees} &= \text{radians} \times \frac{180}{\pi}
+\end{aligned}
+$$
 
 Check them: `30° × π/180 ≈ 0.5236` rad, and `2.0 rad × 180/π ≈ 114.59°`. Software uses radians because the definition buys `arc length = radius × angle` with no conversion factor.
 
 > ### Math!
-> ```
->    s = r · θ          (θ in radians)
-> ```
+> $$
+> s = r \cdot \theta \qquad (\theta \text{ in radians})
+> $$
 > Read out loud as **"s equals r theta"** — arc length equals radius times angle. On a 4-inch wheel (radius 0.0508 m) one rotation is `θ = 2π`, so it rolls `0.0508 × 6.28318 = 0.3192` m. Feed degrees in and you are wrong by about 57×.
 
 **And now the bug.** Java's `Math.sin` and `Math.cos` take **radians**. Gyros — NavX, Pigeon, ADIS — report **degrees**, as does every human on your drive team. `Math.sin(30.0)` when you meant 30 degrees does not crash: it returns the sine of 30 *radians*, `−0.988`. That is a plausible number between −1 and 1, so nothing complains and the wheel simply points the wrong way. Convert with `Math.toRadians` and `Math.toDegrees` at every boundary, and put the unit in the variable name.
@@ -237,23 +247,23 @@ Check them: `30° × π/180 ≈ 0.5236` rad, and `2.0 rad × 180/π ≈ 114.59°
 
 The point `(cos θ, sin θ)` is by construction exactly 1 unit from the origin. Geometry Concept 01 proved the Pythagorean theorem by area rearrangement and turned it into the distance formula. Apply that formula to `(0, 0)` and our point:
 
-```
-   distance = √( (cos θ − 0)² + (sin θ − 0)² )  =  √( cos²θ + sin²θ )  =  1
-```
+$$
+\text{distance} = \sqrt{(\cos\theta - 0)^2 + (\sin\theta - 0)^2} = \sqrt{\cos^2\theta + \sin^2\theta} = 1
+$$
 
 Square both sides:
 
-```
-   sin²θ + cos²θ = 1
-```
+$$
+\sin^2\theta + \cos^2\theta = 1
+$$
 
 That is the **Pythagorean identity**, and nothing new went into it: it is Pythagoras applied to a triangle whose hypotenuse happens to be 1. Check it at 150°: `(−0.866)² + (0.500)² = 0.750 + 0.250 = 1.000`. The sign vanishes under squaring, so it holds in every quadrant with no case split.
 
 Decompose a speed `v` into `(v cos θ, v sin θ)` and ask how fast the robot is going:
 
-```
-   √( (v cos θ)² + (v sin θ)² ) = √( v² (cos²θ + sin²θ) ) = √( v² ) = v
-```
+$$
+\sqrt{(v \cos\theta)^2 + (v \sin\theta)^2} = \sqrt{v^2 (\cos^2\theta + \sin^2\theta)} = \sqrt{v^2} = v
+$$
 
 **Splitting a speed into components never changes the total speed.**
 
@@ -261,9 +271,9 @@ Decompose a speed `v` into `(v cos θ, v sin θ)` and ask how fast the robot is 
 
 Divide sine by cosine and see what survives:
 
-```
-   sin θ / cos θ  =  (opposite / hypotenuse) / (adjacent / hypotenuse)  =  opposite / adjacent  =  tan θ
-```
+$$
+\frac{\sin\theta}{\cos\theta} = \frac{\dfrac{\text{opposite}}{\text{hypotenuse}}}{\dfrac{\text{adjacent}}{\text{hypotenuse}}} = \frac{\text{opposite}}{\text{adjacent}} = \tan\theta
+$$
 
 The hypotenuse cancels and the third ratio reappears. But `opposite / adjacent` is rise over run: `tan θ` **is the slope** of a line through the origin at angle θ.
 

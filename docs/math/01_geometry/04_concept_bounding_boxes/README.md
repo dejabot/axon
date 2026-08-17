@@ -1,4 +1,4 @@
-# Concept 03: Bounding Boxes, Overlap & Collision
+# Concept 04: Bounding Boxes, Overlap & Collision
 
 > **▶ Interactive Demo: [Collision & IoU Sandbox](demo.html)**
 >
@@ -42,16 +42,18 @@ Before doing anything in 2D, solve the easy case. Two intervals on a number line
 
 Trying to characterize overlap directly is fiddly — there are several arrangements to enumerate, one interval inside the other, partial overlap from the left, from the right. The trick is to describe the **opposite** condition, because separation has only two arrangements:
 
-```
-   they are separated  ⟺  a₂ < b₁   (A finishes before B starts)
-                       or  b₂ < a₁   (B finishes before A starts)
-```
+$$
+\begin{aligned}
+\text{they are separated} \iff\ & a_2 < b_1 \quad \text{(A finishes before B starts)} \\
+\text{or}\ & b_2 < a_1 \quad \text{(B finishes before A starts)}
+\end{aligned}
+$$
 
 Overlap is simply "not separated". Negating an *or* turns it into an *and*, and negating each comparison flips it:
 
-```
-   they overlap  ⟺  a₂ ≥ b₁  and  b₂ ≥ a₁
-```
+$$
+\text{they overlap} \iff a_2 \geq b_1 \quad \text{and} \quad b_2 \geq a_1
+$$
 
 Two comparisons. That is the whole 1D test, and every arrangement is covered without enumerating any of them.
 
@@ -64,16 +66,18 @@ An **axis-aligned bounding box**, or AABB, is a rectangle whose sides run parall
 
 So when do two boxes share at least one point? Such a shared point would need an x in both X-intervals and a y in both Y-intervals. Conversely, if the X-intervals share some value and the Y-intervals share some value, you can pair them up to construct a point lying in both boxes. The two directions together give:
 
-```
-   boxes overlap  ⟺  X-intervals overlap  and  Y-intervals overlap
-```
+$$
+\text{boxes overlap} \iff \text{X-intervals overlap} \quad \text{and} \quad \text{Y-intervals overlap}
+$$
 
 Written out, four comparisons:
 
-```
-   A.maxX ≥ B.minX   and   A.minX ≤ B.maxX
-   A.maxY ≥ B.minY   and   A.minY ≤ B.maxY
-```
+$$
+\begin{aligned}
+\text{A.maxX} &\geq \text{B.minX} \quad \text{and} \quad \text{A.minX} \leq \text{B.maxX} \\
+\text{A.maxY} &\geq \text{B.minY} \quad \text{and} \quad \text{A.minY} \leq \text{B.maxY}
+\end{aligned}
+$$
 
 Note the shape of this result: to prove the boxes are **disjoint** you only need to find **one** axis where the shadows fail to meet. Finding a single such axis is enough; you can stop early and skip the rest of the test. That idea — project both shapes onto a candidate axis and look for a gap — is the **separating axis theorem**, and for axis-aligned boxes the only two candidate axes are X and Y. For rotated shapes there are more axes to try, which is why rotated collision is more expensive, and which is why it waits until you have rotation matrices in hand.
 
@@ -81,13 +85,14 @@ Note the shape of this result: to prove the boxes are **disjoint** you only need
 
 Robot poses are given as a centre. Bumper dimensions are given as a total width and length. Converting between them uses **half-extents** — half the width and half the length:
 
-```
-   hx = width  / 2
-   hy = length / 2
-
-   minX = cx − hx      maxX = cx + hx
-   minY = cy − hy      maxY = cy + hy
-```
+$$
+\begin{aligned}
+\text{hx} &= \frac{\text{width}}{2} \\
+\text{hy} &= \frac{\text{length}}{2} \\[6pt]
+\text{minX} &= \text{cx} - \text{hx} & \qquad \text{maxX} &= \text{cx} + \text{hx} \\
+\text{minY} &= \text{cy} - \text{hy} & \qquad \text{maxY} &= \text{cy} + \text{hy}
+\end{aligned}
+$$
 
 A 0.9 by 0.9 metre robot centred at `(3.0, 2.0)` therefore occupies `x ∈ [2.55, 3.45]` and `y ∈ [1.55, 2.45]`. Its centre being 0.5 metres from a wall means its bumper is only 0.05 metres from that wall, which is the entire reason this concept exists.
 
@@ -97,10 +102,12 @@ Here is a reframing that pays for itself many times over. Rather than testing bo
 
 Why is that the same test? The boxes touch exactly when the gap between their centres has closed to `hx_A + hx_B` on X and `hy_A + hy_B` on Y. Moving those two amounts from the robot onto the obstacle changes neither total, so the moment of contact is identical. The robot has become a point, and the obstacle has absorbed its size:
 
-```
-   inflated.minX = obstacle.minX − hx_robot        inflated.maxX = obstacle.maxX + hx_robot
-   inflated.minY = obstacle.minY − hy_robot        inflated.maxY = obstacle.maxY + hy_robot
-```
+$$
+\begin{aligned}
+\text{inflated.minX} &= \text{obstacle.minX} - \text{hx\_robot} & \qquad \text{inflated.maxX} &= \text{obstacle.maxX} + \text{hx\_robot} \\
+\text{inflated.minY} &= \text{obstacle.minY} - \text{hy\_robot} & \qquad \text{inflated.maxY} &= \text{obstacle.maxY} + \text{hy\_robot}
+\end{aligned}
+$$
 
 <div style="text-align: center; margin: 20px 0;">
   <svg width="330" height="180" viewBox="0 0 330 180" style="max-width: 100%; height: auto;" role="img" aria-label="An obstacle box surrounded by a larger dashed inflated box, with the robot reduced to a single point.">
@@ -123,10 +130,12 @@ A boolean is a poor output. "Blocked" gives a planner nothing to work with, whil
 
 The overlap region of two AABBs is itself an AABB, and its bounds come from taking the *inner* edges on each side:
 
-```
-   overlap.minX = max(A.minX, B.minX)      overlap.maxX = min(A.maxX, B.maxX)
-   overlap.minY = max(A.minY, B.minY)      overlap.maxY = min(A.maxY, B.maxY)
-```
+$$
+\begin{aligned}
+\text{overlap.minX} &= \max(\text{A.minX}, \text{B.minX}) & \qquad \text{overlap.maxX} &= \min(\text{A.maxX}, \text{B.maxX}) \\
+\text{overlap.minY} &= \max(\text{A.minY}, \text{B.minY}) & \qquad \text{overlap.maxY} &= \min(\text{A.maxY}, \text{B.maxY})
+\end{aligned}
+$$
 
 Take a moment with the `max` of the mins: the overlap starts wherever the later of the two boxes starts. Symmetrically it ends at the earlier of the two ends. If the boxes are disjoint this computation produces a rectangle with a negative width or height, which is the same information the Step 2 test gives, arriving as a number instead of a boolean.
 
@@ -136,21 +145,21 @@ The overlap widths on each axis are the **penetration depths**. The smaller of t
 
 Sometimes the question is not "do these overlap" but "how well do these two boxes agree". The standard score is **Intersection over Union**:
 
-```
-   IoU = area(intersection) / area(union)
-```
+$$
+\text{IoU} = \frac{\text{area(intersection)}}{\text{area(union)}}
+$$
 
 The intersection area comes straight from Step 5, clamping negatives to zero:
 
-```
-   interArea = max(0, overlap.maxX − overlap.minX) · max(0, overlap.maxY − overlap.minY)
-```
+$$
+\text{interArea} = \max(0, \text{overlap.maxX} - \text{overlap.minX}) \cdot \max(0, \text{overlap.maxY} - \text{overlap.minY})
+$$
 
 The union needs one moment of care. Adding the two areas double-counts the shared region, so subtract it back off exactly once:
 
-```
-   unionArea = areaA + areaB − interArea
-```
+$$
+\text{unionArea} = \text{areaA} + \text{areaB} - \text{interArea}
+$$
 
 IoU runs from 0 for boxes that do not touch, to 1 for boxes that coincide exactly. Work a case through. Box A spans `x ∈ [1, 3]`, `y ∈ [1, 3]`, so `areaA = 4`. Box B spans `x ∈ [2, 5]`, `y ∈ [2, 4]`, so `areaB = 6`. The overlap is `x ∈ [max(1,2), min(3,5)] = [2, 3]` and `y ∈ [max(1,2), min(3,4)] = [2, 3]`, an area of `1 · 1 = 1`. Then `unionArea = 4 + 6 − 1 = 9`, and `IoU = 1/9 ≈ 0.111` — a poor match, as the numbers should say for boxes sharing only a corner.
 
@@ -162,10 +171,12 @@ At 4 metres per second, a 20 millisecond tick moves the robot 8 centimetres. Tes
 
 The cheap and conservative fix is a **swept bounding box**: build one AABB enclosing both the start pose and the end pose, and test that.
 
-```
-   swept.minX = min(start.minX, end.minX)      swept.maxX = max(start.maxX, end.maxX)
-   swept.minY = min(start.minY, end.minY)      swept.maxY = max(start.maxY, end.maxY)
-```
+$$
+\begin{aligned}
+\text{swept.minX} &= \min(\text{start.minX}, \text{end.minX}) & \qquad \text{swept.maxX} &= \max(\text{start.maxX}, \text{end.maxX}) \\
+\text{swept.minY} &= \min(\text{start.minY}, \text{end.minY}) & \qquad \text{swept.maxY} &= \max(\text{start.maxY}, \text{end.maxY})
+\end{aligned}
+$$
 
 The swept box can never miss a collision the true motion would have had, because it contains the entire motion. It can report collisions that would not really happen — a diagonal move produces a swept box covering corners the robot never visits — so it is conservative in the safe direction. For a robot, refusing a path that was marginally passable is a far better failure than driving through a wall.
 

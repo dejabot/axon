@@ -91,6 +91,22 @@ def check_emoji(path, text):
         warn(path, "contains a decorative emoji — REVIEWER_SPEC point 1 forbids them")
 
 
+def check_numbering(path, text):
+    """The title must match the directory's number.
+
+    Renumbering a module moves directories and rewrites nav footers and indexes,
+    but the `# Concept NN:` heading inside each file and any prose cross-references
+    are invisible to a link checker — every link still resolves. This has gone
+    stale twice already, so it is checked rather than remembered.
+    """
+    d = os.path.basename(os.path.dirname(path))
+    m_dir = re.match(r'(\d+)_concept_', d)
+    m_title = re.match(r'#\s*Concept\s*(\d+)', text.lstrip())
+    if m_dir and m_title and m_dir.group(1).lstrip('0') != m_title.group(1).lstrip('0'):
+        err(path, f"title says 'Concept {m_title.group(1)}' but the directory is "
+                  f"{m_dir.group(1)} — left behind by a renumber")
+
+
 def check_concept(path, text):
     # Length follows the topic, so both bounds are advisory. A short concept may be
     # perfectly calibrated (linear interpolation has no theorem in it); a long one may
@@ -157,6 +173,7 @@ def main():
                     check_emoji(path, text)
                     if '_concept_' in dirpath:
                         check_concept(path, text)
+                        check_numbering(path, text)
                 elif fn == 'demo.html':
                     check_demo(path, text)
 
