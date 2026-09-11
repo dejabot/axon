@@ -5,7 +5,7 @@ Each lesson starts from a problem in a real project, builds the math and science
 ## Arc 1: Robotics
 
 1. [Angles and Trig Ratios](01_angles_and_trig/)
-   Problem: turn a robot's heading and speed into down-field and sideways motion.
+   Problem: turn a robot's heading and distance driven into down-field and sideways parts.
 2. Vectors (coming)
    Problem: turn a joystick push into a drive command.
 3. Frames and Rotation (coming)

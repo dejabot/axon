@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lesson 1 demo: heading, speed and the two legs</title>
+<title>Lesson 1 demo: heading, distance and the two legs</title>
 <script src="../../assets/theme.js"></script>
 <link rel="stylesheet" href="../../assets/axon.css">
 <style>
@@ -198,20 +198,11 @@
 
     <div class="control">
       <div class="top">
-        <span class="name">Speed</span>
-        <span class="value" id="speedOut">2.0 m/s</span>
+        <span class="name">Distance driven</span>
+        <span class="value" id="distOut">2.0 m</span>
       </div>
-      <input type="range" id="speed" min="0" max="5" step="0.1" value="2"
-             aria-label="Speed in meters per second">
-    </div>
-
-    <div class="control">
-      <div class="top">
-        <span class="name">Time</span>
-        <span class="value" id="timeOut">1.0 s</span>
-      </div>
-      <input type="range" id="time" min="0" max="2" step="0.1" value="1"
-             aria-label="Elapsed time in seconds">
+      <input type="range" id="distance" min="0" max="5" step="0.1" value="2"
+             aria-label="Distance driven in meters">
     </div>
 
     <div class="toggles">
@@ -231,10 +222,10 @@
     <div class="cell"><span class="k">sin &theta;</span><span class="v green" id="tSin">0.5000</span></div>
     <div class="cell"><span class="k">tan &theta;</span><span class="v" id="tTan">0.5774</span></div>
     <div class="cell"><span class="k">sin&sup2;+cos&sup2;</span><span class="v" id="tIdentity">1.000000</span></div>
-    <div class="cell"><span class="k">Down-field</span><span class="v blue" id="tDown">1.732 m/s</span></div>
-    <div class="cell"><span class="k">Sideways</span><span class="v green" id="tSide">1.000 m/s</span></div>
-    <div class="cell wide"><span class="k">Position after t</span><span class="v amber" id="tPos">(1.732, 1.000) m</span></div>
-    <div class="cell"><span class="k">Distance</span><span class="v amber" id="tDist">2.000 m</span></div>
+    <div class="cell"><span class="k">Down-field</span><span class="v blue" id="tDown">1.732 m</span></div>
+    <div class="cell"><span class="k">Sideways</span><span class="v green" id="tSide">1.000 m</span></div>
+    <div class="cell wide"><span class="k">Position</span><span class="v amber" id="tPos">(1.732, 1.000) m</span></div>
+    <div class="cell"><span class="k">Distance from start</span><span class="v amber" id="tDist">2.000 m</span></div>
   </div>
 
 </div>
@@ -245,12 +236,11 @@
 
   /* ---------- state ------------------------------------------------------ */
 
-  var DEFAULTS = { headingDeg: 30, speed: 2.0, time: 1.0 };
+  var DEFAULTS = { headingDeg: 30, distance: 2.0 };
 
   var state = {
     headingDeg: DEFAULTS.headingDeg,   /* display unit only */
-    speed: DEFAULTS.speed,             /* m/s */
-    time: DEFAULTS.time,               /* s */
+    distance: DEFAULTS.distance,       /* m */
     showUnitCircle: false
   };
 
@@ -266,14 +256,12 @@
   var ctx = canvas.getContext('2d');
 
   var headingIn = document.getElementById('heading');
-  var speedIn = document.getElementById('speed');
-  var timeIn = document.getElementById('time');
+  var distIn = document.getElementById('distance');
   var unitIn = document.getElementById('unitCircle');
   var resetBtn = document.getElementById('reset');
 
   var headingOut = document.getElementById('headingOut');
-  var speedOut = document.getElementById('speedOut');
-  var timeOut = document.getElementById('timeOut');
+  var distOut = document.getElementById('distOut');
 
   var tDeg = document.getElementById('tDeg');
   var tRad = document.getElementById('tRad');
@@ -324,7 +312,7 @@
     return 'IV';
   }
 
-  /* ---------- theme colors, read fresh at paint time --------------------- */
+  /* ---------- theme colors, read fresh on every paint -------------------- */
 
   function palette() {
     var cs = getComputedStyle(document.documentElement);
@@ -370,22 +358,21 @@
   function originX() { return view.w * 0.50; }
   function originY() { return view.h * 0.50; }
 
-  /* Pixels per meter (and per m/s: the two share the picture). Recomputed on
-     every paint from what the scene actually reaches, so a slow robot is not
-     drawn as a stub in a mostly empty canvas.
+  /* Pixels per meter. Recomputed on every paint from what the scene actually
+     reaches, so a short drive is not drawn as a stub in a mostly empty canvas.
 
-     R is how far the picture has to reach from the origin: the arrow is one
-     speed long, the ghost is speed x time away, and 2.5 m is the floor so the
-     grid never turns into a wall of lines at low speeds. The scale is whatever
-     makes R fit above and below the origin and to the right of it, keeping a
-     margin for the labels. The origin is centered, so the same horizontal
-     room exists on both sides and every heading stays on screen. */
+     R is how far the picture has to reach from the origin: the arrow is the
+     distance driven long, and 2.5 m is the floor so the grid never turns into
+     a wall of lines over short distances. The scale is whatever makes R fit
+     above and below the origin and to the right of it, keeping a margin for
+     the labels. The origin is centered, so the same horizontal room exists on
+     both sides and every heading stays on screen. */
   var MAX_PX_PER_M = 140;   /* 1 m never gets bigger than this */
   var VERT_MARGIN = 28;
   var SIDE_MARGIN = 40;
 
   function reach() {
-    return Math.max(2.5, state.speed * Math.max(1, state.time));
+    return Math.max(2.5, state.distance);
   }
 
   function scale() {
@@ -550,12 +537,12 @@
     label('+x down-field', view.w - 8, oy - 10, p.muted, 'right', 'bottom');
     label('+y left', ox + 8, 12, p.muted, 'left', 'top');
 
-    /* ghost robot after t seconds ----------------------------------------
-       At t = 1 s the displacement equals the velocity numerically, so the ghost
-       lands exactly on the arrow tip. The body goes down first, under the arrow
-       and the legs; its time label is drawn last, with the other labels. */
-    var px = state.speed * c * state.time;
-    var py = state.speed * si * state.time;
+    /* ghost robot where the drive ended -----------------------------------
+       It sits at the tip of the path arrow, a distance d out along the heading.
+       The body goes down first, under the arrow and the legs; its label is
+       drawn last, with the other labels. */
+    var px = state.distance * c;
+    var py = state.distance * si;
     var gx = sx(px), gy = sy(py);
     if (Math.hypot(gx - ox, gy - oy) > 2) {
       ctx.save();
@@ -597,8 +584,8 @@
     }
 
     /* the two legs ------------------------------------------------------- */
-    var vx = state.speed * c;
-    var vy = state.speed * si;
+    var vx = state.distance * c;
+    var vy = state.distance * si;
     var tipX = sx(vx), tipY = sy(vy);
     var cornerX = sx(vx), cornerY = oy;
 
@@ -651,35 +638,34 @@
                p.purple, 'bold 12px ' + SANS);
     }
 
-    /* velocity arrow ----------------------------------------------------- */
+    /* the path driven ---------------------------------------------------- */
     arrow(ox, oy, tipX, tipY, p.amber, 3);
-    if (state.speed > 0.05) {
+    if (state.distance > 0.05) {
       /* At the middle of the arrow, stepped off it at a right angle, on the
          side away from the down-field leg. That leaves the tip free for the
-         ghost, which sits right on it at t = 1 s. */
+         ghost, which sits right on it. */
       var vmag = Math.hypot(vx, vy);
       var away = (vx * vy >= 0) ? 1 : -1;   /* the half-plane without the leg */
       var nx = vmag > 1e-6 ? away * -vy / vmag : 0;
       var ny = vmag > 1e-6 ? away * vx / vmag : 1;
-      labelOut(fmt(state.speed, 1) + ' m/s', (ox + tipX) / 2, (oy + tipY) / 2,
+      labelOut(fmt(state.distance, 1) + ' m', (ox + tipX) / 2, (oy + tipY) / 2,
                nx, ny, 17, p.amber, 'bold 11px ' + SANS);
     }
 
     /* the robot, at the origin ------------------------------------------- */
     robot(ox, oy, th, p, false);
 
-    /* the ghost's time label, last: just past its nose along the heading, clear
-       of its body (half a body plus the tick is 22 px) and of the arrowhead. */
+    /* the ghost's label, last: just past its nose along the heading, clear of
+       its body (half a body plus the tick is 22 px) and of the arrowhead. */
     var lead = 27;
-    if (state.showUnitCircle && state.speed > 0.05) {
+    if (state.showUnitCircle && state.distance > 0.05) {
       /* The unit-circle point sits on the same ray, 1 m out, with its own label
          just past it. If the ghost would park its label in that band, step over
          it instead of writing one on top of the other. */
       var ghostPx = Math.hypot(px, py) * s;
       if (ghostPx + lead > s + 4 && ghostPx + lead < s + 40) lead = s + 40 - ghostPx;
     }
-    labelOut('t = ' + fmt(state.time, 1) + ' s', gx, gy, c, si, lead,
-             p.muted, '11px ' + SANS);
+    labelOut('end', gx, gy, c, si, lead, p.muted, '11px ' + SANS);
   }
 
   /* ---------- telemetry -------------------------------------------------- */
@@ -689,8 +675,7 @@
     var c = Math.cos(th), si = Math.sin(th);
 
     headingOut.textContent = fmt(state.headingDeg, 1) + '°';
-    speedOut.textContent = fmt(state.speed, 1) + ' m/s';
-    timeOut.textContent = fmt(state.time, 1) + ' s';
+    distOut.textContent = fmt(state.distance, 1) + ' m';
 
     tDeg.textContent = fmt(state.headingDeg, 1) + '°';
     tRad.textContent = fmt(th, 4);
@@ -700,13 +685,11 @@
     tTan.textContent = tanUndefined() ? 'undefined' : fmt(Math.tan(th), 4);
     tIdentity.textContent = fmt(si * si + c * c, 6);
 
-    var vx = state.speed * c;
-    var vy = state.speed * si;
-    tDown.textContent = fmt(vx, 3) + ' m/s';
-    tSide.textContent = fmt(vy, 3) + ' m/s';
+    var px = state.distance * c;
+    var py = state.distance * si;
+    tDown.textContent = fmt(px, 3) + ' m';
+    tSide.textContent = fmt(py, 3) + ' m';
 
-    var px = vx * state.time;
-    var py = vy * state.time;
     tPos.textContent = '(' + fmt(px, 3) + ', ' + fmt(py, 3) + ') m';
     tDist.textContent = fmt(Math.hypot(px, py), 3) + ' m';
   }
@@ -723,13 +706,8 @@
     render();
   });
 
-  speedIn.addEventListener('input', function () {
-    state.speed = parseFloat(speedIn.value);
-    render();
-  });
-
-  timeIn.addEventListener('input', function () {
-    state.time = parseFloat(timeIn.value);
+  distIn.addEventListener('input', function () {
+    state.distance = parseFloat(distIn.value);
     render();
   });
 
@@ -740,11 +718,9 @@
 
   resetBtn.addEventListener('click', function () {
     state.headingDeg = DEFAULTS.headingDeg;
-    state.speed = DEFAULTS.speed;
-    state.time = DEFAULTS.time;
+    state.distance = DEFAULTS.distance;
     headingIn.value = String(DEFAULTS.headingDeg);
-    speedIn.value = String(DEFAULTS.speed);
-    timeIn.value = String(DEFAULTS.time);
+    distIn.value = String(DEFAULTS.distance);
     render();
   });
 

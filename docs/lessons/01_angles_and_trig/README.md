@@ -8,25 +8,24 @@
 
 ## What we are trying to do
 
-Many things move at a known speed in a known direction: a robot driving across a floor, a ball leaving a launcher, a boat crossing a river. To predict where any of them ends up, or to ask what it is doing along one particular axis, you have to split the motion into parts along the directions you care about. This lesson is about that split.
+Many things move a known distance in a known direction: a robot driving across a floor, a ball leaving a launcher, a boat crossing a river. To say where any of them ends up, you have to split that move into parts along the directions you care about. This lesson is about that split.
 
-The case we will carry through is a robot. A **gyro** reports which way it is facing, and **encoders** on the wheels report how fast it is driving forward. Neither reports where it is; turning a stream of headings and speeds into a position is Lesson 6. The first step is a single instant. The robot faces 30° to the left of straight down-field and drives forward at 2.0 m/s. After one second, how far down-field has it gone, and how far sideways?
+The case we will carry through is a robot. A **gyro** reports which way it is facing, and **encoders** on the wheels report how far it has rolled. Neither reports where it is; turning a stream of headings and distances into a position is Lesson 6. The first step is a single move. The robot faces 30° to the left of straight down-field and drives 2.0 m forward. How far down-field has it gone, and how far sideways?
 
 Getting there takes, in this order:
 
-- how to describe a direction with an angle, and a sign convention that fixes what the angle means;
+- a coordinate frame: an origin, two axes and a sign convention, so that "where" and "which way" become numbers;
 - degrees and radians, the two units angles come in;
 - the three ratios of a right triangle, and why they depend on the angle alone;
 - the unit circle, which extends those ratios to any heading, not just the ones that fit inside a triangle;
-- the identity that guarantees the split loses no speed;
-- velocity as a quantity with a direction, and displacement as velocity times time.
+- the identity that guarantees the split loses no distance.
 
 ---
 
 ## The picture
 
 <div style="text-align: center; margin: 20px 0;">
-  <svg width="400" height="242" viewBox="0 0 380 230" style="max-width: 100%; height: auto;" role="img" aria-label="A robot seen from above, facing thirty degrees to the left of down-field, with a two meters per second velocity arrow split by dashed lines into an unknown down-field leg and an unknown sideways leg.">
+  <svg width="400" height="242" viewBox="0 0 380 230" style="max-width: 100%; height: auto;" role="img" aria-label="A robot seen from above, facing thirty degrees to the left of down-field, with the two meter path it drove split by dashed lines into an unknown down-field leg and an unknown sideways leg.">
     <line x1="40" y1="170" x2="350" y2="170" stroke="currentColor" stroke-opacity="0.3" stroke-width="1.5" />
     <line x1="150" y1="40" x2="150" y2="210" stroke="currentColor" stroke-opacity="0.3" stroke-width="1.5" />
     <text x="296" y="186" fill="currentColor" fill-opacity="0.5" font-family="sans-serif" font-size="10">+x down-field</text>
@@ -39,18 +38,18 @@ Getting there takes, in this order:
     <text x="190" y="164" fill="#c084fc" font-family="sans-serif" font-size="12" font-weight="bold">30°</text>
     <line x1="150" y1="170" x2="253.9" y2="110.0" stroke="#fbbf24" stroke-width="3" />
     <polygon points="253.9,110.0 246.0,120.3 241.0,111.7" fill="#fbbf24" />
-    <text x="186" y="124" fill="#fbbf24" font-family="sans-serif" font-size="11" font-weight="bold">2.0 m/s</text>
+    <text x="186" y="124" fill="#fbbf24" font-family="sans-serif" font-size="11" font-weight="bold">2.0 m</text>
     <line x1="150" y1="170" x2="253.9" y2="170" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="4,4" />
     <line x1="253.9" y1="170" x2="253.9" y2="110.0" stroke="#4ade80" stroke-width="2.5" stroke-dasharray="4,4" />
     <rect x="243.9" y="160" width="10" height="10" fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" />
     <text x="176" y="190" fill="#38bdf8" font-family="sans-serif" font-size="11" font-weight="bold">down-field = ?</text>
     <text x="258" y="142" fill="#4ade80" font-family="sans-serif" font-size="11" font-weight="bold">sideways = ?</text>
     <circle cx="150" cy="170" r="3.5" fill="currentColor" fill-opacity="0.7" />
-    <text x="8" y="222" fill="currentColor" fill-opacity="0.6" font-family="sans-serif" font-size="9">The robot from above. Known: heading 30°, speed 2.0 m/s. Wanted: the two legs.</text>
+    <text x="8" y="222" fill="currentColor" fill-opacity="0.6" font-family="sans-serif" font-size="9">The robot from above. Known: heading 30°, distance driven 2.0 m. Wanted: the two legs.</text>
   </svg>
 </div>
 
-The amber arrow is the motion; the two dashed lines are the parts we want. Together they close into a triangle with a square corner in it, and everything that follows comes out of that triangle.
+The amber arrow is the path the robot drove; the two dashed lines are the parts we want. Together they close into a triangle with a square corner in it, and everything that follows comes out of that triangle.
 
 ---
 
@@ -58,21 +57,21 @@ The amber arrow is the motion; the two dashed lines are the parts we want. Toget
 
 Walk diagonally across a parking lot, heading somewhere between north and east. Part of every step goes north and part of it goes east. There is no such thing as a step that goes diagonally without going partly north.
 
-Turn a little further toward east and you give up some north-progress and gain some east-progress. Turn all the way to east and the north part is gone. The trade between the two is set entirely by the angle you walk at, and not at all by how fast you walk.
+Turn a little further toward east and you give up some north-progress and gain some east-progress. Turn all the way to east and the north part is gone. The trade between the two is set entirely by the angle you walk at, and not at all by how far you walk.
 
-Fast or slow, at the same angle, the same fraction of your motion goes north. So what is worth knowing about an angle is a pair of fractions: how much of the motion goes north, and how much goes east. Find those two fractions for an angle, multiply each by the speed, and the split is done.
+Ten steps or a hundred, at the same angle, the same fraction of the distance goes north. So what is worth knowing about an angle is a pair of fractions: how much of the distance goes north, and how much goes east. Find those two fractions for an angle, multiply each by the distance walked, and the split is done.
 
 ---
 
 ## The theory, from first principles
 
-### Step 1. Saying which way
+### Step 1. Where, and which way
 
-A heading of 30° on its own does not say 30° from what, or turned which way. Both have to be fixed before the number means anything.
+"Where is the robot" needs a reference before it has an answer. Pick a point on the floor to call the **origin**, and two directions at right angles to each other through it, the **axes**. Any point on the floor is then named by two distances: how far along the first axis, and how far along the second. Those two numbers are its **coordinates**, written (x, y). Our robot starts at the origin, (0, 0), and the question is what its coordinates are after the move.
 
-An **angle** is an amount of turn. We measure it in **degrees**, where a full turn back to the starting direction is 360 degrees, written 360°. There is nothing special about 360: it is a convention inherited from Babylonian astronomy, kept because 360 divides evenly by so many numbers. Later in this lesson we meet a second unit that most software prefers.
+"Which way" needs a reference too. A heading of 30° on its own does not say 30° from what, or turned which way. An **angle** is an amount of turn. We measure it in **degrees**, where a full turn back to the starting direction is 360 degrees, written 360°. There is nothing special about 360: it is a convention inherited from Babylonian astronomy, kept because 360 divides evenly by so many numbers. Later in this lesson we meet a second unit that most software prefers.
 
-We also pick a frame: a direction that counts as zero, and a rotational direction that counts as positive. This is a choice, not a fact, and different fields and different software make different choices. The one used here is the common one in robotics software, including WPILib, and it is what the team's gyro reports:
+Putting the two together is a **frame**: which direction is the x axis, which is the y axis, and which way of turning counts as positive. This is a choice, not a fact, and different fields and different software make different choices. The one used here is the common one in robotics software, including WPILib, and it is what the team's gyro reports:
 
 - **down-field** is the positive x direction;
 - **left**, when you are facing down-field, is the positive y direction;
@@ -82,7 +81,7 @@ So a robot facing straight down-field has heading 0°, and our robot has heading
 
 ### Step 2. The triangle already in the picture
 
-In Figure 1, the velocity arrow, the dashed blue line that is its shadow on the down-field axis, and the dashed green line dropping from its tip form a closed three-sided shape.
+In the picture, the arrow of the drive, the dashed blue line that is its shadow on the down-field axis, and the dashed green line dropping from its tip form a closed three-sided shape.
 
 A **right triangle** is a triangle with one angle of exactly 90°, called a right angle and marked in figures by a small square. The other two angles are each less than 90°. The side opposite the right angle, always the longest, is the **hypotenuse**; the other two are the **legs**.
 
@@ -113,11 +112,11 @@ The legs get names, but the names depend on which of the two non-right angles yo
   </svg>
 </div>
 
-In our picture, θ sits at the robot, the corner where the velocity arrow and the down-field axis meet. So the down-field component is the adjacent leg, the sideways component is the opposite leg, and the speed is the hypotenuse. The problem now has a clean statement: given the hypotenuse, 2.0 m/s, and the angle, 30°, find the two legs.
+In our picture, θ sits at the start, the corner where the arrow and the down-field axis meet. So the down-field part is the adjacent leg, the sideways part is the opposite leg, and the distance driven is the hypotenuse. The problem now has a clean statement: given the hypotenuse, 2.0 m, and the angle, 30°, find the two legs.
 
 ### Step 3. Why the fraction depends on the angle alone
 
-This is the step everything else rests on: the claim from the parking lot that the trade between the two parts is set by the angle and not by the speed. Here is why it is true.
+This is the step everything else rests on: the claim from the parking lot that the trade between the two parts is set by the angle and not by the distance. Here is why it is true.
 
 First, scaling. Take any right triangle and multiply every side by the same number k, keeping the angles the same. You get a bigger or smaller copy of the same shape. Now look at a ratio of two of its sides, say the opposite leg divided by the hypotenuse:
 
@@ -129,7 +128,7 @@ Second, angles. The three angles of any triangle add up to 180°. To convince yo
 
 Now take two right triangles that share one of their non-right angles, say both have a 30° in them. Each has a 90°, so each has a third angle of 180° − 90° − 30° = 60°. All three angles match. Two triangles with all three angles equal are called **similar**, and similar triangles are scaled copies of one another: one is the other blown up or shrunk by some factor k.
 
-Put the two facts together. Any two right triangles with the same acute angle are scaled copies, and scaling does not change a ratio of sides. Therefore the ratio of any two sides of a right triangle is fixed by the angle and by nothing else. Not by size, and not by speed.
+Put the two facts together. Any two right triangles with the same acute angle are scaled copies, and scaling does not change a ratio of sides. Therefore the ratio of any two sides of a right triangle is fixed by the angle and by nothing else. Not by size, and not by how far you went.
 
 A numeric check. A right triangle with legs 90 and 120 and hypotenuse 150 is the familiar 3-4-5 shape scaled up by 30. Taking the angle at the corner touching the side of length 120:
 
@@ -165,19 +164,19 @@ For a heading, tangent has a plain reading: sideways meters per down-field meter
 
 Tangent also runs backwards: given the two components, its inverse recovers the angle. That is how Lesson 2 turns a pair of numbers back into a heading.
 
-### Step 5. Solving the opening problem, first pass
+### Step 5. Solving the opening problem
 
 We know the hypotenuse and want the legs, so multiply both sides of each definition by the hypotenuse:
 
 $$\text{adjacent} = \text{hypotenuse} \times \cos \theta \qquad \text{opposite} = \text{hypotenuse} \times \sin \theta$$
 
-Those are the parking lot's two fractions, now with names. Put in our numbers, with the hypotenuse being the speed 2.0 m/s and θ being 30°:
+Those are the parking lot's two fractions, now with names. Put in our numbers, with the hypotenuse being the distance driven, 2.0 m, and θ being 30°:
 
-$$\text{down-field} = 2.0 \times \cos 30° = 2.0 \times 0.866 = 1.732 \text{ m/s}$$
+$$\text{down-field} = 2.0 \times \cos 30° = 2.0 \times 0.866 = 1.732 \text{ m}$$
 
-$$\text{sideways} = 2.0 \times \sin 30° = 2.0 \times 0.500 = 1.000 \text{ m/s}$$
+$$\text{sideways} = 2.0 \times \sin 30° = 2.0 \times 0.500 = 1.000 \text{ m}$$
 
-A calculator or a software library supplies the two numbers 0.866 and 0.500. Where those numbers come from, and how to get them for a heading that will not fit inside a right triangle at all, is the next two steps.
+So the robot is 1.732 m down-field and 1.000 m to the left of where it started: its coordinates are (1.732, 1.000) m. That is the opening problem, solved, except for one thing. A calculator or a software library supplied the two numbers 0.866 and 0.500. Where they come from, how to get them for a heading that will not fit inside a right triangle at all, and how to check the answer, is the rest of the theory.
 
 ### Step 6. Every heading, not just the ones in a triangle
 
@@ -236,11 +235,11 @@ The same reading works in every quadrant, and it always comes down to this table
 | III | 180° to 270° | − | − |
 | IV | 270° to 360° | + | − |
 
-Now the worked example. The robot is at heading 220°, driving at 1.5 m/s. Step 5's formulas do not change at all:
+Now a worked example. The robot drives 1.5 m at heading 220°. Step 5's formulas do not change at all:
 
-$$\text{down-field} = 1.5 \times \cos 220° = 1.5 \times (-0.766) = -1.149 \text{ m/s}$$
+$$\text{down-field} = 1.5 \times \cos 220° = 1.5 \times (-0.766) = -1.149 \text{ m}$$
 
-$$\text{sideways} = 1.5 \times \sin 220° = 1.5 \times (-0.643) = -0.964 \text{ m/s}$$
+$$\text{sideways} = 1.5 \times \sin 220° = 1.5 \times (-0.643) = -0.964 \text{ m}$$
 
 Both are negative. Under our sign convention, negative down-field means up-field, back toward our own end, and negative sideways means to the right, which is exactly what a heading of 220° should mean. The formulas needed no special case; the unit circle handled the signs.
 
@@ -278,9 +277,9 @@ So our heading 30° is 30 × π/180 = 0.5236 rad, the heading 220° from the las
 >
 > On a circle of radius r rather than 1, an angle θ cuts off an arc whose length s is given by `s = r θ`, read "s equals r theta", and the θ must be in radians. This is the reason radians are worth the trouble: with them, arc length is just radius times angle, with no conversion factor stuck in front. With degrees you would have to write `s = r θ π / 180` every time. That single clean formula is how a wheel encoder's count of turns becomes meters rolled across the floor, which appears in the team's code at the end of this lesson.
 
-### Step 8. Did the split lose any speed?
+### Step 8. Did the split lose any distance?
 
-We claimed the two components account for all of the robot's 2.0 m/s. That deserves a check, because if the split leaked speed then every position we computed downstream would drift.
+We claimed the two parts account for all of the robot's 2.0 m. That deserves a check, because if the split leaked distance then every position built on it would drift.
 
 The check needs one classical result, and since we are assuming nothing, here is where it comes from. Draw a square of side a + b, where a and b are the two legs of our right triangle, and fit four copies of that triangle inside it in two different arrangements.
 
@@ -324,37 +323,27 @@ Apply it to the unit circle. The point at angle θ is cos θ across and sin θ u
 
 $$\cos^2\theta + \sin^2\theta = 1$$
 
-This holds for every angle in every quadrant, because squaring wipes out the signs. Now scale it back up to a real speed v by multiplying both sides by v²:
+This holds for every angle in every quadrant, because squaring wipes out the signs. Now scale it back up to a real distance d by multiplying both sides by d²:
 
-$$(v \cos \theta)^2 + (v \sin \theta)^2 = v^2$$
+$$(d \cos \theta)^2 + (d \sin \theta)^2 = d^2$$
 
-The left side is exactly our two components, squared and added. Check it with our numbers:
+The left side is exactly our two parts, squared and added. Check it with our numbers:
 
-$$1.732^2 + 1.000^2 = 3.000 + 1.000 = 4.000 \qquad \sqrt{4.000} = 2.000 \text{ m/s}$$
+$$1.732^2 + 1.000^2 = 3.000 + 1.000 = 4.000 \qquad \sqrt{4.000} = 2.000 \text{ m}$$
 
-The two parts recombine to the full 2.0 m/s. The split lost nothing.
+The two parts recombine to the full 2.0 m: the robot ends up exactly as far from the start as it drove. The split lost nothing.
 
-### Step 9. Finish the problem
+### Step 9. When the hypotenuse is a speed
 
-We have the robot's **velocity**, a speed together with a direction, split into 1.732 m/s down-field and 1.000 m/s to the left. The question asked for distances after one second.
+Nothing in Steps 2 to 8 used the fact that the hypotenuse was a distance. Any quantity with a size and a direction splits the same way, and one that comes up constantly is a speed. A robot doing 2.0 m/s at heading 30° is making 2.0 × 0.866 = 1.732 m/s down-field and 2.0 × 0.500 = 1.000 m/s sideways: Step 5's arithmetic with different units on the end.
 
-**Displacement** is the change of position, and like velocity it carries a direction. When velocity is constant, displacement is velocity times elapsed time. Our robot holds its heading and speed for 1.0 s, so:
-
-$$\Delta x = 1.732 \times 1.0 = 1.732 \text{ m} \qquad \Delta y = 1.000 \times 1.0 = 1.000 \text{ m}$$
-
-After one second the robot is at (1.732, 1.000) m relative to where it started: 1.732 m down-field and 1.000 m to the left. The straight-line distance from the start is
-
-$$\sqrt{1.732^2 + 1.000^2} = \sqrt{3.000 + 1.000} = 2.000 \text{ m}$$
-
-which is 2.0 m/s for 1.0 s, as it must be. That is the opening problem, solved.
-
-The same split works when the second direction is up instead of sideways. A ball leaves a shooter at 12 m/s, aimed 55° above the horizontal. Here cos 55° = 0.5736 and sin 55° = 0.8192, so the ball moves forward at 12 × 0.5736 = 6.883 m/s and upward at 12 × 0.8192 = 9.830 m/s, and the check holds: √(6.883² + 9.830²) = 12.000. Nothing about the method cared that the plane was vertical rather than horizontal. Lesson 5, on how a ball flies, starts from exactly those two numbers.
+The direction does not even have to lie on the floor. A ball leaves a shooter at 12 m/s, aimed 55° above the horizontal. Here cos 55° = 0.5736 and sin 55° = 0.8192, so the ball moves forward at 12 × 0.5736 = 6.883 m/s and upward at 12 × 0.8192 = 9.830 m/s, and the check holds: √(6.883² + 9.830²) = 12.000. Lesson 5, on how a ball flies, starts from exactly those two numbers, and Lesson 6 defines speed properly, as a rate of change of position.
 
 ---
 
 ## Try it
 
-Drag the heading around and watch the two dashed legs and the ghost robot move with it.
+Drag the heading around, change the distance, and watch the two dashed legs and the robot's end position move with it.
 
 <iframe src="demo.html" width="100%" height="640" style="border: 1px solid var(--line, #232b3b); border-radius: 12px; margin: 16px 0; background: var(--panel, #141923);"></iframe>
 
@@ -368,27 +357,21 @@ Drag the heading around and watch the two dashed legs and the ghost robot move w
 import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
 
 Angle heading = Degrees.of(30.0);
-LinearVelocity speed = MetersPerSecond.of(2.0);
-Time elapsed = Seconds.of(1.0);
+Distance driven = Meters.of(2.0);
 
 // Math.cos and Math.sin take radians. The Units library does the conversion.
 double cosHeading = Math.cos(heading.in(Radians));   // 0.866
 double sinHeading = Math.sin(heading.in(Radians));   // 0.500
 
-LinearVelocity downField = speed.times(cosHeading);  // 1.732 m/s
-LinearVelocity sideways  = speed.times(sinHeading);  // 1.000 m/s
+Distance downField = driven.times(cosHeading);       // 1.732 m
+Distance sideways  = driven.times(sinHeading);       // 1.000 m
 
-Distance dx = downField.times(elapsed);              // 1.732 m
-Distance dy = sideways.times(elapsed);               // 1.000 m
-
-System.out.printf("down-field %.3f m, sideways %.3f m%n", dx.in(Meters), dy.in(Meters));
+System.out.printf("down-field %.3f m, sideways %.3f m%n", downField.in(Meters), sideways.in(Meters));
 ```
 
-This is Step 5 typed out line for line. The point of the `Angle`, `LinearVelocity`, `Distance` and `Time` types is that each quantity carries its unit with it, so a heading measured in degrees cannot be handed to `Math.cos` by accident: the compiler will not let an `Angle` stand where a `double` is wanted. The one place the conversion happens is `heading.in(Radians)`, which is visible, deliberate, and easy to find later. All three tiers produce the same 1.732 and 1.000.
+This is Step 5 typed out line for line. The point of the `Angle` and `Distance` types is that each quantity carries its unit with it, so a heading measured in degrees cannot be handed to `Math.cos` by accident: the compiler will not let an `Angle` stand where a `double` is wanted. The one place the conversion happens is `heading.in(Radians)`, which is visible, deliberate, and easy to find later. All three tiers produce the same 1.732 and 1.000.
 
 ### Tier 2, WPILib geometry
 
@@ -397,17 +380,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 Rotation2d heading = new Rotation2d(Degrees.of(30.0));   // or Rotation2d.fromDegrees(30.0)
-double speedMps = 2.0;
+double drivenMeters = 2.0;
 
-double downFieldMps = speedMps * heading.getCos();   // 1.732
-double sidewaysMps  = speedMps * heading.getSin();   // 1.000
+double downFieldMeters = drivenMeters * heading.getCos();   // 1.732
+double sidewaysMeters  = drivenMeters * heading.getSin();   // 1.000
 
-// The same split in one call: a length pointed along a direction.
-Translation2d velocity = new Translation2d(speedMps, heading);   // (1.732, 1.000)
-Translation2d afterOneSecond = velocity.times(1.0);              // (1.732, 1.000) m
+// The same split in one call: a distance pointed along a direction.
+Translation2d position = new Translation2d(drivenMeters, heading);   // (1.732, 1.000) m
 ```
 
-`Rotation2d` is WPILib's type for an angle. It stores the angle and caches its cosine and sine at construction, so `getCos()` and `getSin()` are reads of a stored number. That matters in a loop that runs fifty times a second: nothing recomputes a trig function it already has. The constructor `new Translation2d(distance, angle)` is Step 5 packaged as one call, taking a length and a direction and handing back the pair of components. Lesson 2 gives that pair its proper name, a vector.
+`Rotation2d` is WPILib's type for an angle. It stores the angle and caches its cosine and sine at construction, so `getCos()` and `getSin()` are reads of a stored number. That matters in a loop that runs fifty times a second: nothing recomputes a trig function it already has. The constructor `new Translation2d(distance, angle)` is Step 5 packaged as one call, and WPILib even names its first parameter `distance`. It takes a length and a direction and hands back the pair of coordinates. Lesson 2 gives that pair its proper name, a vector.
 
 ### Tier 3, the team's code
 
@@ -431,7 +413,7 @@ In the second line, `deltaX` is how far that wheel rolled since the last loop. I
 
 ## Recap
 
-You can now turn a heading and a speed into a down-field part and a sideways part, using cosine for the leg along the heading's axis and sine for the leg across it. You know why those two fractions depend on the angle and not on the speed: right triangles sharing an acute angle are scaled copies, and scaling cancels out of a ratio. You can do it for any heading, not just the ones under 90°, by reading cos θ and sin θ off the unit circle and taking the signs from the quadrant. You can convert between degrees and radians in either direction, and you know why the library wants radians. And you can check your own work, because cos²θ + sin²θ = 1 guarantees the two parts recombine to the whole speed.
+You can now turn a heading and a distance into a down-field part and a sideways part, using cosine for the leg along the heading's axis and sine for the leg across it. You know why those two fractions depend on the angle and not on the distance: right triangles sharing an acute angle are scaled copies, and scaling cancels out of a ratio. You can do it for any heading, not just the ones under 90°, by reading cos θ and sin θ off the unit circle and taking the signs from the quadrant. You can convert between degrees and radians in either direction, and you know why the library wants radians. And you can check your own work, because cos²θ + sin²θ = 1 guarantees the two parts recombine to the whole distance. And the same split works unchanged when the hypotenuse is a speed instead.
 
 ### Re-derive it from a blank page
 
@@ -439,7 +421,7 @@ Come back to this in about a week, take a blank sheet, and do these three withou
 
 1. Show why the ratio of two sides of a right triangle depends on the angle alone.
 2. Starting from the unit circle and Pythagoras, get cos²θ + sin²θ = 1.
-3. A robot at heading 220° is driving at 1.5 m/s. Find both components, and check them.
+3. A robot drives 1.5 m at heading 220°. Find both parts of the move, and check them.
 
 ---
 

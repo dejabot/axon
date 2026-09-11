@@ -196,3 +196,8 @@ Telemetry, monospace, each with a small uppercase label: heading in degrees (one
 Defaults must reproduce the lesson's numbers exactly: 30.0°, 0.5236 rad, cos 0.8660, sin 0.5000, tan 0.5774, down-field 1.732 m/s, sideways 1.000 m/s, position (1.732, 1.000) m, distance 2.000 m.
 
 Before finishing, extract the inline script to a temporary file and run `node --check` on it, and confirm the page has no reference to any external host.
+
+
+## Revision, 2026-09-11: displacement first
+
+The lesson now opens on a distance driven, not a speed: "the robot faces 30° left of down-field and drives 2.0 m forward; how far down-field and how far sideways?" Reasons: velocity brought in a rate and the unearned fact that displacement is velocity times time; the gyro and encoders report a heading and a distance rolled, which is what the team's odometry code actually resolves; and a position opening gives Step 1 a place to introduce the coordinate frame (origin, axes, coordinates) explicitly. All numbers are unchanged with meters in place of meters per second. Step 9 became "When the hypotenuse is a speed": the same split for a velocity, with the shooter's 12 m/s at 55° as the example and pointers to Lessons 5 and 6. Tier 1 code uses `Distance driven = Meters.of(2.0)` and no `Time`; Tier 2 drops the `times(1.0)` line. The demo replaced its speed and time sliders with one distance slider, and the ghost robot marks the end of the move. The tone pass the same day removed the "that is the whole lesson" refrains and opened on the general problem before the robot.
