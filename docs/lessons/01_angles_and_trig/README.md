@@ -8,13 +8,11 @@
 
 ## What we are trying to do
 
-A mobile robot carries two kinds of sensor that between them ought to say where it is. A **gyro** reports which way the robot is facing. **Encoders** on the wheels report how fast it is driving forward. Neither one reports a position. Turning a stream of headings and speeds into a position on the floor is called odometry, and that is Lesson 6.
+Many things move at a known speed in a known direction: a robot driving across a floor, a ball leaving a launcher, a boat crossing a river. To predict where any of them ends up, or to ask what it is doing along one particular axis, you have to split the motion into parts along the directions you care about. This lesson is about that split.
 
-The first step, and the whole of this lesson, is one moment of that motion. Freeze the robot at a single instant: it faces some direction and moves at some speed. Where is that motion taking it?
+The case we will carry through is a robot. A **gyro** reports which way it is facing, and **encoders** on the wheels report how fast it is driving forward. Neither reports where it is; turning a stream of headings and speeds into a position is Lesson 6. The first step is a single instant. The robot faces 30° to the left of straight down-field and drives forward at 2.0 m/s. After one second, how far down-field has it gone, and how far sideways?
 
-The concrete instance we will solve: the robot faces 30° to the left of straight down-field and drives forward at 2.0 m/s. After one second, how far down-field has it gone, and how far sideways?
-
-To answer that we need, in this order:
+Getting there takes, in this order:
 
 - how to describe a direction with an angle, and a sign convention that fixes what the angle means;
 - degrees and radians, the two units angles come in;
@@ -52,7 +50,7 @@ To answer that we need, in this order:
   </svg>
 </div>
 
-The amber arrow is what the robot is doing; the two dashed lines are the answer we want. Notice that they close into a triangle with a square corner in it. That triangle is the subject of this lesson.
+The amber arrow is the motion; the two dashed lines are the parts we want. Together they close into a triangle with a square corner in it, and everything that follows comes out of that triangle.
 
 ---
 
@@ -62,7 +60,7 @@ Walk diagonally across a parking lot, heading somewhere between north and east. 
 
 Turn a little further toward east and you give up some north-progress and gain some east-progress. Turn all the way to east and the north part is gone. The trade between the two is set entirely by the angle you walk at, and not at all by how fast you walk.
 
-That last point deserves a sentence of its own. Fast or slow, at the same angle, the same fraction of your motion goes north. So the useful thing to know about an angle is a pair of fractions: what fraction of the motion goes north, and what fraction goes east. That is the whole lesson. Once we have the two fractions for an angle, we multiply each by the speed and we are done.
+Fast or slow, at the same angle, the same fraction of your motion goes north. So what is worth knowing about an angle is a pair of fractions: how much of the motion goes north, and how much goes east. Find those two fractions for an angle, multiply each by the speed, and the split is done.
 
 ---
 
@@ -70,11 +68,11 @@ That last point deserves a sentence of its own. Fast or slow, at the same angle,
 
 ### Step 1. Saying which way
 
-The gyro hands us a number, and "30°" on its own does not say 30° from what, or turned which way. So we fix both.
+A heading of 30° on its own does not say 30° from what, or turned which way. Both have to be fixed before the number means anything.
 
 An **angle** is an amount of turn. We measure it in **degrees**, where a full turn back to the starting direction is 360 degrees, written 360°. There is nothing special about 360: it is a convention inherited from Babylonian astronomy, kept because 360 divides evenly by so many numbers. Later in this lesson we meet a second unit that most software prefers.
 
-We also pick a frame: a direction that counts as zero, and a rotational direction that counts as positive. This is a choice, not a fact, and different teams and different software make different choices. Ours is WPILib's field convention, which is what the team's gyro reports:
+We also pick a frame: a direction that counts as zero, and a rotational direction that counts as positive. This is a choice, not a fact, and different fields and different software make different choices. The one used here is the common one in robotics software, including WPILib, and it is what the team's gyro reports:
 
 - **down-field** is the positive x direction;
 - **left**, when you are facing down-field, is the positive y direction;
@@ -119,7 +117,7 @@ In our picture, θ sits at the robot, the corner where the velocity arrow and th
 
 ### Step 3. Why the fraction depends on the angle alone
 
-This is the step everything else rests on: the parking-lot claim that the trade between forward and sideways is set by the angle and not by the speed. Here is why it is true.
+This is the step everything else rests on: the claim from the parking lot that the trade between the two parts is set by the angle and not by the speed. Here is why it is true.
 
 First, scaling. Take any right triangle and multiply every side by the same number k, keeping the angles the same. You get a bigger or smaller copy of the same shape. Now look at a ratio of two of its sides, say the opposite leg divided by the hypotenuse:
 
@@ -163,7 +161,7 @@ The standard mnemonic is SOH-CAH-TOA: Sine is Opposite over Hypotenuse, Cosine i
 >
 > `sin θ` is read "sine theta", `cos θ` is "cosine theta", `tan θ` is "tangent theta". The name and the angle are written next to each other with no symbol between them, which looks like multiplication but is not. `sin θ` does not mean "sin times θ"; it means "the sine function applied to the angle θ", and on its own `sin` is not a number at all. Some writers add brackets, `sin(θ)`, and that means the same thing. One more piece of shorthand you will meet in Step 8: `sin²θ` means `(sin θ)²`, that is, take the sine first and then square the result. It does not mean the sine of θ².
 
-For our problem, tangent has a plain reading: sideways meters per down-field meter. At 30° it is 0.577, so the robot slides 0.577 m sideways for every 1 m it makes down-field. Tangent has no upper limit. As the heading approaches 90°, straight sideways, down-field progress approaches zero and the ratio runs away: tan 89° = 57.29, tan 89.9° = 572.96, tan 89.99° = 5729.6. At exactly 90° it is undefined, which is correct rather than broken, since a robot going straight sideways makes no down-field progress to divide by.
+For a heading, tangent has a plain reading: sideways meters per down-field meter. At 30° it is 0.577, so the robot slides 0.577 m sideways for every 1 m it makes down-field. Tangent has no upper limit. As the heading approaches 90°, straight sideways, down-field progress approaches zero and the ratio runs away: tan 89° = 57.29, tan 89.9° = 572.96, tan 89.99° = 5729.6. At exactly 90° it is undefined, which is correct rather than broken, since a robot going straight sideways makes no down-field progress to divide by.
 
 Tangent also runs backwards: given the two components, its inverse recovers the angle. That is how Lesson 2 turns a pair of numbers back into a heading.
 
@@ -278,7 +276,7 @@ So our heading 30° is 30 × π/180 = 0.5236 rad, the heading 220° from the las
 
 > ### Math!
 >
-> On a circle of radius r rather than 1, an angle θ cuts off an arc whose length s is given by `s = r θ`, read "s equals r theta", and the θ must be in radians. This is the reason radians are worth the trouble: with them, arc length is just radius times angle, with no conversion factor stuck in front. With degrees you would have to write `s = r θ π / 180` every time. That single clean formula is how a wheel encoder's count of rotations turns into meters rolled across the floor, which you will see in the team's code in Step 9.
+> On a circle of radius r rather than 1, an angle θ cuts off an arc whose length s is given by `s = r θ`, read "s equals r theta", and the θ must be in radians. This is the reason radians are worth the trouble: with them, arc length is just radius times angle, with no conversion factor stuck in front. With degrees you would have to write `s = r θ π / 180` every time. That single clean formula is how a wheel encoder's count of turns becomes meters rolled across the floor, which appears in the team's code at the end of this lesson.
 
 ### Step 8. Did the split lose any speed?
 
@@ -427,7 +425,7 @@ Translation2d wheelMotion =
 
 Each wheel on this robot can be steered independently, so a wheel does not necessarily point where the robot points. Its direction on the field is the robot's heading, read from the gyro, plus how far that wheel is turned relative to the robot, read from its steering sensor. That is the first line.
 
-In the second line, `deltaX` is how far that wheel rolled since the last loop. It comes from the wheel's number of turns times its circumference, 2πr: each full turn is 2π radians, so this is Step 7's arc length s = rθ with the angle in radians. For a wheel that rolled straight ahead, `deltaY` is zero, so the point being rotated is `(deltaX, 0)`, and turning it to the wheel's field direction gives exactly `(deltaX · cos θ, deltaX · sin θ)`. That is this lesson's split, once per wheel, fifty times a second, on a real robot. Lesson 3 covers what `rotateBy` does when `deltaY` is not zero, and Lesson 6 covers adding these little steps up into a position on the field.
+In the second line, `deltaX` is how far that wheel rolled since the last loop. It comes from the wheel's number of turns times its circumference, 2πr: each full turn is 2π radians, so this is Step 7's arc length s = rθ with the angle in radians. For a wheel that rolled straight ahead, `deltaY` is zero, so the point being rotated is `(deltaX, 0)`, and turning it to the wheel's field direction gives exactly `(deltaX · cos θ, deltaX · sin θ)`. That is the same split, once per wheel, fifty times a second. Lesson 3 covers what `rotateBy` does when `deltaY` is not zero, and Lesson 6 covers adding these little steps up into a position on the field.
 
 ---
 
