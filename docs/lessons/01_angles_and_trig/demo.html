@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 1 demo: heading, speed and the two legs</title>
+<script src="../../assets/theme.js"></script>
+<link rel="stylesheet" href="../../assets/axon.css">
+<style>
+  body {
+    padding: 12px;
+    overflow-x: hidden;
+  }
+
+  .demo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .canvas-container {
+    position: relative;
+    overflow: hidden;
+    height: 400px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  .canvas-container canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .canvas-container canvas.dragging { cursor: grabbing; }
+
+  .hint {
+    position: absolute;
+    left: 10px;
+    bottom: 8px;
+    margin: 0;
+    font-size: 0.72rem;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .controls {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px 18px;
+  }
+
+  .control {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1 1 165px;
+    min-width: 150px;
+  }
+
+  .control .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .control .name {
+    font-size: 0.66rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .control .value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    color: var(--ink);
+  }
+
+  .control input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    margin: 0;
+  }
+
+  .toggles {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+  }
+
+  .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--ink);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .check input { accent-color: var(--accent); margin: 0; cursor: pointer; }
+
+  button.reset {
+    border: 1px solid var(--line);
+    background: var(--panel-hover);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  button.reset:hover { border-color: var(--accent); background: var(--panel); }
+
+  .telemetry {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 6px 10px;
+  }
+
+  .cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 3px 4px;
+    min-width: 0;
+  }
+
+  .cell .k {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .cell .v {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.84rem;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .cell .v.blue { color: var(--accent); }
+  .cell .v.green { color: var(--accent-green); }
+  .cell .v.amber { color: var(--accent-amber); }
+  .cell .v.purple { color: var(--accent-purple); }
+
+  /* The position reads "(-1.149, -0.964) m", the longest value here. Give it a
+     second column wherever there is one; below that it still fits a single
+     150px column on its own. */
+  @media (min-width: 340px) {
+    .wide { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+
+<div class="demo">
+
+  <div class="canvas-container" id="stage">
+    <canvas id="scene"></canvas>
+    <p class="hint">Drag on the floor to swing the heading.</p>
+  </div>
+
+  <div class="controls">
+    <div class="control">
+      <div class="top">
+        <span class="name">Heading</span>
+        <span class="value" id="headingOut">30&deg;</span>
+      </div>
+      <input type="range" id="heading" min="-180" max="360" step="1" value="30"
+             aria-label="Heading in degrees">
+    </div>
+
+    <div class="control">
+      <div class="top">
+        <span class="name">Speed</span>
+        <span class="value" id="speedOut">2.0 m/s</span>
+      </div>
+      <input type="range" id="speed" min="0" max="5" step="0.1" value="2"
+             aria-label="Speed in meters per second">
+    </div>
+
+    <div class="control">
+      <div class="top">
+        <span class="name">Time</span>
+        <span class="value" id="timeOut">1.0 s</span>
+      </div>
+      <input type="range" id="time" min="0" max="2" step="0.1" value="1"
+             aria-label="Elapsed time in seconds">
+    </div>
+
+    <div class="toggles">
+      <label class="check">
+        <input type="checkbox" id="unitCircle">
+        <span>Show unit circle</span>
+      </label>
+      <button type="button" class="reset" id="reset">Reset</button>
+    </div>
+  </div>
+
+  <div class="telemetry">
+    <div class="cell"><span class="k">Heading</span><span class="v purple" id="tDeg">30.0&deg;</span></div>
+    <div class="cell"><span class="k">Heading (rad)</span><span class="v purple" id="tRad">0.5236</span></div>
+    <div class="cell"><span class="k">Quadrant</span><span class="v" id="tQuad">I</span></div>
+    <div class="cell"><span class="k">cos &theta;</span><span class="v blue" id="tCos">0.8660</span></div>
+    <div class="cell"><span class="k">sin &theta;</span><span class="v green" id="tSin">0.5000</span></div>
+    <div class="cell"><span class="k">tan &theta;</span><span class="v" id="tTan">0.5774</span></div>
+    <div class="cell"><span class="k">sin&sup2;+cos&sup2;</span><span class="v" id="tIdentity">1.000000</span></div>
+    <div class="cell"><span class="k">Down-field</span><span class="v blue" id="tDown">1.732 m/s</span></div>
+    <div class="cell"><span class="k">Sideways</span><span class="v green" id="tSide">1.000 m/s</span></div>
+    <div class="cell wide"><span class="k">Position after t</span><span class="v amber" id="tPos">(1.732, 1.000) m</span></div>
+    <div class="cell"><span class="k">Distance</span><span class="v amber" id="tDist">2.000 m</span></div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- state ------------------------------------------------------ */
+
+  var DEFAULTS = { headingDeg: 30, speed: 2.0, time: 1.0 };
+
+  var state = {
+    headingDeg: DEFAULTS.headingDeg,   /* display unit only */
+    speed: DEFAULTS.speed,             /* m/s */
+    time: DEFAULTS.time,               /* s */
+    showUnitCircle: false
+  };
+
+  var DEG = Math.PI / 180;
+
+  /* Everything below the display boundary works in radians. */
+  function theta() { return state.headingDeg * DEG; }
+
+  /* ---------- elements --------------------------------------------------- */
+
+  var stage = document.getElementById('stage');
+  var canvas = document.getElementById('scene');
+  var ctx = canvas.getContext('2d');
+
+  var headingIn = document.getElementById('heading');
+  var speedIn = document.getElementById('speed');
+  var timeIn = document.getElementById('time');
+  var unitIn = document.getElementById('unitCircle');
+  var resetBtn = document.getElementById('reset');
+
+  var headingOut = document.getElementById('headingOut');
+  var speedOut = document.getElementById('speedOut');
+  var timeOut = document.getElementById('timeOut');
+
+  var tDeg = document.getElementById('tDeg');
+  var tRad = document.getElementById('tRad');
+  var tQuad = document.getElementById('tQuad');
+  var tCos = document.getElementById('tCos');
+  var tSin = document.getElementById('tSin');
+  var tTan = document.getElementById('tTan');
+  var tIdentity = document.getElementById('tIdentity');
+  var tDown = document.getElementById('tDown');
+  var tSide = document.getElementById('tSide');
+  var tPos = document.getElementById('tPos');
+  var tDist = document.getElementById('tDist');
+
+  /* ---------- formatting ------------------------------------------------- */
+
+  /* toFixed can hand back "-0.000"; a signed zero helps nobody. */
+  function fmt(value, digits) {
+    var s = value.toFixed(digits);
+    if (/^-0(\.0*)?$/.test(s)) s = s.slice(1);
+    return s;
+  }
+
+  var AXIS_TOL = 0.05;   /* degrees; also the tan blow-up window */
+
+  function normalizedDeg() {
+    var d = state.headingDeg % 360;
+    if (d < 0) d += 360;
+    return d;
+  }
+
+  function nearAxis() {
+    var d = normalizedDeg();
+    var r = d % 90;
+    return r <= AXIS_TOL || r >= 90 - AXIS_TOL;
+  }
+
+  function tanUndefined() {
+    var d = normalizedDeg();
+    return Math.abs(d - 90) <= AXIS_TOL || Math.abs(d - 270) <= AXIS_TOL;
+  }
+
+  function quadrantName() {
+    if (nearAxis()) return 'axis';
+    var d = normalizedDeg();
+    if (d < 90) return 'I';
+    if (d < 180) return 'II';
+    if (d < 270) return 'III';
+    return 'IV';
+  }
+
+  /* ---------- theme colors, read fresh at paint time --------------------- */
+
+  function palette() {
+    var cs = getComputedStyle(document.documentElement);
+    function v(name, fallback) {
+      var got = cs.getPropertyValue(name);
+      got = got ? got.trim() : '';
+      return got || fallback;
+    }
+    return {
+      panel: v('--panel', '#141923'),
+      ink: v('--ink', '#f1f5f9'),
+      muted: v('--muted', '#94a3b8'),
+      line: v('--line', '#232b3b'),
+      blue: v('--accent', '#38bdf8'),
+      green: v('--accent-green', '#4ade80'),
+      amber: v('--accent-amber', '#fbbf24'),
+      purple: v('--accent-purple', '#c084fc')
+    };
+  }
+
+  /* ---------- canvas sizing --------------------------------------------- */
+
+  /* The canvas is absolutely positioned inside a fixed-height container, so it
+     can never push the container around. Its backing store is sized from the
+     container's own box. */
+  var view = { w: 0, h: 0, dpr: 1 };
+
+  function resize() {
+    var rect = stage.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.max(1, Math.round(rect.width));
+    var h = Math.max(1, Math.round(rect.height));
+    view.w = w;
+    view.h = h;
+    view.dpr = dpr;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    draw();
+  }
+
+  /* Origin centered, so a heading pointing up-field has as much room as one
+     pointing down-field. */
+  function originX() { return view.w * 0.50; }
+  function originY() { return view.h * 0.50; }
+
+  /* Pixels per meter (and per m/s: the two share the picture). Recomputed on
+     every paint from what the scene actually reaches, so a slow robot is not
+     drawn as a stub in a mostly empty canvas.
+
+     R is how far the picture has to reach from the origin: the arrow is one
+     speed long, the ghost is speed x time away, and 2.5 m is the floor so the
+     grid never turns into a wall of lines at low speeds. The scale is whatever
+     makes R fit above and below the origin and to the right of it, keeping a
+     margin for the labels. The origin is centered, so the same horizontal
+     room exists on both sides and every heading stays on screen. */
+  var MAX_PX_PER_M = 140;   /* 1 m never gets bigger than this */
+  var VERT_MARGIN = 28;
+  var SIDE_MARGIN = 40;
+
+  function reach() {
+    return Math.max(2.5, state.speed * Math.max(1, state.time));
+  }
+
+  function scale() {
+    var R = reach();
+    var vert = Math.max(20, view.h / 2 - VERT_MARGIN) / R;
+    var side = Math.max(20, Math.min(originX(), view.w - originX()) - SIDE_MARGIN) / R;
+    return Math.min(vert, side, MAX_PX_PER_M);
+  }
+
+  /* Math orientation: +x right, +y up. Screen y grows downward, so flip it. */
+  function sx(x) { return originX() + x * scale(); }
+  function sy(y) { return originY() - y * scale(); }
+
+  /* ---------- drawing helpers ------------------------------------------- */
+
+  var SANS = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+  var MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+
+  function line(x1, y1, x2, y2) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+
+  /* Labels sit on top of grid lines and legs, so each one gets a halo in the
+     panel color before the fill. */
+  var pal = null;
+
+  function label(text, x, y, color, align, baseline, font) {
+    ctx.font = font || ('11px ' + SANS);
+    ctx.textAlign = align || 'left';
+    ctx.textBaseline = baseline || 'middle';
+    if (pal) {
+      ctx.save();
+      ctx.lineWidth = 3.5;
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = pal.panel;
+      ctx.strokeText(text, x, y);
+      ctx.restore();
+    }
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+  }
+
+  /* A label pushed away from (x, y) along the direction (ux, uy), given in math
+     orientation. The alignment follows that direction so the text box grows
+     outward instead of folding back over whatever the label is stepping away
+     from. */
+  function labelOut(text, x, y, ux, uy, dist, color, font) {
+    var align = ux > 0.25 ? 'left' : (ux < -0.25 ? 'right' : 'center');
+    var baseline = uy > 0.25 ? 'bottom' : (uy < -0.25 ? 'top' : 'middle');
+    label(text, x + ux * dist, y - uy * dist, color, align, baseline, font);
+  }
+
+  function roundedRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  /* A rounded square with a tick at its front, pointed along ang (radians,
+     math orientation). */
+  function robot(cx, cy, ang, p, ghost) {
+    var bw = 30, bh = 24;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-ang);              /* screen y is flipped, so negate */
+    if (ghost) ctx.globalAlpha = 0.38;
+
+    roundedRect(-bw / 2, -bh / 2, bw, bh, 6);
+    ctx.fillStyle = p.panel;
+    ctx.globalAlpha *= 0.85;
+    ctx.fill();
+    ctx.globalAlpha = ghost ? 0.38 : 1;
+    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = ghost ? p.muted : p.ink;
+    ctx.stroke();
+
+    ctx.strokeStyle = ghost ? p.muted : p.amber;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(bw / 2, 0);
+    ctx.lineTo(bw / 2 + 7, 0);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function arrow(x1, y1, x2, y2, color, width) {
+    var dx = x2 - x1, dy = y2 - y1;
+    var len = Math.hypot(dx, dy);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    if (len < 1) return;
+    var head = Math.min(12, len * 0.35);
+    var a = Math.atan2(dy, dx);
+    line(x1, y1, x2 - Math.cos(a) * head * 0.55, y2 - Math.sin(a) * head * 0.55);
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - Math.cos(a - 0.42) * head, y2 - Math.sin(a - 0.42) * head);
+    ctx.lineTo(x2 - Math.cos(a + 0.42) * head, y2 - Math.sin(a + 0.42) * head);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.lineCap = 'butt';
+  }
+
+  /* ---------- the scene -------------------------------------------------- */
+
+  function draw() {
+    if (!view.w || !view.h) return;
+    var p = palette();
+    pal = p;
+    var s = scale();
+    var th = theta();
+    var c = Math.cos(th), si = Math.sin(th);
+
+    ctx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
+    ctx.clearRect(0, 0, view.w, view.h);
+    ctx.fillStyle = p.panel;
+    ctx.fillRect(0, 0, view.w, view.h);
+
+    var ox = originX(), oy = originY();
+
+    /* 1 m grid ---------------------------------------------------------- */
+    var maxX = Math.ceil(Math.max(ox, view.w - ox) / s);
+    var maxY = Math.ceil((view.h / 2) / s);
+    ctx.strokeStyle = p.line;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.75;
+    var i;
+    for (i = -maxX; i <= maxX; i++) {
+      if (i === 0) continue;
+      line(sx(i), 0, sx(i), view.h);
+    }
+    for (i = -maxY; i <= maxY; i++) {
+      if (i === 0) continue;
+      line(0, sy(i), view.w, sy(i));
+    }
+    ctx.globalAlpha = 1;
+
+    /* axes: down-field a little stronger than the rest ------------------- */
+    ctx.strokeStyle = p.muted;
+    ctx.globalAlpha = 0.35;
+    ctx.lineWidth = 1;
+    line(ox, 0, ox, view.h);
+    ctx.globalAlpha = 0.6;
+    ctx.lineWidth = 1.5;
+    line(0, oy, view.w, oy);
+    ctx.globalAlpha = 1;
+
+    label('+x down-field', view.w - 8, oy - 10, p.muted, 'right', 'bottom');
+    label('+y left', ox + 8, 12, p.muted, 'left', 'top');
+
+    /* ghost robot after t seconds ----------------------------------------
+       At t = 1 s the displacement equals the velocity numerically, so the ghost
+       lands exactly on the arrow tip. The body goes down first, under the arrow
+       and the legs; its time label is drawn last, with the other labels. */
+    var px = state.speed * c * state.time;
+    var py = state.speed * si * state.time;
+    var gx = sx(px), gy = sy(py);
+    if (Math.hypot(gx - ox, gy - oy) > 2) {
+      ctx.save();
+      ctx.setLineDash([2, 5]);
+      ctx.strokeStyle = p.muted;
+      ctx.globalAlpha = 0.55;
+      ctx.lineWidth = 1.5;
+      line(ox, oy, gx, gy);
+      ctx.restore();
+    }
+    robot(gx, gy, th, p, true);
+
+    /* unit circle overlay ------------------------------------------------ */
+    if (state.showUnitCircle) {
+      ctx.save();
+      ctx.strokeStyle = p.purple;
+      ctx.globalAlpha = 0.5;
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.arc(ox, oy, s, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.setLineDash([3, 3]);
+      ctx.globalAlpha = 0.7;
+      ctx.strokeStyle = p.blue;
+      line(ox, oy, sx(c), oy);
+      ctx.strokeStyle = p.green;
+      line(sx(c), oy, sx(c), sy(si));
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(sx(c), sy(si), 4, 0, Math.PI * 2);
+      ctx.fillStyle = p.purple;
+      ctx.fill();
+      /* On the far side of the point from the origin, stepped outward along the
+         radius, so it clears the point, the robot and the arrow's own label. */
+      labelOut('(cos θ, sin θ)', sx(c), sy(si), c, si, 18, p.purple,
+               '10px ' + MONO);
+    }
+
+    /* the two legs ------------------------------------------------------- */
+    var vx = state.speed * c;
+    var vy = state.speed * si;
+    var tipX = sx(vx), tipY = sy(vy);
+    var cornerX = sx(vx), cornerY = oy;
+
+    ctx.save();
+    ctx.setLineDash([6, 4]);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = p.blue;
+    line(ox, oy, cornerX, cornerY);
+    ctx.strokeStyle = p.green;
+    line(cornerX, cornerY, tipX, tipY);
+    ctx.restore();
+
+    /* right-angle marker, opening toward the triangle's interior */
+    if (Math.abs(vx) * s > 14 && Math.abs(vy) * s > 14) {
+      var m = 9;
+      var hx = vx > 0 ? -m : m;
+      var hy = vy > 0 ? -m : m;
+      ctx.strokeStyle = p.muted;
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.moveTo(cornerX + hx, cornerY);
+      ctx.lineTo(cornerX + hx, cornerY + hy);
+      ctx.lineTo(cornerX, cornerY + hy);
+      ctx.stroke();
+    }
+
+    /* Both leg labels sit out along their legs, away from the robot body that
+       fills the corner at the origin. */
+    if (Math.abs(vx) * s > 34) {
+      label(fmt(vx, 3), ox + (cornerX - ox) * 0.74, oy + 13, p.blue,
+            'center', 'top', '11px ' + MONO);
+    }
+    if (Math.abs(vy) * s > 26) {
+      label(fmt(vy, 3), cornerX + 9, (cornerY + tipY) / 2, p.green,
+            'left', 'middle', '11px ' + MONO);
+    }
+
+    /* angle arc ---------------------------------------------------------- */
+    var arcR = Math.min(48, Math.max(30, s * 0.95));
+    ctx.strokeStyle = p.purple;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(ox, oy, arcR, 0, -th, th > 0);
+    ctx.stroke();
+    /* On the bisector, just outside the arc, so it never lands on the arrow. */
+    if (Math.abs(state.headingDeg) > 4) {
+      var half = th / 2;
+      labelOut(fmt(state.headingDeg, 1) + '°', ox, oy,
+               Math.cos(half), Math.sin(half), arcR + 16,
+               p.purple, 'bold 12px ' + SANS);
+    }
+
+    /* velocity arrow ----------------------------------------------------- */
+    arrow(ox, oy, tipX, tipY, p.amber, 3);
+    if (state.speed > 0.05) {
+      /* At the middle of the arrow, stepped off it at a right angle, on the
+         side away from the down-field leg. That leaves the tip free for the
+         ghost, which sits right on it at t = 1 s. */
+      var vmag = Math.hypot(vx, vy);
+      var away = (vx * vy >= 0) ? 1 : -1;   /* the half-plane without the leg */
+      var nx = vmag > 1e-6 ? away * -vy / vmag : 0;
+      var ny = vmag > 1e-6 ? away * vx / vmag : 1;
+      labelOut(fmt(state.speed, 1) + ' m/s', (ox + tipX) / 2, (oy + tipY) / 2,
+               nx, ny, 17, p.amber, 'bold 11px ' + SANS);
+    }
+
+    /* the robot, at the origin ------------------------------------------- */
+    robot(ox, oy, th, p, false);
+
+    /* the ghost's time label, last: just past its nose along the heading, clear
+       of its body (half a body plus the tick is 22 px) and of the arrowhead. */
+    var lead = 27;
+    if (state.showUnitCircle && state.speed > 0.05) {
+      /* The unit-circle point sits on the same ray, 1 m out, with its own label
+         just past it. If the ghost would park its label in that band, step over
+         it instead of writing one on top of the other. */
+      var ghostPx = Math.hypot(px, py) * s;
+      if (ghostPx + lead > s + 4 && ghostPx + lead < s + 40) lead = s + 40 - ghostPx;
+    }
+    labelOut('t = ' + fmt(state.time, 1) + ' s', gx, gy, c, si, lead,
+             p.muted, '11px ' + SANS);
+  }
+
+  /* ---------- telemetry -------------------------------------------------- */
+
+  function updateReadouts() {
+    var th = theta();
+    var c = Math.cos(th), si = Math.sin(th);
+
+    headingOut.textContent = fmt(state.headingDeg, 1) + '°';
+    speedOut.textContent = fmt(state.speed, 1) + ' m/s';
+    timeOut.textContent = fmt(state.time, 1) + ' s';
+
+    tDeg.textContent = fmt(state.headingDeg, 1) + '°';
+    tRad.textContent = fmt(th, 4);
+    tQuad.textContent = quadrantName();
+    tCos.textContent = fmt(c, 4);
+    tSin.textContent = fmt(si, 4);
+    tTan.textContent = tanUndefined() ? 'undefined' : fmt(Math.tan(th), 4);
+    tIdentity.textContent = fmt(si * si + c * c, 6);
+
+    var vx = state.speed * c;
+    var vy = state.speed * si;
+    tDown.textContent = fmt(vx, 3) + ' m/s';
+    tSide.textContent = fmt(vy, 3) + ' m/s';
+
+    var px = vx * state.time;
+    var py = vy * state.time;
+    tPos.textContent = '(' + fmt(px, 3) + ', ' + fmt(py, 3) + ') m';
+    tDist.textContent = fmt(Math.hypot(px, py), 3) + ' m';
+  }
+
+  function render() {
+    updateReadouts();
+    draw();
+  }
+
+  /* ---------- input ------------------------------------------------------ */
+
+  headingIn.addEventListener('input', function () {
+    state.headingDeg = parseFloat(headingIn.value);
+    render();
+  });
+
+  speedIn.addEventListener('input', function () {
+    state.speed = parseFloat(speedIn.value);
+    render();
+  });
+
+  timeIn.addEventListener('input', function () {
+    state.time = parseFloat(timeIn.value);
+    render();
+  });
+
+  unitIn.addEventListener('change', function () {
+    state.showUnitCircle = unitIn.checked;
+    draw();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    state.headingDeg = DEFAULTS.headingDeg;
+    state.speed = DEFAULTS.speed;
+    state.time = DEFAULTS.time;
+    headingIn.value = String(DEFAULTS.headingDeg);
+    speedIn.value = String(DEFAULTS.speed);
+    timeIn.value = String(DEFAULTS.time);
+    render();
+  });
+
+  /* Dragging on the floor sets the heading. atan2 returns (-180, 180]; the
+     slider runs -180 to 360, so pick whichever equivalent angle is closest to
+     where the heading already is and no turn appears to jump. */
+  function nearestEquivalent(deg, current) {
+    var best = null, bestGap = Infinity;
+    for (var k = -1; k <= 1; k++) {
+      var candidate = deg + 360 * k;
+      if (candidate < -180 || candidate > 360) continue;
+      var gap = Math.abs(candidate - current);
+      if (gap < bestGap) { bestGap = gap; best = candidate; }
+    }
+    if (best === null) best = Math.max(-180, Math.min(360, deg));
+    return best;
+  }
+
+  function headingFromPointer(event) {
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left - originX();
+    var y = originY() - (event.clientY - rect.top);   /* flip back to math y */
+    if (Math.hypot(x, y) < 6) return;
+    var deg = Math.atan2(y, x) / DEG;
+    state.headingDeg = nearestEquivalent(deg, state.headingDeg);
+    headingIn.value = String(state.headingDeg);       /* the slider follows */
+    render();
+  }
+
+  var dragging = false;
+
+  canvas.addEventListener('pointerdown', function (e) {
+    dragging = true;
+    canvas.classList.add('dragging');
+    if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+    headingFromPointer(e);
+    e.preventDefault();
+  });
+
+  canvas.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    headingFromPointer(e);
+    e.preventDefault();
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    canvas.classList.remove('dragging');
+    if (canvas.releasePointerCapture && e.pointerId !== undefined) {
+      try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+  }
+
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+
+  /* ---------- theme and size --------------------------------------------- */
+
+  window.addEventListener('axon-theme-changed', draw);
+
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(resize).observe(stage);
+  } else {
+    window.addEventListener('resize', resize);
+  }
+
+  resize();
+  render();
+})();
+</script>
+
+</body>
+</html>
